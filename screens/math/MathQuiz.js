@@ -55,8 +55,8 @@ export default function MathQuizScreen() {
 
   async function playSound(isCorrect) {
     const soundFile = isCorrect 
-      ? require('../assets/sounds/correct.mp3')
-      : require('../assets/sounds/wrong.mp3');
+      ? require('../../assets/sounds/correct.mp3')
+      : require('../../assets/sounds/wrong.mp3');
     
     const { sound } = await Audio.Sound.createAsync(soundFile);
     await sound.playAsync();

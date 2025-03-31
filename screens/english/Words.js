@@ -7,50 +7,50 @@ import { Audio } from 'expo-av';
 const words = [
   {
     word: 'Apple',
-    image: require('../assets/images/words/apple.png'),
-    sound: require('../assets/sounds/words/apple.mp3'),
+    image: require('../../assets/images/words/apple.png'),
+    sound: require('../../assets/sounds/words/apple.mp3'),
     category: 'Fruits'
   },
   {
     word: 'Ball',
-    image: require('../assets/images/words/ball.png'),
-    sound: require('../assets/sounds/words/ball.mp3'),
+    image: require('../../assets/images/words/ball.png'),
+    sound: require('../../assets/sounds/words/ball.mp3'),
     category: 'Toys'
   },
   {
     word: 'Cat',
-    image: require('../assets/images/words/cat.png'),
-    sound: require('../assets/sounds/words/cat.mp3'),
+    image: require('../../assets/images/words/cat.png'),
+    sound: require('../../assets/sounds/words/cat.mp3'),
     category: 'Animals'
   },
   {
     word: 'Dog',
-    image: require('../assets/images/words/dog.png'),
-    sound: require('../assets/sounds/words/dog.mp3'),
+    image: require('../../assets/images/words/dog.png'),
+    sound: require('../../assets/sounds/words/dog.mp3'),
     category: 'Animals'
   },
   {
     word: 'Elephant',
-    image: require('../assets/images/words/elephant.png'),
-    sound: require('../assets/sounds/words/elephant.mp3'),
+    image: require('../../assets/images/words/elephant.png'),
+    sound: require('../../assets/sounds/words/elephant.mp3'),
     category: 'Animals'
   },
   {
     word: 'Fish',
-    image: require('../assets/images/words/fish.png'),
-    sound: require('../assets/sounds/words/fish.mp3'),
+    image: require('../../assets/images/words/fish.png'),
+    sound: require('../../assets/sounds/words/fish.mp3'),
     category: 'Animals'
   },
   {
     word: 'House',
-    image: require('../assets/images/words/house.png'),
-    sound: require('../assets/sounds/words/house.mp3'),
+    image: require('../../assets/images/words/house.png'),
+    sound: require('../../assets/sounds/words/house.mp3'),
     category: 'Places'
   },
   {
     word: 'Ice Cream',
-    image: require('../assets/images/words/ice-cream.png'),
-    sound: require('../assets/sounds/words/ice-cream.mp3'),
+    image: require('../../assets/images/words/ice-cream.png'),
+    sound: require('../../assets/sounds/words/ice-cream.mp3'),
     category: 'Food'
   }
 ];
@@ -158,7 +158,7 @@ export default function WordsLessonScreen() {
                 <Text style={styles.wordText}>{item.word}</Text>
                 <View style={styles.soundIcon}>
                   <Image 
-                    source={require('../assets/images/speaker.png')}
+                    source={require('../../assets/images/speaker.png')}
                     style={styles.speakerImage}
                   />
                 </View>

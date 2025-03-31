@@ -1,31 +1,25 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
-import { useAuth } from '../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
-const cardWidth = (width - 60) / 2; // 60 = padding (20) * 3 for left, right, and middle gap
+const cardWidth = (width - 60) / 2;
 
-const subjects = [
-  { id: '1', title: 'Maths', color: '#FF0000', route: 'MathsLesson' },
-  { id: '2', title: 'English', color: '#FFFF00', route: 'EnglishLesson' },
-  { id: '3', title: 'አማርኛ', color: '#00FF00', route: 'AmharicLesson' },
-  { id: '4', title: 'A/Oromo', color: '#FF00FF', route: 'OromoLesson' },
-  { id: '5', title: 'Animals and\ntheir Sound', color: '#0088FF', route: 'AnimalsLesson', isWide: true },
-  { id: '6', title: 'Days and\nMonths', color: '#FF8800', route: 'CalendarLesson', isWide: true },
+const englishTopics = [
+  { id: '1', title: 'Alphabets', color: '#FF6B6B', route: 'Alphabets' },
+  { id: '2', title: 'Words', color: '#4ECDC4', route: 'Words' },
+  { id: '3', title: 'Days of\nWeek', color: '#45B7D1', route: 'DaysOfWeek' },
+  { id: '4', title: 'Months', color: '#96CEB4', route: 'Months' },
+  { id: '5', title: 'Colors', color: '#FFEEAD', route: 'Colors' },
+  { id: '6', title: 'English Quiz', color: '#FF9F9F', route: 'EnglishQuiz', isWide: true },
 ];
 
-export default function LessonsScreen() {
-  const navigation = useNavigation();
-  const { user } = useAuth();
-  const userName = user?.displayName || "Student";
-
-  const renderSubjectCard = (subject, index) => {
+const EnglishLessons = ({ navigation }) => {
+  const renderEnglishCard = (topic, index) => {
     const cardStyle = [
       styles.card,
-      { backgroundColor: subject.color },
-      subject.isWide && styles.wideCard
+      { backgroundColor: topic.color },
+      topic.isWide && styles.wideCard
     ];
 
     return (
@@ -33,20 +27,15 @@ export default function LessonsScreen() {
         animation="zoomIn"
         duration={500}
         delay={index * 100}
-        key={subject.id}
-        style={subject.isWide ? styles.wideCardContainer : styles.cardContainer}
+        key={topic.id}
+        style={topic.isWide ? styles.wideCardContainer : styles.cardContainer}
       >
         <TouchableOpacity
           style={cardStyle}
-          onPress={() => navigation.navigate(subject.route)}
+          onPress={() => navigation.navigate(topic.route)}
           activeOpacity={0.8}
         >
-          <Text style={[
-            styles.cardText,
-            subject.color === '#FFFF00' && styles.darkText
-          ]}>
-            {subject.title}
-          </Text>
+          <Text style={styles.cardText}>{topic.title}</Text>
         </TouchableOpacity>
       </Animatable.View>
     );
@@ -59,16 +48,16 @@ export default function LessonsScreen() {
         duration={800} 
         style={styles.header}
       >
-        <Text style={styles.greeting}>Hello "{userName}"!</Text>
-        <Text style={styles.subtitle}>Choose a subject to learn</Text>
+        <Text style={styles.headerText}>English</Text>
+        <Text style={styles.subtitle}>Choose your lesson</Text>
       </Animatable.View>
 
       <View style={styles.cardsContainer}>
-        {subjects.map((subject, index) => renderSubjectCard(subject, index))}
+        {englishTopics.map((topic, index) => renderEnglishCard(topic, index))}
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -79,11 +68,10 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 30,
   },
-  greeting: {
+  headerText: {
     fontSize: 32,
     fontWeight: 'bold',
     color: 'white',
-    fontFamily: 'System',
   },
   subtitle: {
     fontSize: 18,
@@ -126,14 +114,12 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#000000',
+    color: 'white',
     textAlign: 'center',
-    textShadowColor: 'rgba(255, 255, 255, 0.5)',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
-  darkText: {
-    color: '#000000',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-  },
 });
+
+export default EnglishLessons; 

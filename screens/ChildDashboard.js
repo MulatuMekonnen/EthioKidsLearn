@@ -1,107 +1,162 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Dimensions,
+  Image,
+} from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import { useAuth } from '../contexts/AuthContext';
 
-const menuItems = [
-  { name: 'Lessons', route: 'Lessons', color: '#2196F3', delay: 300 },
-  { name: 'Progress', route: 'Progress', color: '#FF0000', delay: 500 },
-  { name: 'Download', route: 'Download', color: '#FFA500', delay: 700 },
-];
+const { width } = Dimensions.get('window');
+const CARD_WIDTH = width * 0.4;
 
-export default function ChildDashboard() {
-  const navigation = useNavigation();
+const SubjectCard = ({ title, icon, color, onPress, delay }) => (
+  <Animatable.View
+    animation="zoomIn"
+    delay={delay}
+    style={[styles.card, { backgroundColor: color }]}
+  >
+    <TouchableOpacity onPress={onPress} style={styles.cardContent}>
+      <Image source={icon} style={styles.cardIcon} resizeMode="contain" />
+      <Text style={styles.cardTitle}>{title}</Text>
+    </TouchableOpacity>
+  </Animatable.View>
+);
+
+const ChildDashboard = ({ navigation }) => {
+  const { user } = useAuth();
+
+  const subjects = [
+    {
+      title: 'Math',
+      screen: 'MathLessons',
+      icon: require('../assets/images/math-icon.png'),
+      color: '#FF6B6B',
+      delay: 100,
+    },
+    {
+      title: 'English',
+      screen: 'EnglishLessons',
+      icon: require('../assets/images/english-icon.png'),
+      color: '#4ECDC4',
+      delay: 200,
+    },
+    {
+      title: 'Animals',
+      screen: 'Animals',
+      icon: require('../assets/images/animals-icon.png'),
+      color: '#45B7D1',
+      delay: 300,
+    },
+    {
+      title: 'Time',
+      screen: 'TimeNavigation',
+      icon: require('../assets/images/time-icon.png'),
+      color: '#96CEB4',
+      delay: 400,
+    },
+    {
+      title: 'Afaan Oromo',
+      screen: 'OromoLesson',
+      icon: require('../assets/images/oromo-icon.png'),
+      color: '#FFEEAD',
+      delay: 500,
+    },
+  ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        {menuItems.map((item) => (
-          <Animatable.View
-            key={item.name}
-            animation="fadeInDown"
-            delay={item.delay}
-            style={styles.buttonContainer}
-          >
-            <TouchableOpacity
-              style={[styles.button, { backgroundColor: item.color }]}
-              onPress={() => navigation.navigate(item.route)}
-              activeOpacity={0.8}
-            >
-              <Text style={styles.buttonText}>{item.name}</Text>
-            </TouchableOpacity>
-          </Animatable.View>
-        ))}
-      </View>
-
-      <Animatable.View
-        animation="fadeInUp"
-        delay={900}
-        style={styles.logoutContainer}
-      >
-        <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={() => navigation.navigate('Login')}
-        >
-          <Text style={styles.logoutText}>⇨ Logout</Text>
-        </TouchableOpacity>
+    <View style={styles.container}>
+      <Animatable.View animation="fadeInDown" style={styles.header}>
+        <Text style={styles.welcomeText}>
+          Welcome back, {user?.displayName || 'Student'}!
+        </Text>
+        <Text style={styles.subtitle}>What would you like to learn today?</Text>
       </Animatable.View>
-    </SafeAreaView>
+
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <View style={styles.cardsContainer}>
+          {subjects.map((subject, index) => (
+            <SubjectCard
+              key={subject.title}
+              title={subject.title}
+              icon={subject.icon}
+              color={subject.color}
+              delay={subject.delay}
+              onPress={() => navigation.navigate(subject.screen)}
+            />
+          ))}
+        </View>
+      </ScrollView>
+    </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1A1B41',
   },
-  content: {
+  header: {
+    padding: 20,
+    paddingTop: 40,
+    backgroundColor: '#2196F3',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    elevation: 5,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 5,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 15,
+  },
+  cardsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    paddingVertical: 10,
+  },
+  card: {
+    width: CARD_WIDTH,
+    height: CARD_WIDTH,
+    margin: 10,
+    borderRadius: 20,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  cardContent: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 30,
+    padding: 15,
   },
-  buttonContainer: {
-    width: '100%',
-    alignItems: 'center',
+  cardIcon: {
+    width: CARD_WIDTH * 0.5,
+    height: CARD_WIDTH * 0.5,
+    marginBottom: 10,
   },
-  button: {
-    width: 300,
-    height: 80,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 15,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 32,
+  cardTitle: {
+    fontSize: 16,
     fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-  },
-  logoutContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 30,
-  },
-  logoutButton: {
-    backgroundColor: '#FF0000',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
-    elevation: 5,
-  },
-  logoutText: {
     color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
+    textAlign: 'center',
   },
-}); 
+});
+
+export default ChildDashboard; 
