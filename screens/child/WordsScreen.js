@@ -8,31 +8,31 @@ const wordCategories = [
   {
     name: 'Animals',
     words: [
-      { word: 'Owl', image: require('../assets/images/owl.png') },
-      { word: 'Bird', image: require('../assets/images/bird.png') },
-      { word: 'Fish', image: require('../assets/images/fish.png') },
-      { word: 'Cat', image: require('../assets/images/cat.png') },
-      { word: 'Dog', image: require('../assets/images/dog.png') },
+      { word: 'Owl', image: require('../../assets/images/owl.png') },
+      { word: 'Bird', image: require('../../assets/images/bird.png') },
+      { word: 'Fish', image: require('../../assets/images/fish.png') },
+      { word: 'Cat', image: require('../../assets/images/cat.png') },
+      { word: 'Dog', image: require('../../assets/images/dog.png') },
     ]
   },
   {
     name: 'Objects',
     words: [
-      { word: 'Car', image: require('../assets/images/car.png') },
-      { word: 'Computer', image: require('../assets/images/computer.png') },
-      { word: 'Book', image: require('../assets/images/book.png') },
-      { word: 'Ball', image: require('../assets/images/ball.png') },
-      { word: 'Phone', image: require('../assets/images/phone.png') },
+      { word: 'Car', image: require('../../assets/images/car.png') },
+      { word: 'Computer', image: require('../../assets/images/computer.png') },
+      { word: 'Book', image: require('../../assets/images/book.png') },
+      { word: 'Ball', image: require('../../assets/images/ball.png') },
+      { word: 'Phone', image: require('../../assets/images/phone.png') },
     ]
   },
   {
     name: 'Nature',
     words: [
-      { word: 'Sun', image: require('../assets/images/sun.png') },
-      { word: 'Tree', image: require('../assets/images/tree.png') },
-      { word: 'Flower', image: require('../assets/images/flower.png') },
-      { word: 'Cloud', image: require('../assets/images/cloud.png') },
-      { word: 'Star', image: require('../assets/images/star.png') },
+      { word: 'Sun', image: require('../../assets/images/sun.png') },
+      { word: 'Tree', image: require('../../assets/images/tree.png') },
+      { word: 'Flower', image: require('../../assets/images/flower.png') },
+      { word: 'Cloud', image: require('../../assets/images/cloud.png') },
+      { word: 'Star', image: require('../../assets/images/star.png') },
     ]
   }
 ];
@@ -118,7 +118,7 @@ export default function WordsScreen() {
                 <Text style={styles.wordText}>{item.word}</Text>
                 <View style={styles.speakerIcon}>
                   <Image 
-                    source={require('../assets/images/speaker.png')}
+                    source={require('../../assets/images/speaker.png')}
                     style={styles.speakerImage}
                   />
                 </View>

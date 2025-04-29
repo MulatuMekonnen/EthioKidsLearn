@@ -4,18 +4,18 @@ import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
 
-export default function SubtractionScreen() {
+export default function AdditionScreen() {
   const navigation = useNavigation();
   const [sound, setSound] = useState();
   const [currentProblem, setCurrentProblem] = useState({
-    num1: 8,
-    num2: 3,
-    result: 5
+    num1: 3,
+    num2: 5,
+    result: 8
   });
 
   async function playSound() {
     const { sound } = await Audio.Sound.createAsync(
-      require('../../assets/sounds/correct.mp3')
+      require('../../../assets/sounds/correct.mp3')
     );
     setSound(sound);
     await sound.playAsync();
@@ -39,7 +39,7 @@ export default function SubtractionScreen() {
         <View style={styles.content}>
           <View style={styles.teacherContainer}>
             <Image
-              source={require('../../assets/images/teacher.png')}
+              source={require('../../../assets/images/teacher.png')}
               style={styles.teacherImage}
               resizeMode="contain"
             />
@@ -48,7 +48,7 @@ export default function SubtractionScreen() {
           <View style={styles.problemContainer}>
             <View style={styles.equation}>
               <Text style={styles.equationText}>
-                {currentProblem.num1} - {currentProblem.num2} =
+                {currentProblem.num1} + {currentProblem.num2} =
               </Text>
               <Animatable.Text
                 animation="bounceIn"
@@ -62,18 +62,18 @@ export default function SubtractionScreen() {
               {[...Array(currentProblem.num1)].map((_, i) => (
                 <Animatable.Image
                   key={`ball1-${i}`}
-                  source={require('../../assets/images/ball.png')}
+                  source={require('../../../assets/images/ball.png')}
                   style={styles.helpImage}
                   animation="bounceIn"
                   delay={i * 100}
                 />
               ))}
-              <Text style={styles.minusText}>-</Text>
+              <Text style={styles.plusText}>+</Text>
               {[...Array(currentProblem.num2)].map((_, i) => (
                 <Animatable.Image
                   key={`ball2-${i}`}
-                  source={require('../../assets/images/ball.png')}
-                  style={[styles.helpImage, styles.removedBall]}
+                  source={require('../../../assets/images/ball.png')}
+                  style={styles.helpImage}
                   animation="bounceIn"
                   delay={(i + currentProblem.num1) * 100}
                 />
@@ -85,7 +85,7 @@ export default function SubtractionScreen() {
               onPress={playSound}
             >
               <Image
-                source={require('../../assets/images/play.png')}
+                source={require('../../../assets/images/play.png')}
                 style={styles.playIcon}
               />
             </TouchableOpacity>
@@ -97,12 +97,10 @@ export default function SubtractionScreen() {
         style={styles.nextButton}
         onPress={() => {
           // Generate new problem
-          const num1 = Math.floor(Math.random() * 5) + 5; // 5-10
-          const num2 = Math.floor(Math.random() * 3) + 1; // 1-4
           setCurrentProblem({
-            num1,
-            num2,
-            result: num1 - num2
+            num1: Math.floor(Math.random() * 5) + 1,
+            num2: Math.floor(Math.random() * 5) + 1,
+            result: Math.floor(Math.random() * 5) + 1 + Math.floor(Math.random() * 5) + 1
           });
         }}
       >
@@ -191,10 +189,7 @@ const styles = StyleSheet.create({
     height: 30,
     margin: 5,
   },
-  removedBall: {
-    opacity: 0.5,
-  },
-  minusText: {
+  plusText: {
     fontSize: 24,
     fontWeight: 'bold',
     marginHorizontal: 10,
@@ -239,4 +234,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-});
+}); 

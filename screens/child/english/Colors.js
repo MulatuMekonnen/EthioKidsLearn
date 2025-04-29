@@ -20,7 +20,7 @@ export default function Colors() {
 
   async function playSound() {
     const { sound } = await Audio.Sound.createAsync(
-      require('../../assets/sounds/correct.mp3')
+      require('../../../assets/sounds/correct.mp3')
     );
     setSound(sound);
     await sound.playAsync();
@@ -44,7 +44,7 @@ export default function Colors() {
         <View style={styles.content}>
           <View style={styles.teacherContainer}>
             <Image
-              source={require('../../assets/images/teacher.png')}
+              source={require('../../../assets/images/teacher.png')}
               style={styles.teacherImage}
               resizeMode="contain"
             />

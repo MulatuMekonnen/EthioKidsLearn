@@ -16,7 +16,7 @@ export default function AlphabetLessonScreen() {
   return (
     <View style={styles.container}>
       <Animatable.Text animation="zoomIn" style={styles.letter}>{currentLetter}</Animatable.Text>
-      <Image source={require('../assets/apple.png')} style={styles.image} />
+      <Image source={require('../../assets/apple.png')} style={styles.image} />
       <TouchableOpacity style={styles.audioButton} onPress={playAudio}>
         <Feather name="volume-2" size={24} color="white" />
       </TouchableOpacity>

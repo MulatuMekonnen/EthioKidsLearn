@@ -7,74 +7,74 @@ import { Audio } from 'expo-av';
 const animals = [
   {
     name: 'Lion',
-    image: require('../assets/images/animals/lion.png'),
-    sound: require('../assets/sounds/animals/lion.mp3'),
+    image: require('../../assets/images/animals/lion.png'),
+    sound: require('../../assets/sounds/animals/lion.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Tiger',
-    image: require('../assets/images/animals/tiger.png'),
-    sound: require('../assets/sounds/animals/tiger.mp3'),
+    image: require('../../assets/images/animals/tiger.png'),
+    sound: require('../../assets/sounds/animals/tiger.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Monkey',
-    image: require('../assets/images/animals/monkey.png'),
-    sound: require('../assets/sounds/animals/monkey.mp3'),
+    image: require('../../assets/images/animals/monkey.png'),
+    sound: require('../../assets/sounds/animals/monkey.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Hyena',
-    image: require('../assets/images/animals/hyena.png'),
-    sound: require('../assets/sounds/animals/hyena.mp3'),
+    image: require('../../assets/images/animals/hyena.png'),
+    sound: require('../../assets/sounds/animals/hyena.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Cow',
-    image: require('../assets/images/animals/cow.png'),
-    sound: require('../assets/sounds/animals/cow.mp3'),
+    image: require('../../assets/images/animals/cow.png'),
+    sound: require('../../assets/sounds/animals/cow.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Sheep',
-    image: require('../assets/images/animals/sheep.png'),
-    sound: require('../assets/sounds/animals/sheep.mp3'),
+    image: require('../../assets/images/animals/sheep.png'),
+    sound: require('../../assets/sounds/animals/sheep.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Horse',
-    image: require('../assets/images/animals/horse.png'),
-    sound: require('../assets/sounds/animals/horse.mp3'),
+    image: require('../../assets/images/animals/horse.png'),
+    sound: require('../../assets/sounds/animals/horse.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Donkey',
-    image: require('../assets/images/animals/donkey.png'),
-    sound: require('../assets/sounds/animals/donkey.mp3'),
+    image: require('../../assets/images/animals/donkey.png'),
+    sound: require('../../assets/sounds/animals/donkey.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Ox',
-    image: require('../assets/images/animals/ox.png'),
-    sound: require('../assets/sounds/animals/ox.mp3'),
+    image: require('../../assets/images/animals/ox.png'),
+    sound: require('../../assets/sounds/animals/ox.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Cat',
-    image: require('../assets/images/animals/cat.png'),
-    sound: require('../assets/sounds/animals/cat.mp3'),
+    image: require('../../assets/images/animals/cat.png'),
+    sound: require('../../assets/sounds/animals/cat.mp3'),
     category: 'Pets'
   },
   {
     name: 'Dog',
-    image: require('../assets/images/animals/dog.png'),
-    sound: require('../assets/sounds/animals/dog.mp3'),
+    image: require('../../assets/images/animals/dog.png'),
+    sound: require('../../assets/sounds/animals/dog.mp3'),
     category: 'Pets'
   },
   {
     name: 'Chicken',
-    image: require('../assets/images/animals/chicken.png'),
-    sound: require('../assets/sounds/animals/chicken.mp3'),
+    image: require('../../assets/images/animals/chicken.png'),
+    sound: require('../../assets/sounds/animals/chicken.mp3'),
     category: 'Farm Animals'
   }
 ];
@@ -182,7 +182,7 @@ export default function AnimalSoundsScreen() {
                 <Text style={styles.animalName}>{animal.name}</Text>
                 <View style={styles.soundIcon}>
                   <Image 
-                    source={require('../assets/images/speaker.png')}
+                    source={require('../../assets/images/speaker.png')}
                     style={styles.speakerImage}
                   />
                 </View>

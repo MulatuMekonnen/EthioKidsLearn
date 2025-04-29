@@ -1,74 +1,63 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
 
-const oromoContent = [
+const words = [
   {
-    letter: 'A',
-    pronunciation: 'aa',
-    example: 'Aadaa',
-    meaning: 'Culture',
-    sound: require('../assets/sounds/oromo/a.mp3'),
-    category: 'Alphabet'
+    word: 'Apple',
+    image: require('../../../assets/images/words/apple.png'),
+    sound: require('../../../assets/sounds/words/apple.mp3'),
+    category: 'Fruits'
   },
   {
-    letter: 'B',
-    pronunciation: 'ba',
-    example: 'Buna',
-    meaning: 'Coffee',
-    sound: require('../assets/sounds/oromo/b.mp3'),
-    category: 'Alphabet'
+    word: 'Ball',
+    image: require('../../../assets/images/words/ball.png'),
+    sound: require('../../../assets/sounds/words/ball.mp3'),
+    category: 'Toys'
   },
   {
-    letter: 'C',
-    pronunciation: 'ca',
-    example: 'Cabbii',
-    meaning: 'Butter',
-    sound: require('../assets/sounds/oromo/c.mp3'),
-    category: 'Alphabet'
+    word: 'Cat',
+    image: require('../../../assets/images/words/cat.png'),
+    sound: require('../../../assets/sounds/words/cat.mp3'),
+    category: 'Animals'
   },
   {
-    word: 'Abbaa',
-    pronunciation: 'Ab-baa',
-    meaning: 'Father',
-    sound: require('../assets/sounds/oromo/father.mp3'),
-    category: 'Family'
+    word: 'Dog',
+    image: require('../../../assets/images/words/dog.png'),
+    sound: require('../../../assets/sounds/words/dog.mp3'),
+    category: 'Animals'
   },
   {
-    word: 'Haadha',
-    pronunciation: 'Haa-dha',
-    meaning: 'Mother',
-    sound: require('../assets/sounds/oromo/mother.mp3'),
-    category: 'Family'
+    word: 'Elephant',
+    image: require('../../../assets/images/words/elephant.png'),
+    sound: require('../../../assets/sounds/words/elephant.mp3'),
+    category: 'Animals'
   },
   {
-    word: 'Bishaan',
-    pronunciation: 'Bi-shaan',
-    meaning: 'Water',
-    sound: require('../assets/sounds/oromo/water.mp3'),
-    category: 'Basic Words'
+    word: 'Fish',
+    image: require('../../../assets/images/words/fish.png'),
+    sound: require('../../../assets/sounds/words/fish.mp3'),
+    category: 'Animals'
   },
   {
-    word: 'Nyaata',
-    pronunciation: 'Nya-ata',
-    meaning: 'Food',
-    sound: require('../assets/sounds/oromo/food.mp3'),
-    category: 'Basic Words'
+    word: 'House',
+    image: require('../../../assets/images/words/house.png'),
+    sound: require('../../../assets/sounds/words/house.mp3'),
+    category: 'Places'
   },
   {
-    word: 'Nagaa',
-    pronunciation: 'Na-gaa',
-    meaning: 'Peace',
-    sound: require('../assets/sounds/oromo/peace.mp3'),
-    category: 'Greetings'
+    word: 'Ice Cream',
+    image: require('../../../assets/images/words/ice-cream.png'),
+    sound: require('../../../assets/sounds/words/ice-cream.mp3'),
+    category: 'Food'
   }
 ];
 
-const categories = [...new Set(oromoContent.map(item => item.category))];
+const categories = [...new Set(words.map(item => item.category))];
 
-export default function OromoLessonScreen() {
+export default function WordsLessonScreen() {
   const navigation = useNavigation();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [sound, setSound] = useState();
@@ -83,11 +72,6 @@ export default function OromoLessonScreen() {
       await newSound.playAsync();
     } catch (error) {
       console.log('Error playing sound:', error);
-      Alert.alert(
-        'Sound Not Available',
-        'The sound file for this item is not available yet.',
-        [{ text: 'OK' }]
-      );
     }
   }
 
@@ -99,9 +83,9 @@ export default function OromoLessonScreen() {
       : undefined;
   }, [sound]);
 
-  const filteredContent = selectedCategory === 'All' 
-    ? oromoContent 
-    : oromoContent.filter(item => item.category === selectedCategory);
+  const filteredWords = selectedCategory === 'All' 
+    ? words 
+    : words.filter(item => item.category === selectedCategory);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,7 +93,7 @@ export default function OromoLessonScreen() {
         animation="fadeIn"
         style={styles.header}
       >
-        <Text style={styles.headerText}>Learn Oromo</Text>
+        <Text style={styles.headerText}>Learn Words</Text>
       </Animatable.View>
 
       <View style={styles.categoryContainer}>
@@ -154,35 +138,27 @@ export default function OromoLessonScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.grid}>
-          {filteredContent.map((item, index) => (
+          {filteredWords.map((item, index) => (
             <Animatable.View
-              key={item.letter || item.word}
+              key={item.word}
               animation="zoomIn"
               delay={index * 100}
-              style={styles.card}
+              style={styles.wordCard}
             >
               <TouchableOpacity
-                style={styles.button}
+                style={styles.wordButton}
                 onPress={() => playSound(item.sound)}
                 activeOpacity={0.7}
               >
-                <Text style={styles.mainText}>
-                  {item.letter || item.word}
-                </Text>
-                <Text style={styles.pronunciationText}>
-                  ({item.pronunciation})
-                </Text>
-                {item.example && (
-                  <Text style={styles.exampleText}>
-                    {item.example}
-                  </Text>
-                )}
-                <Text style={styles.meaningText}>
-                  {item.meaning}
-                </Text>
+                <Image 
+                  source={item.image}
+                  style={styles.wordImage}
+                  resizeMode="contain"
+                />
+                <Text style={styles.wordText}>{item.word}</Text>
                 <View style={styles.soundIcon}>
                   <Image 
-                    source={require('../assets/images/speaker.png')}
+                    source={require('../../../assets/images/speaker.png')}
                     style={styles.speakerImage}
                   />
                 </View>
@@ -214,7 +190,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A1B41',
   },
   header: {
-    backgroundColor: '#FFA500',
+    backgroundColor: '#4CAF50',
     padding: 15,
     borderRadius: 15,
     margin: 10,
@@ -244,7 +220,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   selectedCategory: {
-    backgroundColor: '#FFA500',
+    backgroundColor: '#4CAF50',
   },
   categoryText: {
     fontSize: 16,
@@ -266,12 +242,12 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-around',
   },
-  card: {
+  wordCard: {
     width: '45%',
     aspectRatio: 1,
     margin: 8,
   },
-  button: {
+  wordButton: {
     flex: 1,
     backgroundColor: 'white',
     borderRadius: 15,
@@ -287,35 +263,22 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
-  mainText: {
-    fontSize: 32,
+  wordImage: {
+    width: '80%',
+    height: '70%',
+    marginBottom: 10,
+  },
+  wordText: {
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#1A1B41',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  pronunciationText: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  exampleText: {
-    fontSize: 14,
-    color: '#FFA500',
-    textAlign: 'center',
-    marginBottom: 5,
-  },
-  meaningText: {
-    fontSize: 14,
-    color: '#4CAF50',
     textAlign: 'center',
   },
   soundIcon: {
     position: 'absolute',
     top: 5,
     right: 5,
-    backgroundColor: '#FFA500',
+    backgroundColor: '#4CAF50',
     borderRadius: 12,
     padding: 5,
   },
@@ -330,7 +293,7 @@ const styles = StyleSheet.create({
     left: 20,
   },
   backButton: {
-    backgroundColor: '#FFA500',
+    backgroundColor: '#4CAF50',
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,

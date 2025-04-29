@@ -4,11 +4,11 @@ import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
 
 const animals = [
-  { name: 'Lion', sound: require('../assets/sounds/animals/lion.mp3'), image: require('../assets/images/animals/lion.png') },
-  { name: 'Elephant', sound: require('../assets/sounds/animals/elephant.mp3'), image: require('../assets/images/animals/elephant.png') },
-  { name: 'Giraffe', sound: require('../assets/sounds/animals/giraffe.mp3'), image: require('../assets/images/animals/giraffe.png') },
-  { name: 'Zebra', sound: require('../assets/sounds/animals/zebra.mp3'), image: require('../assets/images/animals/zebra.png') },
-  { name: 'Monkey', sound: require('../assets/sounds/animals/monkey.mp3'), image: require('../assets/images/animals/monkey.png') },
+  { name: 'Lion', sound: require('../../assets/sounds/animals/lion.mp3'), image: require('../../assets/images/animals/lion.png') },
+  { name: 'Elephant', sound: require('../../assets/sounds/animals/elephant.mp3'), image: require('../../assets/images/animals/elephant.png') },
+  { name: 'Giraffe', sound: require('../../assets/sounds/animals/giraffe.mp3'), image: require('../../assets/images/animals/giraffe.png') },
+  { name: 'Zebra', sound: require('../../assets/sounds/animals/zebra.mp3'), image: require('../../assets/images/animals/zebra.png') },
+  { name: 'Monkey', sound: require('../../assets/sounds/animals/monkey.mp3'), image: require('../../assets/images/animals/monkey.png') },
 ];
 
 const AnimalsLessonScreen = ({ navigation }) => {

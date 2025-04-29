@@ -1,19 +1,37 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { 
+  SafeAreaView, 
+  View, 
+  Text, 
+  StyleSheet, 
+  TouchableOpacity, 
+  Image, 
+  Dimensions 
+} from 'react-native';
 import * as Animatable from 'react-native-animatable';
 
 const { width, height } = Dimensions.get('window');
 
 const WelcomeText = () => {
-  const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#8B00FF'];
+  const colors = ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#4B0082','#8B00FF'];
   return (
     <View style={styles.welcomeContainer}>
-      {'WELCOME'.split('').map((letter, index) => (
+      {'WELCOME'.split('').map((letter, idx) => (
         <Animatable.Text
-          key={index}
+          key={idx}
           animation="bounceIn"
-          delay={index * 100}
-          style={[styles.welcomeLetter, { color: colors[index] }]}
+          delay={idx * 100}
+          style={[
+            styles.welcomeLetter,
+            {
+              color: colors[idx],
+              // add perspective so rotateY looks 3D
+              transform: [
+                { perspective: 1000 },
+                { rotateY: '20deg' }
+              ]
+            },
+          ]}
         >
           {letter}
         </Animatable.Text>
@@ -22,38 +40,28 @@ const WelcomeText = () => {
   );
 };
 
-const WelcomeScreen = ({ navigation }) => {
-  return (
-    <View style={styles.container}>
-      <WelcomeText />
-      
-      <Animatable.View 
-        animation="fadeIn" 
-        delay={800} 
-        style={styles.illustrationContainer}
-      >
-        <Image 
-          source={require('../assets/images/children-reading.png')} 
-          style={styles.illustration}
-          resizeMode="contain"
-        />
-      </Animatable.View>
+const WelcomeScreen = ({ navigation }) => (
+  <SafeAreaView style={styles.container}>
+    <WelcomeText />
 
-      <Animatable.View 
-        animation="fadeInUp"
-        delay={1200} 
-        style={styles.buttonContainer}
+    <Animatable.View animation="fadeIn" delay={800} style={styles.illustrationContainer}>
+      <Image
+        source={require('../assets/images/children-reading.png')}
+        style={styles.illustration}
+        resizeMode="contain"
+      />
+    </Animatable.View>
+
+    <Animatable.View animation="fadeInUp" delay={1200} style={styles.buttonContainer}>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate('Auth')}
       >
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('Auth')}
-        >
-          <Text style={styles.loginButtonText}>LOGIN</Text>
-        </TouchableOpacity>
-      </Animatable.View>
-    </View>
-  );
-};
+        <Text style={styles.loginButtonText}>LOGIN</Text>
+      </TouchableOpacity>
+    </Animatable.View>
+  </SafeAreaView>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -71,10 +79,9 @@ const styles = StyleSheet.create({
   welcomeLetter: {
     fontSize: 36,
     fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 3,
-    transform: [{ rotateY: '20deg' }],
   },
   illustrationContainer: {
     flex: 1,
@@ -99,11 +106,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   loginButtonText: {
-    color: 'white',
+    color: '#FFF',
     fontSize: 24,
     fontWeight: 'bold',
     letterSpacing: 2,
   },
 });
 
-export default WelcomeScreen; 
+export default WelcomeScreen;

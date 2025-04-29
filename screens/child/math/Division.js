@@ -4,18 +4,18 @@ import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
 
-export default function MultiplicationScreen() {
+export default function AdditionScreen() {
   const navigation = useNavigation();
   const [sound, setSound] = useState();
   const [currentProblem, setCurrentProblem] = useState({
-    num1: 2,
-    num2: 3,
-    result: 6
+    num1: 3,
+    num2: 5,
+    result: 8
   });
 
   async function playSound() {
     const { sound } = await Audio.Sound.createAsync(
-      require('../../assets/sounds/correct.mp3')
+      require('../../../assets/sounds/correct.mp3')
     );
     setSound(sound);
     await sound.playAsync();
@@ -39,7 +39,7 @@ export default function MultiplicationScreen() {
         <View style={styles.content}>
           <View style={styles.teacherContainer}>
             <Image
-              source={require('../../assets/images/teacher.png')}
+              source={require('../../../assets/images/teacher.png')}
               style={styles.teacherImage}
               resizeMode="contain"
             />
@@ -48,7 +48,7 @@ export default function MultiplicationScreen() {
           <View style={styles.problemContainer}>
             <View style={styles.equation}>
               <Text style={styles.equationText}>
-                {currentProblem.num1} × {currentProblem.num2} =
+                {currentProblem.num1} + {currentProblem.num2} =
               </Text>
               <Animatable.Text
                 animation="bounceIn"
@@ -60,17 +60,23 @@ export default function MultiplicationScreen() {
 
             <View style={styles.visualHelp}>
               {[...Array(currentProblem.num1)].map((_, i) => (
-                <View key={`group-${i}`} style={styles.groupContainer}>
-                  {[...Array(currentProblem.num2)].map((_, j) => (
-                    <Animatable.Image
-                      key={`ball-${i}-${j}`}
-                      source={require('../../assets/images/ball.png')}
-                      style={styles.helpImage}
-                      animation="bounceIn"
-                      delay={(i * currentProblem.num2 + j) * 100}
-                    />
-                  ))}
-                </View>
+                <Animatable.Image
+                  key={`ball1-${i}`}
+                  source={require('../../../assets/images/ball.png')}
+                  style={styles.helpImage}
+                  animation="bounceIn"
+                  delay={i * 100}
+                />
+              ))}
+              <Text style={styles.plusText}>+</Text>
+              {[...Array(currentProblem.num2)].map((_, i) => (
+                <Animatable.Image
+                  key={`ball2-${i}`}
+                  source={require('../../../assets/images/ball.png')}
+                  style={styles.helpImage}
+                  animation="bounceIn"
+                  delay={(i + currentProblem.num1) * 100}
+                />
               ))}
             </View>
 
@@ -79,7 +85,7 @@ export default function MultiplicationScreen() {
               onPress={playSound}
             >
               <Image
-                source={require('../../assets/images/play.png')}
+                source={require('../../../assets/images/play.png')}
                 style={styles.playIcon}
               />
             </TouchableOpacity>
@@ -91,12 +97,10 @@ export default function MultiplicationScreen() {
         style={styles.nextButton}
         onPress={() => {
           // Generate new problem
-          const num1 = Math.floor(Math.random() * 2) + 1; // 1-3
-          const num2 = Math.floor(Math.random() * 2) + 1; // 1-3
           setCurrentProblem({
-            num1,
-            num2,
-            result: num1 * num2
+            num1: Math.floor(Math.random() * 5) + 1,
+            num2: Math.floor(Math.random() * 5) + 1,
+            result: Math.floor(Math.random() * 5) + 1 + Math.floor(Math.random() * 5) + 1
           });
         }}
       >
@@ -180,14 +184,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  groupContainer: {
-    flexDirection: 'row',
-    margin: 5,
-  },
   helpImage: {
     width: 30,
     height: 30,
-    margin: 2,
+    margin: 5,
+  },
+  plusText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginHorizontal: 10,
   },
   playButton: {
     backgroundColor: '#FF0000',
@@ -229,4 +234,4 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-});
+}); 

@@ -8,65 +8,65 @@ const amharicContent = [
   {
     letter: 'ሀ',
     pronunciation: 'ha',
-    sound: require('../assets/sounds/amharic/ha.mp3'),
+    sound: require('../../assets/sounds/amharic/ha.mp3'),
     category: 'Alphabet'
   },
   {
     letter: 'ለ',
     pronunciation: 'le',
-    sound: require('../assets/sounds/amharic/le.mp3'),
+    sound: require('../../assets/sounds/amharic/le.mp3'),
     category: 'Alphabet'
   },
   {
     letter: 'ሐ',
     pronunciation: 'ha',
-    sound: require('../assets/sounds/amharic/ha2.mp3'),
+    sound: require('../../assets/sounds/amharic/ha2.mp3'),
     category: 'Alphabet'
   },
   {
     letter: 'መ',
     pronunciation: 'me',
-    sound: require('../assets/sounds/amharic/me.mp3'),
+    sound: require('../../assets/sounds/amharic/me.mp3'),
     category: 'Alphabet'
   },
   {
     letter: 'ሰ',
     pronunciation: 'se',
-    sound: require('../assets/sounds/amharic/se.mp3'),
+    sound: require('../../assets/sounds/amharic/se.mp3'),
     category: 'Alphabet'
   },
   {
     letter: 'ረ',
     pronunciation: 're',
-    sound: require('../assets/sounds/amharic/re.mp3'),
+    sound: require('../../assets/sounds/amharic/re.mp3'),
     category: 'Alphabet'
   },
   {
     word: 'እናት',
     pronunciation: 'Inat',
     meaning: 'Mother',
-    sound: require('../assets/sounds/amharic/mother.mp3'),
+    sound: require('../../assets/sounds/amharic/mother.mp3'),
     category: 'Family'
   },
   {
     word: 'አባት',
     pronunciation: 'Abat',
     meaning: 'Father',
-    sound: require('../assets/sounds/amharic/father.mp3'),
+    sound: require('../../assets/sounds/amharic/father.mp3'),
     category: 'Family'
   },
   {
     word: 'ውሃ',
     pronunciation: 'Wuha',
     meaning: 'Water',
-    sound: require('../assets/sounds/amharic/water.mp3'),
+    sound: require('../../assets/sounds/amharic/water.mp3'),
     category: 'Basic Words'
   },
   {
     word: 'ዳቦ',
     pronunciation: 'Dabo',
     meaning: 'Bread',
-    sound: require('../assets/sounds/amharic/bread.mp3'),
+    sound: require('../../assets/sounds/amharic/bread.mp3'),
     category: 'Food'
   }
 ];
@@ -181,7 +181,7 @@ export default function AmharicLessonScreen() {
                 )}
                 <View style={styles.soundIcon}>
                   <Image 
-                    source={require('../assets/images/speaker.png')}
+                    source={require('../../assets/images/speaker.png')}
                     style={styles.speakerImage}
                   />
                 </View>

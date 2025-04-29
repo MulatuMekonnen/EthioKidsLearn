@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 const { width } = Dimensions.get('window');
 const cardWidth = (width - 60) / 2; // 60 = padding (20) * 3 for left, right, and middle gap
@@ -19,7 +19,7 @@ const subjects = [
 export default function LessonsScreen() {
   const navigation = useNavigation();
   const { user } = useAuth();
-  const userName = user?.displayName || "Student";
+  const userName = user?.displayName || 'Student';
 
   const renderSubjectCard = (subject, index) => {
     const cardStyle = [
@@ -54,6 +54,14 @@ export default function LessonsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Go Back Button */}
+      <TouchableOpacity
+        style={styles.backButton}
+        onPress={() => navigation.navigate('ParentHome')}
+      >
+        <Text style={styles.backText}>Go Back</Text>
+      </TouchableOpacity>
+
       <Animatable.View 
         animation="fadeInDown" 
         duration={800} 
@@ -76,6 +84,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#1A1B41',
     padding: 20,
   },
+  backButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: '#FFF',
+    borderRadius: 5,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
+  },
+  backText: {
+    color: '#2196F3',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   header: {
     marginBottom: 30,
   },
@@ -83,7 +104,6 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     color: 'white',
-    fontFamily: 'System',
   },
   subtitle: {
     fontSize: 18,
@@ -111,10 +131,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     padding: 10,
