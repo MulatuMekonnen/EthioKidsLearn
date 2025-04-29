@@ -1,9 +1,8 @@
-import { initializeApp } from 'firebase/app';
-import { initializeAuth, getReactNativePersistence, getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { initializeApp, getApps } from 'firebase/app';
+import { initializeAuth, getReactNativePersistence } from 'firebase/auth';
+import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { getAnalytics, isSupported } from 'firebase/analytics';
 
 // Your web app's Firebase configuration
@@ -16,8 +15,13 @@ const firebaseConfig = {
   appId: "1:488926380778:web:608e077603f39d83c7cd93"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if it hasn't been initialized already
+let app;
+if (!getApps().length) {
+  app = initializeApp(firebaseConfig);
+} else {
+  app = getApps()[0];
+}
 
 // Initialize Auth with AsyncStorage persistence
 const auth = initializeAuth(app, {
@@ -26,6 +30,30 @@ const auth = initializeAuth(app, {
 
 // Initialize Firestore
 const db = getFirestore(app);
+
+// Function to initialize Firebase services
+async function initializeFirebaseServices() {
+  if (Platform.OS !== 'web') {
+    try {
+      // Enable offline persistence for Firestore
+      await enableIndexedDbPersistence(db, {
+        synchronizeTabs: true
+      });
+      console.log('Firestore persistence enabled successfully');
+    } catch (err) {
+      if (err.code === 'failed-precondition') {
+        console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+      } else if (err.code === 'unimplemented') {
+        console.warn('The current browser does not support persistence.');
+      } else {
+        console.error('Error enabling Firestore persistence:', err);
+      }
+    }
+  }
+}
+
+// Initialize Firebase services
+initializeFirebaseServices().catch(console.error);
 
 let analytics = null;
 
@@ -70,4 +98,5 @@ const setUserProperty = async (name, value) => {
   }
 };
 
-export { auth, db, analytics, logEvent, setUserProperty }; 
+export { auth, db, analytics, logEvent, setUserProperty };
+export default app;

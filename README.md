@@ -1,2 +1,0 @@
-# EthioKidsLearn
-React-Native App

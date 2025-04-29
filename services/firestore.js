@@ -1,4 +1,4 @@
-import { db } from '../firebase';
+import { db } from '../config/firebase';
 
 export const firestoreService = {
   // Create a document

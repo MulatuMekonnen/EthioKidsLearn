@@ -1,4 +1,4 @@
-import { db } from '../firebaseConfig';
+import { db } from '../config/firebase';
 
 // Add data
 const addData = async (collection, data) => {

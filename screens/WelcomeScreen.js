@@ -1,108 +1,112 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions } from 'react-native';
-import * as Animatable from 'react-native-animatable';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  Dimensions,
+} from 'react-native';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
-const WelcomeText = () => {
-  const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#8B00FF'];
-  return (
-    <View style={styles.welcomeContainer}>
-      {'WELCOME'.split('').map((letter, index) => (
-        <Animatable.Text
-          key={index}
-          animation="bounceIn"
-          delay={index * 100}
-          style={[styles.welcomeLetter, { color: colors[index] }]}
-        >
-          {letter}
-        </Animatable.Text>
-      ))}
-    </View>
-  );
-};
-
 const WelcomeScreen = ({ navigation }) => {
-  return (
-    <View style={styles.container}>
-      <WelcomeText />
-      
-      <Animatable.View 
-        animation="fadeIn" 
-        delay={800} 
-        style={styles.illustrationContainer}
-      >
-        <Image 
-          source={require('../assets/images/children-reading.png')} 
-          style={styles.illustration}
-          resizeMode="contain"
-        />
-      </Animatable.View>
+  const { translate } = useLanguage();
 
-      <Animatable.View 
-        animation="fadeInUp"
-        delay={1200} 
-        style={styles.buttonContainer}
-      >
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('Auth')}
-        >
-          <Text style={styles.loginButtonText}>LOGIN</Text>
-        </TouchableOpacity>
-      </Animatable.View>
-    </View>
+  return (
+    <ImageBackground
+      source={require('../assets/welcome-bg.png')}
+      style={styles.background}
+      resizeMode="cover"
+    >
+      <View style={styles.container}>
+        <View style={styles.content}>
+          <Text style={styles.title}>EthioKids Learn</Text>
+          <Text style={styles.subtitle}>
+            {translate('welcome.subtitle')}
+          </Text>
+        </View>
+
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.signupButton]}
+            onPress={() => navigation.navigate('Signup')}
+          >
+            <Text style={styles.buttonText}>{translate('auth.signup')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.button, styles.loginButton]}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={[styles.buttonText, styles.loginText]}>
+              {translate('auth.login')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: width,
+    height: height,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#1A1B41',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    backgroundColor: 'rgba(16, 16, 37, 0.9)',
     padding: 20,
+    justifyContent: 'space-between',
   },
-  welcomeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: height * 0.05,
-  },
-  welcomeLetter: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 3,
-    transform: [{ rotateY: '20deg' }],
-  },
-  illustrationContainer: {
+  content: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
   },
-  illustration: {
-    width: width * 0.8,
-    height: width * 0.8,
+  title: {
+    fontSize: 36,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
+    opacity: 0.8,
   },
   buttonContainer: {
     width: '100%',
+    paddingBottom: 40,
+  },
+  button: {
+    width: '100%',
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: height * 0.05,
+    marginBottom: 16,
+  },
+  signupButton: {
+    backgroundColor: '#007AFF',
   },
   loginButton: {
-    backgroundColor: '#2196F3',
-    paddingVertical: 15,
-    paddingHorizontal: 60,
-    borderRadius: 30,
-    elevation: 5,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#007AFF',
   },
-  loginButtonText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: 'bold',
-    letterSpacing: 2,
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+  },
+  loginText: {
+    color: '#007AFF',
   },
 });
 

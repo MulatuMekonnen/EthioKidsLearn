@@ -1,4 +1,4 @@
-package com.ethiokidslearningapp
+package com.ethiokidslearn
 
 import android.os.Build
 import android.os.Bundle

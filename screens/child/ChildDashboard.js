@@ -9,7 +9,7 @@ import {
   Image,
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.4;
@@ -29,40 +29,42 @@ const SubjectCard = ({ title, icon, color, onPress, delay }) => (
 
 const ChildDashboard = ({ navigation }) => {
   const { user } = useAuth();
+  // Use a default name if user is not available or displayName is not set
+  const userName = user?.displayName || "Student";
 
   const subjects = [
     {
       title: 'Math',
       screen: 'MathLessons',
-      icon: require('../assets/images/math-icon.png'),
+      icon: require('../../assets/images/math-icon.png'),
       color: '#FF6B6B',
       delay: 100,
     },
     {
       title: 'English',
       screen: 'EnglishLessons',
-      icon: require('../assets/images/english-icon.png'),
+      icon: require('../../assets/images/english-icon.png'),
       color: '#4ECDC4',
       delay: 200,
     },
     {
       title: 'Animals',
       screen: 'Animals',
-      icon: require('../assets/images/animals-icon.png'),
+      icon: require('../../assets/images/animals-icon.png'),
       color: '#45B7D1',
       delay: 300,
     },
     {
       title: 'Time',
       screen: 'TimeNavigation',
-      icon: require('../assets/images/time-icon.png'),
+      icon: require('../../assets/images/time-icon.png'),
       color: '#96CEB4',
       delay: 400,
     },
     {
       title: 'Afaan Oromo',
       screen: 'OromoLesson',
-      icon: require('../assets/images/oromo-icon.png'),
+      icon: require('../../assets/images/oromo-icon.png'),
       color: '#FFEEAD',
       delay: 500,
     },
@@ -159,4 +161,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChildDashboard; 
+export default ChildDashboard;

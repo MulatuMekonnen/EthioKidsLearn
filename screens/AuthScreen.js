@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig';
+import { auth } from '../config/firebase';
 
 const AuthScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');

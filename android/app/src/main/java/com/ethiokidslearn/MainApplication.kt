@@ -1,4 +1,4 @@
-package com.ethiokidslearningapp
+package com.ethiokidslearn
 
 import android.app.Application
 import android.content.res.Configuration

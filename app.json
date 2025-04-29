@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "EthioKidsLearningApp",
-    "slug": "ethiokidslearningapp",
+    "name": "EthioKidsLearn",
+    "slug": "EthioKidsLearn",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,20 +16,34 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ethiokids.learningapp"
+      "bundleIdentifier": "com.ethiokidslearn"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.ethiokids.learningapp"
+      "package": "com.ethiokidslearn"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-av"
-    ]
+      "expo-camera",
+      "expo-file-system"
+    ],
+    "newArchEnabled": true,
+    "extra": {
+      "eas": {
+        "projectId": "ethio-kids-learn"
+      }
+    },
+    "owner": "ethiokidslearn",
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    }
   }
 }
