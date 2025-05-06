@@ -540,7 +540,7 @@ export default function ParentDashboard() {
         
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
           <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Quick Access</Text>
-          <View style={styles.quickAccessContainer}>
+          <View style={styles.quickAccessRow}>
             <TouchableOpacity 
               style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
               onPress={() => navigation.navigate('Profile')}
@@ -556,9 +556,11 @@ export default function ParentDashboard() {
               <Ionicons name="stats-chart" size={28} color={currentTheme.primary} />
               <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>Progress Report</Text>
             </TouchableOpacity>
-            
+          </View>
+          
+          <View style={[styles.quickAccessRow, { justifyContent: 'center' }]}>
             <TouchableOpacity 
-              style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
+              style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border, marginHorizontal: 0 }]}
               onPress={() => navigation.navigate('Settings')}
             >
               <Ionicons name="settings" size={28} color={currentTheme.primary} />
@@ -994,9 +996,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
-  quickAccessContainer: {
+  quickAccessRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 16,
   },
   quickAccessButton: {
@@ -1005,6 +1008,9 @@ const styles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     borderWidth: 1,
+  },
+  quickAccessSpacer: {
+    width: '24%',
   },
   quickAccessText: {
     marginTop: 8,

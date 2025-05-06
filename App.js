@@ -4,6 +4,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { UserManagementProvider } from './context/UserManagementContext';
+import { ContentProvider } from './context/ContentContext';
 import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
@@ -13,7 +14,9 @@ export default function App() {
         <LanguageProvider>
           <AuthProvider>
             <UserManagementProvider>
-              <AppNavigator />
+              <ContentProvider>
+                <AppNavigator />
+              </ContentProvider>
             </UserManagementProvider>
           </AuthProvider>
         </LanguageProvider>
