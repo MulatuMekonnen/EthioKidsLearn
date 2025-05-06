@@ -17,11 +17,11 @@ export default function TeacherHome({ navigation }) {
 
       {/* Dashboard Actions */}
       <View style={styles.container}>
-        <Button title="Child Progress" onPress={() => navigation.navigate('ChildDashboard')} />
+        <Button title="Child Progress" onPress={() => {}} />
         <View style={styles.buttonSpacing} />
-        <Button title="Give Report" onPress={() => {}} />
+        <Button title="Give Report" onPress={() => navigation.navigate('ChildScores')} />
         <View style={styles.buttonSpacing} />
-        <Button title="Send Content" onPress={() => {}} />
+        <Button title="Create Content" onPress={() => navigation.navigate('CreateContent')} />
         <View style={styles.buttonSpacing} />
         <Button title="Button 4" onPress={() => {}} />
       </View>

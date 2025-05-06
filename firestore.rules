@@ -12,30 +12,74 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Helper function to get user role
+    function getUserRole() {
+      let userDoc = get(/databases/$(database)/documents/users/$(request.auth.uid));
+      return userDoc.data.role;
+    }
+
+    // Helper function to check if user is an admin
+    function isAdmin() {
+      return isAuthenticated() && getUserRole() == 'admin';
+    }
+
+    // Helper function to check if user is a teacher
+    function isTeacher() {
+      return isAuthenticated() && getUserRole() == 'teacher';
+    }
+
     // Users collection rules
     match /users/{userId} {
       // Allow users to create their own document during registration
-      allow create: if request.auth != null && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId && 
+                      request.resource.data.role == 'parent';
       
-      // Allow users to read and write their own document
-      allow read, write: if isOwner(userId);
+      // Allow users to read their own document
+      allow read: if isOwner(userId);
       
-      // Allow authenticated users to read other user documents
-      allow read: if isAuthenticated();
+      // Allow admins to read and write all user documents
+      allow read, write: if isAdmin();
       
+      // Allow teachers to read user documents (for viewing student/parent info)
+      allow read: if isTeacher();
+      
+      // Allow users to update their own document, but not change their role
+      allow update: if isOwner(userId) && 
+                      request.resource.data.role == resource.data.role;
+
       // Children subcollection rules
       match /children/{childId} {
         // Allow parent to read and write their children's documents
         allow read, write: if isOwner(userId);
+        
+        // Allow teachers to read children documents
+        allow read: if isTeacher();
+        
+        // Allow admin full access
+        allow read, write: if isAdmin();
         
         // Allow anyone to read child profiles for the child login feature
         allow read: if true;
       }
     }
 
-    // Allow authenticated users to read and write to other collections
+    // Class management collection (for teachers and admins)
+    match /classes/{classId} {
+      // Allow admins full access
+      allow read, write: if isAdmin();
+      
+      // Allow teachers to read all classes and modify their assigned classes
+      allow read: if isTeacher();
+      allow write: if isTeacher() && 
+                    request.auth.uid in resource.data.assignedTeachers;
+      
+      // Allow parents to read classes their children are enrolled in
+      allow read: if isAuthenticated();
+    }
+
+    // Restrict access to other collections to admins only
     match /{document=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAdmin();
     }
   }
 }

@@ -1,20 +1,23 @@
 import React from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { AuthProvider } from './context/AuthContext';
-import { LanguageProvider } from './context/LanguageContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { LanguageProvider } from './context/LanguageContext';
+import { AuthProvider } from './context/AuthContext';
+import { UserManagementProvider } from './context/UserManagementContext';
 import AppNavigator from './navigation/AppNavigator';
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
+      <ThemeProvider>
         <LanguageProvider>
-          <ThemeProvider>
-            <AppNavigator />
-          </ThemeProvider>
+          <AuthProvider>
+            <UserManagementProvider>
+              <AppNavigator />
+            </UserManagementProvider>
+          </AuthProvider>
         </LanguageProvider>
-      </AuthProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

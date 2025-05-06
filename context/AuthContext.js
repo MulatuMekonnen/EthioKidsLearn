@@ -48,23 +48,17 @@ export function AuthProvider({ children }) {
     return () => unsubscribe();
   }, []);
 
+  
+
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-      
-      if (userDoc.exists()) {
-        const userData = userDoc.data();
-        setUserRole(userData.role);
-        setUser(userCredential.user);
-        return userCredential.user;
-      } else {
-        throw new Error('User document not found');
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const userDocSnap = await getDoc(doc(db, 'users', cred.user.uid));
+      if (userDocSnap.exists()) {
+        setUserRole(userDocSnap.data().role);
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      throw err;
+      return cred.user;
     } finally {
       setLoading(false);
     }
@@ -102,6 +96,37 @@ export function AuthProvider({ children }) {
     }
   };
 
+  // Admin-created teacher (collects name)
+  const createTeacherAccount = async (email, password, name) => {
+    if (userRole !== 'admin') {
+      throw new Error('Unauthorized: Only admins can create teachers');
+    }
+    setLoading(true);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      await setDoc(doc(db, 'users', cred.user.uid), {
+        email,
+        name,
+        role: 'teacher',
+        createdAt: new Date().toISOString(),
+        assignedClasses: [],
+      });
+      return cred.user;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Password reset
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return true;
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  };
+
   const logout = async () => {
     setLoading(true);
     try {
@@ -121,6 +146,8 @@ export function AuthProvider({ children }) {
     loading,
     login,
     register,
+    createTeacherAccount,
+    resetPassword,
     logout,
   };
 
