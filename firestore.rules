@@ -1,0 +1,41 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // Users collection rules
+    match /users/{userId} {
+      // Allow users to create their own document during registration
+      allow create: if request.auth != null && request.auth.uid == userId;
+      
+      // Allow users to read and write their own document
+      allow read, write: if isOwner(userId);
+      
+      // Allow authenticated users to read other user documents
+      allow read: if isAuthenticated();
+      
+      // Children subcollection rules
+      match /children/{childId} {
+        // Allow parent to read and write their children's documents
+        allow read, write: if isOwner(userId);
+        
+        // Allow anyone to read child profiles for the child login feature
+        allow read: if true;
+      }
+    }
+
+    // Allow authenticated users to read and write to other collections
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "noAccount": "Don't have an account? Sign up",
+    "name": "Name",
+    "email": "Email",
+    "password": "Password",
+    "childName": "Child's Name",
+    "age": "Age",
+    "grade": "Grade",
+    "pin": "PIN",
+    "addChild": "Add Child",
+    "children": "Children",
+    "role": "Role",
+    "welcome": "Welcome"
+  },
+  "roles": {
+    "parent": "Parent",
+    "teacher": "Teacher",
+    "admin": "Admin"
+  },
+  "errors": {
+    "title": "Error",
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required",
+    "invalidEmail": "Please enter a valid email",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "roleRequired": "Please select a role",
+    "pinRequired": "PIN is required",
+    "fillAllFields": "Please fill in all fields",
+    "signupFailed": "Failed to create account. Please try again.",
+    "loginFailed": "Login failed. Please check your credentials.",
+    "invalidCredentials": "Invalid name or PIN. Please try again."
+  },
+  "common": {
+    "cancel": "Cancel",
+    "add": "Add",
+    "delete": "Delete",
+    "close": "Close",
+    "selectLanguage": "Select Language",
+    "language": "Language"
+  },
+  "lessons": {
+    "greeting": "Hello \"{0}\"!",
+    "chooseSubject": "Choose a subject to learn"
+  }
+} 
