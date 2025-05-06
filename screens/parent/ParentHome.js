@@ -40,6 +40,14 @@ export default function ParentHome() {
       backgroundColor: '#2196F3',
     },
     {
+      id: 2,
+      title: 'My Profile',
+      description: 'View and edit your profile information',
+      icon: 'person-circle',
+      route: 'Profile',
+      backgroundColor: '#9C27B0',
+    },
+    {
       id: 3,
       title: 'Progress Report',
       description: 'View detailed learning progress',

@@ -16,8 +16,10 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db, auth } from '../../services/firebase';
+import { db, auth, storage } from '../../services/firebase';
 import { updateProfile } from 'firebase/auth';
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function Profile() {
   const navigation = useNavigation();
@@ -29,6 +31,8 @@ export default function Profile() {
   const [displayName, setDisplayName] = useState('');
   const [saving, setSaving] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [profileImage, setProfileImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -43,7 +47,11 @@ export default function Profile() {
       const userDoc = await getDoc(userDocRef);
       
       if (userDoc.exists()) {
-        setUserData(userDoc.data());
+        const data = userDoc.data();
+        setUserData(data);
+        if (data.profileImage) {
+          setProfileImage(data.profileImage);
+        }
       }
       
       setDisplayName(user.displayName || '');
@@ -52,6 +60,58 @@ export default function Profile() {
       Alert.alert('Error', 'Failed to load user data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const pickImage = async () => {
+    if (!user) {
+      Alert.alert("Error", "You must be logged in to upload a profile picture");
+      return;
+    }
+    
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert("Permission Required", "You need to grant permission to access your photos");
+        return;
+      }
+      
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+      });
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setUploadingImage(true);
+        const imageUri = result.assets[0].uri;
+        
+        // Upload to Firebase Storage
+        const response = await fetch(imageUri);
+        const blob = await response.blob();
+        const filename = `profile_${user.uid}_${Date.now()}`;
+        const storageRef = ref(storage, `profiles/${user.uid}/${filename}`);
+        
+        await uploadBytes(storageRef, blob);
+        const downloadURL = await getDownloadURL(storageRef);
+        
+        // Update user document in Firestore
+        const userDocRef = doc(db, 'users', user.uid);
+        await updateDoc(userDocRef, {
+          profileImage: downloadURL,
+          updatedAt: new Date().toISOString()
+        });
+        
+        setProfileImage(downloadURL);
+        setUploadingImage(false);
+        Alert.alert("Success", "Profile picture uploaded successfully");
+      }
+    } catch (error) {
+      console.error('Error picking or uploading image:', error);
+      setUploadingImage(false);
+      Alert.alert("Error", "Failed to upload profile picture");
     }
   };
 
@@ -113,14 +173,25 @@ export default function Profile() {
       <ScrollView style={styles.content}>
         <View style={[styles.profileCard, { backgroundColor: currentTheme.card }]}>
           <View style={styles.avatarContainer}>
-            <View style={[styles.avatar, { backgroundColor: currentTheme.primary }]}>
-              <Text style={styles.avatarText}>
-                {(user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
-              </Text>
-            </View>
+            {uploadingImage ? (
+              <View style={[styles.avatar, { backgroundColor: currentTheme.border }]}>
+                <ActivityIndicator size="large" color={currentTheme.primary} />
+              </View>
+            ) : profileImage ? (
+              <Image source={{ uri: profileImage }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, { backgroundColor: currentTheme.primary }]}>
+                <Text style={styles.avatarText}>
+                  {(user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
+                </Text>
+              </View>
+            )}
             {editing && (
-              <TouchableOpacity style={styles.changePhotoButton}>
-                <Text style={{ color: currentTheme.primary }}>Change Photo</Text>
+              <TouchableOpacity 
+                style={[styles.uploadButton, { backgroundColor: currentTheme.primary }]}
+                onPress={pickImage}
+              >
+                <Ionicons name="camera" size={18} color="#FFF" />
               </TouchableOpacity>
             )}
           </View>
@@ -250,6 +321,7 @@ const styles = StyleSheet.create({
   avatarContainer: {
     alignItems: 'center',
     marginBottom: 16,
+    position: 'relative',
   },
   avatar: {
     width: 100,
@@ -262,6 +334,18 @@ const styles = StyleSheet.create({
     fontSize: 40,
     fontWeight: 'bold',
     color: '#FFF',
+  },
+  uploadButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#FFF',
   },
   changePhotoButton: {
     marginTop: 8,
@@ -310,12 +394,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     width: '100%',
+    gap: 12,
   },
   actionButton: {
     paddingVertical: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     borderRadius: 20,
-    marginHorizontal: 8,
     minWidth: 100,
     alignItems: 'center',
   },
@@ -324,13 +408,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   accountSection: {
-    padding: 20,
+    padding: 16,
     borderRadius: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    marginBottom: 20,
   },
   sectionTitle: {
     fontSize: 18,
@@ -340,11 +420,12 @@ const styles = StyleSheet.create({
   accountItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   accountItemContent: {
     marginLeft: 12,
-    flex: 1,
   },
   accountItemTitle: {
     fontSize: 16,

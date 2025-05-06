@@ -419,7 +419,10 @@ export default function ParentDashboard() {
       </View>
 
       <ScrollView style={styles.scrollView}>
-        <View style={[styles.profileSection, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
+        <TouchableOpacity 
+          style={[styles.profileSection, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}
+          onPress={() => navigation.navigate('Profile')}
+        >
           <View style={styles.profileImageContainer}>
             {uploadingImage ? (
               <View style={[styles.profileImage, { backgroundColor: currentTheme.border }]}>
@@ -436,7 +439,10 @@ export default function ParentDashboard() {
             )}
             <TouchableOpacity 
               style={[styles.uploadButton, { backgroundColor: currentTheme.primary }]}
-              onPress={pickImage}
+              onPress={(e) => {
+                e.stopPropagation();
+                pickImage();
+              }}
             >
               <Ionicons name="camera" size={18} color="#FFF" />
             </TouchableOpacity>
@@ -451,8 +457,12 @@ export default function ParentDashboard() {
                 {children.length} {children.length === 1 ? 'Child' : 'Children'}
               </Text>
             </View>
+            <View style={[styles.editProfileButton, { borderColor: currentTheme.primary }]}>
+              <Ionicons name="pencil-outline" size={14} color={currentTheme.primary} />
+              <Text style={[styles.editProfileText, { color: currentTheme.primary }]}>Edit Profile</Text>
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
 
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
           <View style={styles.sectionHeaderRow}>
@@ -531,6 +541,14 @@ export default function ParentDashboard() {
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
           <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Quick Access</Text>
           <View style={styles.quickAccessContainer}>
+            <TouchableOpacity 
+              style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
+              onPress={() => navigation.navigate('Profile')}
+            >
+              <Ionicons name="person" size={28} color={currentTheme.primary} />
+              <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>My Profile</Text>
+            </TouchableOpacity>
+            
             <TouchableOpacity 
               style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
               onPress={() => navigation.navigate('ProgressReport')}
@@ -751,9 +769,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
+  profileSectionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   profileImageContainer: {
     position: 'relative',
-    marginBottom: 12,
+    marginRight: 12,
   },
   profileImage: {
     width: 100,
@@ -989,5 +1011,20 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+  editProfileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    alignSelf: 'center',
+  },
+  editProfileText: {
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
