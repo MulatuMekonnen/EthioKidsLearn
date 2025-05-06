@@ -1,17 +1,131 @@
-import React from 'react';
-import { createStackNavigator } from '@react-navigation/stack';
-import { useAuth } from '../contexts/AuthContext';
-import RoleNavigator from './RoleNavigator';
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuth } from '../context/AuthContext';
 
-const Stack = createStackNavigator();
+// Auth Screens
+import WelcomeScreen from '../screens/WelcomeScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
+import SignUpScreen from '../screens/auth/SignUpScreen';
+import ChildLoginScreen from '../screens/auth/ChildLoginScreen';
 
-const AppNavigator = () => {
-  // Bypass authentication check - always render RoleNavigator
+// Role-based Screens
+import AdminPanel from '../screens/admin/AdminPanel';
+import TeacherHome from '../screens/teacher/TeacherHome';
+import ParentHome from '../screens/parent/ParentHome';
+import ParentDashboard from '../screens/parent/ParentDashboard';
+import ProgressReport from '../screens/parent/ProgressReport';
+import ChildProgress from '../screens/parent/ChildProgress';
+import Settings from '../screens/parent/Settings';
+import Profile from '../screens/parent/Profile';
+
+// Child Screens
+import LessonsScreen from '../screens/child/LessonsScreen';
+import MathLessons from '../screens/child/MathLessons';
+import LearnCount from '../screens/child/math/LearnCount';
+import Addition from '../screens/child/math/Addition';
+import Subtraction from '../screens/child/math/Subtraction';
+import Multiplication from '../screens/child/math/Multiplication';
+import Division from '../screens/child/math/Division';
+import MathQuiz from '../screens/child/math/MathQuiz';
+import EnglishLessons from '../screens/child/EnglishLessons';
+import Alphabets from '../screens/child/english/Alphabets';
+import Words from '../screens/child/english/Words';
+import DaysOfWeek from '../screens/child/english/DaysOfWeek';
+import Months from '../screens/child/english/Months';
+import Colors from '../screens/child/english/Colors';
+import EnglishQuiz from '../screens/child/english/EnglishQuiz';
+import AmharicLessonsScreen from '../screens/child/AmharicLessonsScreen';
+import OromoLessonScreen from '../screens/child/OromoLessonScreen';
+import AnimalSoundsScreen from '../screens/child/AnimalSoundsScreen';
+import TimeNavigationScreen from '../screens/child/TimeNavigationScreen';
+
+const Stack = createNativeStackNavigator();
+
+export default function AppNavigator() {
+  const { user, userRole, loading } = useAuth();
+  const [isFirstLaunch, setIsFirstLaunch] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+      if (hasLaunched === null) {
+        await AsyncStorage.setItem('hasLaunched', 'true');
+        setIsFirstLaunch(true);
+      } else {
+        setIsFirstLaunch(false);
+      }
+    })();
+  }, []);
+
+  if (loading || isFirstLaunch === null) {
+    return null;
+  }
+
+  // Setup screen options with default params handler
+  const screenOptions = {
+    headerShown: false
+  };
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="RoleNavigator" component={RoleNavigator} />
-    </Stack.Navigator>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={screenOptions}>
+        {!user ? (
+          // Auth Stack
+          <>
+            <Stack.Screen 
+              name="Welcome" 
+              component={WelcomeScreen} 
+              options={{ gestureEnabled: false }}
+            />
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="ChildLogin" component={ChildLoginScreen} />
+          </>
+        ) : (
+          // Role-based Stack
+          <>
+            {userRole === 'admin' && (
+              <Stack.Screen name="AdminPanel" component={AdminPanel} />
+            )}
+            {userRole === 'teacher' && (
+              <Stack.Screen name="TeacherHome" component={TeacherHome} />
+            )}
+            {userRole === 'parent' && (
+              <>
+                <Stack.Screen name="ParentHome" component={ParentHome} />
+                <Stack.Screen name="ParentDashboard" component={ParentDashboard} />
+                <Stack.Screen name="Profile" component={Profile} />
+                <Stack.Screen name="ProgressReport" component={ProgressReport} />
+                <Stack.Screen name="ChildProgress" component={ChildProgress} />
+                <Stack.Screen name="Settings" component={Settings} />
+                <Stack.Screen name="ChildLogin" component={ChildLoginScreen} />
+                {/* Child Screens accessible from Parent */}
+                <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
+                <Stack.Screen name="MathLessons" component={MathLessons} />
+                <Stack.Screen name="LearnCount" component={LearnCount} />
+                <Stack.Screen name="Addition" component={Addition} />
+                <Stack.Screen name="Subtraction" component={Subtraction} />
+                <Stack.Screen name="Multiplication" component={Multiplication} />
+                <Stack.Screen name="Division" component={Division} />
+                <Stack.Screen name="MathQuiz" component={MathQuiz} />
+                <Stack.Screen name="EnglishLessons" component={EnglishLessons} />
+                <Stack.Screen name="Alphabets" component={Alphabets} />
+                <Stack.Screen name="Words" component={Words} />
+                <Stack.Screen name="DaysOfWeek" component={DaysOfWeek} />
+                <Stack.Screen name="Months" component={Months} />
+                <Stack.Screen name="Colors" component={Colors} />
+                <Stack.Screen name="EnglishQuiz" component={EnglishQuiz} />
+                <Stack.Screen name="AmharicLessonsScreen" component={AmharicLessonsScreen} />
+                <Stack.Screen name="OromoLessonScreen" component={OromoLessonScreen} />
+                <Stack.Screen name="AnimalSoundsScreen" component={AnimalSoundsScreen} />
+                <Stack.Screen name="TimeNavigationScreen" component={TimeNavigationScreen} />
+              </>
+            )}
+          </>
+        )}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-};
-
-export default AppNavigator;
+}
