@@ -19,6 +19,12 @@ import ProgressReport from '../screens/parent/ProgressReport';
 import ChildProgress from '../screens/parent/ChildProgress';
 import Settings from '../screens/parent/Settings';
 import Profile from '../screens/parent/Profile';
+import CreateTeacherScreen from '../screens/admin/CreateTeacherScreen';
+import ContentManagementScreen from '../screens/admin/ContentManagementScreen';
+import UserManagementScreen from '../screens/admin/UserManagementScreen';
+import CreateContentScreen from '../screens/teacher/CreateContentScreen';
+import ChildScores from '../screens/teacher/ChildScores';
+import ScoresByChild from '../screens/teacher/ScoresByChild';
 
 // Child Screens
 import LessonsScreen from '../screens/child/LessonsScreen';
@@ -87,10 +93,20 @@ export default function AppNavigator() {
           // Role-based Stack
           <>
             {userRole === 'admin' && (
-              <Stack.Screen name="AdminPanel" component={AdminPanel} />
+              <>
+                <Stack.Screen name="AdminPanel" component={AdminPanel} />
+                <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
+                <Stack.Screen name="ManageUsers" component={UserManagementScreen} />
+                <Stack.Screen name="ManageContent" component={ContentManagementScreen} />
+              </>
             )}
             {userRole === 'teacher' && (
-              <Stack.Screen name="TeacherHome" component={TeacherHome} />
+              <>
+                <Stack.Screen name="TeacherHome" component={TeacherHome} />
+                <Stack.Screen name="CreateContent" component={CreateContentScreen} />
+                <Stack.Screen name="ScoresByChild" component={ScoresByChild} />
+                <Stack.Screen name="ChildScores" component={ChildScores} />
+              </>
             )}
             {userRole === 'parent' && (
               <>
