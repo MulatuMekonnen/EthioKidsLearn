@@ -8,7 +8,8 @@ import {
   TouchableOpacity, 
   Alert, 
   SafeAreaView,
-  ActivityIndicator
+  ActivityIndicator,
+  StatusBar
 } from 'react-native';
 import { useUserManagement } from '../../context/UserManagementContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -57,18 +58,41 @@ export default function UserManagementScreen({ navigation }) {
     ? users 
     : users.filter(user => user.role === selectedFilter);
 
-  const renderFilterButton = (filter, label) => (
+  const getUserIcon = (role) => {
+    switch(role) {
+      case 'parent':
+        return { name: 'people-circle-outline', color: '#4CAF50' };
+      case 'teacher':
+        return { name: 'school-outline', color: '#2196F3' };
+      case 'admin':
+        return { name: 'shield-outline', color: '#F44336' };
+      default:
+        return { name: 'person-outline', color: currentTheme.textSecondary };
+    }
+  };
+
+  const renderFilterButton = (filter, label, icon) => (
     <TouchableOpacity
       style={[
         styles.filterButton,
-        selectedFilter === filter && { backgroundColor: currentTheme.primary }
+        selectedFilter === filter ? 
+          { backgroundColor: currentTheme.primary, borderColor: currentTheme.primary } : 
+          { backgroundColor: 'transparent', borderColor: currentTheme.border }
       ]}
       onPress={() => setSelectedFilter(filter)}
     >
+      <Ionicons 
+        name={icon} 
+        size={18} 
+        color={selectedFilter === filter ? currentTheme.background : currentTheme.text} 
+        style={styles.filterIcon}
+      />
       <Text
         style={[
           styles.filterButtonText,
-          selectedFilter === filter ? { color: currentTheme.background } : { color: currentTheme.text }
+          selectedFilter === filter ? 
+            { color: currentTheme.background } : 
+            { color: currentTheme.text }
         ]}
       >
         {label}
@@ -76,28 +100,40 @@ export default function UserManagementScreen({ navigation }) {
     </TouchableOpacity>
   );
 
-  const renderItem = ({ item }) => (
-    <View style={[styles.userCard, { backgroundColor: currentTheme.card }]}>
-      <View style={styles.userInfo}>
-        <Text style={[styles.userName, { color: currentTheme.text }]}>{item.email}</Text>
-        <Text style={[styles.userRole, { color: currentTheme.textSecondary }]}>Role: {item.role}</Text>
-        {item.name && (
-          <Text style={[styles.userName, { color: currentTheme.text, fontSize: 14 }]}>
-            {item.name}
-          </Text>
-        )}
+  const renderItem = ({ item }) => {
+    const userIcon = getUserIcon(item.role);
+    
+    return (
+      <View style={[styles.userCard, { backgroundColor: currentTheme.card }]}>
+        <View style={[styles.userIconContainer, { backgroundColor: userIcon.color + '15' }]}>
+          <Ionicons name={userIcon.name} size={28} color={userIcon.color} />
+        </View>
+        <View style={styles.userInfo}>
+          <Text style={[styles.userName, { color: currentTheme.text }]}>{item.email}</Text>
+          <View style={styles.roleBadge}>
+            <Text style={[styles.userRole, { color: userIcon.color }]}>
+              {item.role.charAt(0).toUpperCase() + item.role.slice(1)}
+            </Text>
+          </View>
+          {item.name && (
+            <Text style={[styles.userFullName, { color: currentTheme.textSecondary }]}>
+              {item.name}
+            </Text>
+          )}
+        </View>
+        <TouchableOpacity 
+          style={styles.deleteButton}
+          onPress={() => handleDeleteUser(item.id, item.email)}
+        >
+          <Ionicons name="trash-outline" size={22} color="#F44336" />
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity 
-        style={[styles.button, { backgroundColor: '#F44336' }]}
-        onPress={() => handleDeleteUser(item.id, item.email)}
-      >
-        <Text style={[styles.buttonText, { color: currentTheme.background }]}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      <StatusBar barStyle="light-content" backgroundColor={currentTheme.primary} />
       <View style={[styles.header, { backgroundColor: currentTheme.primary }]}>
         <TouchableOpacity 
           style={styles.backButton}
@@ -106,13 +142,41 @@ export default function UserManagementScreen({ navigation }) {
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>User Management</Text>
+        <TouchableOpacity 
+          style={styles.refreshButton}
+          onPress={handleRefresh}
+          disabled={refreshing}
+        >
+          <Ionicons name="refresh" size={24} color="#FFF" />
+        </TouchableOpacity>
       </View>
       
       <View style={styles.content}>
         <View style={styles.filterContainer}>
-          {renderFilterButton('all', 'All Users')}
-          {renderFilterButton('parent', 'Parents')}
-          {renderFilterButton('teacher', 'Teachers')}
+          {renderFilterButton('all', 'All Users', 'people')}
+          {renderFilterButton('parent', 'Parents', 'people-circle')}
+          {renderFilterButton('teacher', 'Teachers', 'school')}
+        </View>
+
+        <View style={styles.statsContainer}>
+          <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
+            <Text style={[styles.statValue, { color: currentTheme.text }]}>
+              {users.filter(u => u.role === 'parent').length}
+            </Text>
+            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Parents</Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
+            <Text style={[styles.statValue, { color: currentTheme.text }]}>
+              {users.filter(u => u.role === 'teacher').length}
+            </Text>
+            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Teachers</Text>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
+            <Text style={[styles.statValue, { color: currentTheme.text }]}>
+              {users.filter(u => u.role === 'admin').length}
+            </Text>
+            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Admins</Text>
+          </View>
         </View>
 
         {loading && !refreshing ? (
@@ -128,6 +192,7 @@ export default function UserManagementScreen({ navigation }) {
             contentContainerStyle={styles.list}
             refreshing={refreshing}
             onRefresh={handleRefresh}
+            showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
                 <Ionicons name="people-outline" size={60} color={currentTheme.textSecondary} />
@@ -150,10 +215,10 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
   },
   backButton: {
-    marginRight: 12,
     padding: 8,
   },
   headerTitle: {
@@ -161,8 +226,40 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#FFF',
   },
+  refreshButton: {
+    padding: 8,
+  },
   content: {
     flex: 1,
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginBottom: 16,
+  },
+  statCard: {
+    width: '31%',
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  statLabel: {
+    fontSize: 12,
+    marginTop: 4,
   },
   loadingContainer: {
     flex: 1,
@@ -182,13 +279,18 @@ const styles = StyleSheet.create({
   filterContainer: {
     flexDirection: 'row',
     padding: 16,
-    gap: 8,
+    gap: 10,
   },
   filterButton: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#F2F2F7',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+  },
+  filterIcon: {
+    marginRight: 6,
   },
   filterButtonText: {
     fontSize: 14,
@@ -197,12 +299,12 @@ const styles = StyleSheet.create({
   list: {
     padding: 16,
     flexGrow: 1,
+    paddingTop: 0,
   },
   userCard: {
     padding: 16,
     borderRadius: 12,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     shadowColor: "#000",
     shadowOffset: {
@@ -211,8 +313,16 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 3,
     marginBottom: 16,
+  },
+  userIconContainer: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
   },
   userInfo: {
     flex: 1,
@@ -221,18 +331,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  userRole: {
+  userFullName: {
     fontSize: 14,
     marginTop: 4,
   },
-  button: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+  roleBadge: {
+    marginTop: 6,
   },
-  buttonText: {
-    fontSize: 14,
+  userRole: {
+    fontSize: 13,
     fontWeight: '500',
+  },
+  deleteButton: {
+    padding: 8,
   },
   emptyText: {
     textAlign: 'center',
