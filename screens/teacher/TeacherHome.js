@@ -121,7 +121,7 @@ export default function TeacherHome({ navigation }) {
       title: 'Give Reports',
       description: 'Submit evaluations and feedback for students',
       icon: 'create-outline',
-      onPress: () => navigation.navigate('ChildScores'),
+      onPress: () => navigation.navigate('QuizScoresScreen'),
       color: '#EA4335'
     },
     {

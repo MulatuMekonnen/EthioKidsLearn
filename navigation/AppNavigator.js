@@ -25,6 +25,7 @@ import UserManagementScreen from '../screens/admin/UserManagementScreen';
 import CreateContentScreen from '../screens/teacher/CreateContentScreen';
 import ChildScores from '../screens/teacher/ChildScores';
 import ScoresByChild from '../screens/teacher/ScoresByChild';
+import QuizScoresScreen from '../screens/teacher/QuizScoresScreen';
 
 // Child Screens
 import LessonsScreen from '../screens/child/LessonsScreen';
@@ -105,7 +106,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="TeacherHome" component={TeacherHome} />
                 <Stack.Screen name="CreateContent" component={CreateContentScreen} />
                 <Stack.Screen name="ScoresByChild" component={ScoresByChild} />
-                <Stack.Screen name="ChildScores" component={ChildScores} />
+                <Stack.Screen name="QuizScoresScreen" component={QuizScoresScreen} />
               </>
             )}
             {userRole === 'parent' && (
@@ -135,7 +136,6 @@ export default function AppNavigator() {
                 <Stack.Screen name="EnglishQuiz" component={EnglishQuiz} />
                 <Stack.Screen name="AmharicLessonsScreen" component={AmharicLessonsScreen} />
                 <Stack.Screen name="OromoLessonScreen" component={OromoLessonScreen} />
-                <Stack.Screen name="AnimalSoundsScreen" component={AnimalSoundsScreen} />
                 <Stack.Screen name="TimeNavigationScreen" component={TimeNavigationScreen} />
               </>
             )}

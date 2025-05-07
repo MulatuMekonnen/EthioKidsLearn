@@ -6,12 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
   SafeAreaView,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../context/ThemeContext';
+import { useAuth } from '../../context/AuthContext';
+import { getQuizScoresByChild, getProgressReportsByChild } from '../../services/firebase';
 
 export default function ChildProgress() {
   const navigation = useNavigation();
@@ -21,9 +24,22 @@ export default function ChildProgress() {
   const [quizResults, setQuizResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedResult, setSelectedResult] = useState(null);
+  const { user } = useAuth();
+  const [quizScores, setQuizScores] = useState([]);
+  const [progressReports, setProgressReports] = useState([]);
+
+  // Default colors if theme is not available
+  const colors = {
+    primary: '#1E90FF',
+    background: '#F5F5F5',
+    card: '#FFFFFF',
+    text: '#333333',
+    textSecondary: '#666666'
+  };
 
   useEffect(() => {
     loadQuizResults();
+    loadChildProgress();
   }, [childId]);
 
   const loadQuizResults = async () => {
@@ -51,6 +67,26 @@ export default function ChildProgress() {
       console.error('Error loading quiz results:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadChildProgress = async () => {
+    try {
+      // Use childId from route params instead of user.childId
+      if (!childId) {
+        Alert.alert('Error', 'No child ID found');
+        return;
+      }
+
+      const [scores, reports] = await Promise.all([
+        getQuizScoresByChild(childId),
+        getProgressReportsByChild(childId),
+      ]);
+
+      setQuizScores(scores);
+      setProgressReports(reports);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to load child progress');
     }
   };
 
@@ -101,8 +137,16 @@ export default function ChildProgress() {
     }
   };
 
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: currentTheme?.background || '#F5F5F5' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <TouchableOpacity
           style={styles.backButton}
@@ -119,131 +163,54 @@ export default function ChildProgress() {
         </TouchableOpacity>
       </View>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FFA500" />
-          <Text style={styles.loadingText}>Loading progress reports...</Text>
-        </View>
-      ) : (
-        <>
-          {quizResults.length === 0 ? (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="school-outline" size={80} color="#BDBDBD" />
-              <Text style={styles.emptyText}>No quiz results yet</Text>
-              <Text style={styles.emptySubText}>{childName} hasn't completed any quizzes</Text>
-            </View>
+      <ScrollView style={[styles.scrollView, { backgroundColor: colors.background }]}>
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Quiz Scores</Text>
+          {quizScores.length > 0 ? (
+            quizScores.map((score, index) => (
+              <View key={`quiz-${score.id}-${index}`} style={[styles.card, { backgroundColor: colors.card }]}>
+                <Text style={[styles.quizType, { color: colors.text }]}>{score.quizType}</Text>
+                <View style={styles.scoreContainer}>
+                  <Text style={[styles.score, { color: colors.primary }]}>
+                    {score.score}/{score.totalQuestions}
+                  </Text>
+                  <Text style={[styles.percentage, { color: colors.primary }]}>
+                    {score.percentage.toFixed(1)}%
+                  </Text>
+                </View>
+                <Text style={[styles.date, { color: colors.textSecondary }]}>
+                  {new Date(score.timestamp).toLocaleDateString()}
+                </Text>
+              </View>
+            ))
           ) : (
-            <>
-              {!selectedResult ? (
-                // Results list view
-                <ScrollView style={styles.scrollView}>
-                  <View style={styles.resultsContainer}>
-                    <Text style={styles.sectionTitle}>Oromo Language Quizzes</Text>
-                    <Text style={styles.resultCount}>{quizResults.length} quiz results</Text>
-                    
-                    {quizResults.map((result, index) => (
-                      <TouchableOpacity
-                        key={result.id || index}
-                        style={styles.resultCard}
-                        onPress={() => handleResultPress(result)}
-                      >
-                        <View style={[styles.categoryBadge, { backgroundColor: getCategoryColor(result.category) }]}>
-                          <Text style={styles.categoryText}>{result.category}</Text>
-                        </View>
-                        
-                        <View style={styles.resultInfo}>
-                          <Text style={styles.dateText}>{formatDate(result.date)}</Text>
-                          <View style={styles.scoreContainer}>
-                            <Text style={[styles.scoreText, { color: getScoreColor(result.score, result.totalQuestions) }]}>
-                              Score: {result.score}/{result.totalQuestions}
-                            </Text>
-                            <Text style={styles.percentText}>
-                              ({Math.round((result.score / result.totalQuestions) * 100)}%)
-                            </Text>
-                          </View>
-                        </View>
-                        
-                        <Ionicons name="chevron-forward" size={24} color="#BDBDBD" />
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </ScrollView>
-              ) : (
-                // Detail view
-                <ScrollView style={styles.scrollView}>
-                  <View style={styles.detailsContainer}>
-                    <TouchableOpacity
-                      style={styles.closeButton}
-                      onPress={closeDetails}
-                    >
-                      <Ionicons name="arrow-back" size={20} color="#666" />
-                      <Text style={styles.closeText}>Back to list</Text>
-                    </TouchableOpacity>
-                    
-                    <View style={styles.detailsHeader}>
-                      <View style={[styles.detailsCategoryBadge, { backgroundColor: getCategoryColor(selectedResult.category) }]}>
-                        <Text style={styles.detailsCategoryText}>{selectedResult.category}</Text>
-                      </View>
-                      <Text style={styles.detailsDate}>{formatDate(selectedResult.date)}</Text>
-                    </View>
-                    
-                    <View style={styles.scoreBox}>
-                      <Text style={styles.scoreBoxTitle}>Quiz Score</Text>
-                      <View style={styles.scoreBoxContent}>
-                        <Text style={[styles.scoreBoxValue, { color: getScoreColor(selectedResult.score, selectedResult.totalQuestions) }]}>
-                          {selectedResult.score}/{selectedResult.totalQuestions}
-                        </Text>
-                        <Text style={[styles.scoreBoxPercent, { color: getScoreColor(selectedResult.score, selectedResult.totalQuestions) }]}>
-                          {Math.round((selectedResult.score / selectedResult.totalQuestions) * 100)}%
-                        </Text>
-                      </View>
-                    </View>
-                    
-                    <Text style={styles.answersTitle}>Question Details</Text>
-                    
-                    {selectedResult.answers.map((answer, index) => (
-                      <View 
-                        key={index} 
-                        style={[
-                          styles.answerItem,
-                          { borderLeftColor: answer.isCorrect ? '#4CAF50' : '#F44336' }
-                        ]}
-                      >
-                        <Text style={styles.questionText}>{index + 1}. {answer.question}</Text>
-                        <View style={styles.answerDetail}>
-                          <Text style={styles.answerLabel}>Child's answer: </Text>
-                          <Text style={{ 
-                            color: answer.isCorrect ? '#4CAF50' : '#F44336',
-                            fontWeight: 'bold'
-                          }}>
-                            {answer.selectedAnswer}
-                          </Text>
-                        </View>
-                        
-                        {!answer.isCorrect && (
-                          <View style={styles.answerDetail}>
-                            <Text style={styles.answerLabel}>Correct answer: </Text>
-                            <Text style={{ color: '#4CAF50', fontWeight: 'bold' }}>
-                              {answer.correctAnswer}
-                            </Text>
-                          </View>
-                        )}
-                      </View>
-                    ))}
-                    
-                    <View style={styles.feedbackBox}>
-                      <Text style={styles.feedbackTitle}>Feedback for Parent</Text>
-                      <Text style={styles.feedbackText}>
-                        {getPerformanceFeedback(selectedResult.score, selectedResult.totalQuestions)}
-                      </Text>
-                    </View>
-                  </View>
-                </ScrollView>
-              )}
-            </>
+            <Text style={[styles.noData, { color: colors.textSecondary }]}>No quiz scores yet</Text>
           )}
-        </>
-      )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Progress Reports</Text>
+          {progressReports.length > 0 ? (
+            progressReports.map((report, index) => (
+              <View key={`report-${report.id}-${index}`} style={[styles.card, { backgroundColor: colors.card }]}>
+                <View style={styles.reportHeader}>
+                  <Text style={[styles.teacherName, { color: colors.text }]}>
+                    {report.teacherName}
+                  </Text>
+                  <Text style={[styles.date, { color: colors.textSecondary }]}>
+                    {new Date(report.timestamp).toLocaleDateString()}
+                  </Text>
+                </View>
+                <Text style={[styles.reportText, { color: colors.text }]}>
+                  {report.report}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={[styles.noData, { color: colors.textSecondary }]}>No progress reports yet</Text>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -280,213 +247,68 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  emptyText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#666',
-    marginTop: 20,
-  },
-  emptySubText: {
-    fontSize: 14,
-    color: '#999',
-    marginTop: 10,
-    textAlign: 'center',
-  },
   scrollView: {
     flex: 1,
   },
-  resultsContainer: {
+  section: {
     padding: 16,
   },
   sectionTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 5,
+    marginBottom: 16,
   },
-  resultCount: {
-    fontSize: 14,
-    color: '#777',
-    marginBottom: 20,
-  },
-  resultCard: {
-    backgroundColor: 'white',
+  card: {
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
+    elevation: 2,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    shadowRadius: 4,
   },
-  categoryBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    marginRight: 12,
-  },
-  categoryText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 12,
-  },
-  resultInfo: {
-    flex: 1,
-  },
-  dateText: {
-    fontSize: 12,
-    color: '#666',
-    marginBottom: 4,
+  quizType: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
   },
   scoreContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-  },
-  scoreText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  percentText: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 4,
-  },
-  // Detail view styles
-  detailsContainer: {
-    padding: 16,
-  },
-  closeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  closeText: {
-    marginLeft: 8,
-    color: '#666',
-    fontSize: 14,
-  },
-  detailsHeader: {
-    marginBottom: 20,
-  },
-  detailsCategoryBadge: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    borderRadius: 20,
-    alignSelf: 'flex-start',
     marginBottom: 8,
   },
-  detailsCategoryText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 14,
+  score: {
+    fontSize: 16,
+    fontWeight: '600',
   },
-  detailsDate: {
-    fontSize: 14,
-    color: '#666',
+  percentage: {
+    fontSize: 16,
+    fontWeight: '600',
   },
-  scoreBox: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
+  date: {
+    fontSize: 12,
+    opacity: 0.7,
+  },
+  reportHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  scoreBoxTitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 10,
-  },
-  scoreBoxContent: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  scoreBoxValue: {
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  scoreBoxPercent: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginLeft: 8,
-  },
-  answersTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
-  },
-  answerItem: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    borderLeftWidth: 5,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  questionText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
     marginBottom: 8,
   },
-  answerDetail: {
-    flexDirection: 'row',
-    marginBottom: 4,
-  },
-  answerLabel: {
-    fontSize: 14,
-    color: '#666',
-  },
-  feedbackBox: {
-    backgroundColor: '#F5F8FF',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 10,
-    marginBottom: 30,
-    borderLeftWidth: 4,
-    borderLeftColor: '#FFA500',
-  },
-  feedbackTitle: {
+  teacherName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    fontWeight: '600',
   },
-  feedbackText: {
+  reportText: {
     fontSize: 14,
-    color: '#666',
     lineHeight: 20,
-  }
+  },
+  noData: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontStyle: 'italic',
+    marginTop: 8,
+  },
 }); 

@@ -28,6 +28,11 @@ service cloud.firestore {
       return isAuthenticated() && getUserRole() == 'teacher';
     }
 
+    // Helper function to check if user is a parent
+    function isParent() {
+      return isAuthenticated() && getUserRole() == 'parent';
+    }
+
     // Users collection rules
     match /users/{userId} {
       // Allow users to create their own document during registration
@@ -61,6 +66,32 @@ service cloud.firestore {
         // Allow anyone to read child profiles for the child login feature
         allow read: if true;
       }
+    }
+
+    // Quiz scores collection rules
+    match /quizScores/{scoreId} {
+      // Allow teachers to read and write quiz scores
+      allow read, write: if isTeacher();
+      
+      // Allow parents to read their children's quiz scores
+      allow read: if isParent() && 
+                    request.auth.uid == resource.data.parentId;
+      
+      // Allow admins full access
+      allow read, write: if isAdmin();
+    }
+
+    // Progress reports collection rules
+    match /progressReports/{reportId} {
+      // Allow teachers to read and write progress reports
+      allow read, write: if isTeacher();
+      
+      // Allow parents to read their children's progress reports
+      allow read: if isParent() && 
+                    request.auth.uid == resource.data.parentId;
+      
+      // Allow admins full access
+      allow read, write: if isAdmin();
     }
 
     // Class management collection (for teachers and admins)
