@@ -19,7 +19,6 @@ export default function SignUpScreen({ navigation }) {
   });
   const { register } = useAuth();
 
-<<<<<<< HEAD
   // SVG Icons
   const PersonIcon = () => (
     <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -57,16 +56,11 @@ export default function SignUpScreen({ navigation }) {
   );
 
   // Email validation function
-  const isValidEmail = (email) => {
-=======
   const validateEmail = (email) => {
->>>>>>> 59f2af2f64e79dc2ec8270ef05b67fbf70274111
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-<<<<<<< HEAD
-=======
   const checkPasswordStrength = (pass) => {
     setPasswordStrength({
       hasUpperCase: /[A-Z]/.test(pass),
@@ -86,25 +80,19 @@ export default function SignUpScreen({ navigation }) {
     return Object.values(passwordStrength).every(Boolean);
   };
 
->>>>>>> 59f2af2f64e79dc2ec8270ef05b67fbf70274111
   const handleSignUp = async () => {
     if (!fullName || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-<<<<<<< HEAD
-    if (!isValidEmail(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
-=======
     if (!validateEmail(email)) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      Alert.alert('Invalid Email', 'Please enter a valid email address');
       return;
     }
 
     if (!isPasswordValid()) {
       Alert.alert('Error', 'Password does not meet the requirements');
->>>>>>> 59f2af2f64e79dc2ec8270ef05b67fbf70274111
       return;
     }
 
