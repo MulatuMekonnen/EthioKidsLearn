@@ -156,7 +156,7 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#f0f8f',
   },
   backContainer: {
     paddingHorizontal: 20,

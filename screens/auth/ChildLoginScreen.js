@@ -286,9 +286,16 @@ export default function ChildLoginScreen() {
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#F0F8FF',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#1A1B41',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#F0F8FF',
   },
   header: {
     flexDirection: 'row',

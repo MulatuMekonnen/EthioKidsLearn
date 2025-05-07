@@ -214,12 +214,13 @@ export default function SignUpScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F0F8FF',
   },
   container: {
     flex: 1,
     justifyContent: 'center',
     padding: 30,
+    backgroundColor: '#F0F8FF',
   },
   title: {
     fontSize: 28,
@@ -236,7 +237,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     marginBottom: 20,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#FFFFFF',
   },
   inputIcon: {
     marginLeft: 15,
@@ -271,7 +272,7 @@ const styles = StyleSheet.create({
   passwordRequirements: {
     marginTop: 10,
     padding: 15,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#FFFFFF',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#E0E0E0',
