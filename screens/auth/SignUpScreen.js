@@ -10,8 +10,16 @@ export default function SignUpScreen({ navigation }) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    hasUpperCase: false,
+    hasLowerCase: false,
+    hasNumber: false,
+    hasSymbol: false,
+    hasMinLength: false
+  });
   const { register } = useAuth();
 
+<<<<<<< HEAD
   // SVG Icons
   const PersonIcon = () => (
     <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
@@ -50,18 +58,53 @@ export default function SignUpScreen({ navigation }) {
 
   // Email validation function
   const isValidEmail = (email) => {
+=======
+  const validateEmail = (email) => {
+>>>>>>> 59f2af2f64e79dc2ec8270ef05b67fbf70274111
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
+<<<<<<< HEAD
+=======
+  const checkPasswordStrength = (pass) => {
+    setPasswordStrength({
+      hasUpperCase: /[A-Z]/.test(pass),
+      hasLowerCase: /[a-z]/.test(pass),
+      hasNumber: /[0-9]/.test(pass),
+      hasSymbol: /[!@#$%^&*(),.?":{}|<>]/.test(pass),
+      hasMinLength: pass.length >= 8
+    });
+  };
+
+  const handlePasswordChange = (text) => {
+    setPassword(text);
+    checkPasswordStrength(text);
+  };
+
+  const isPasswordValid = () => {
+    return Object.values(passwordStrength).every(Boolean);
+  };
+
+>>>>>>> 59f2af2f64e79dc2ec8270ef05b67fbf70274111
   const handleSignUp = async () => {
     if (!fullName || !email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
+<<<<<<< HEAD
     if (!isValidEmail(email)) {
       Alert.alert('Invalid Email', 'Please enter a valid email address');
+=======
+    if (!validateEmail(email)) {
+      Alert.alert('Error', 'Please enter a valid email address');
+      return;
+    }
+
+    if (!isPasswordValid()) {
+      Alert.alert('Error', 'Password does not meet the requirements');
+>>>>>>> 59f2af2f64e79dc2ec8270ef05b67fbf70274111
       return;
     }
 
@@ -119,7 +162,7 @@ export default function SignUpScreen({ navigation }) {
             placeholder="Password"
             secureTextEntry={!passwordVisible}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={handlePasswordChange}
           />
           <TouchableOpacity 
             style={styles.eyeIcon}
@@ -127,6 +170,25 @@ export default function SignUpScreen({ navigation }) {
           >
             {passwordVisible ? <EyeOffIcon /> : <EyeIcon />}
           </TouchableOpacity>
+        </View>
+
+        <View style={styles.passwordRequirements}>
+          <Text style={styles.requirementTitle}>Password Requirements:</Text>
+          <Text style={[styles.requirement, passwordStrength.hasMinLength && styles.requirementMet]}>
+            • At least 8 characters
+          </Text>
+          <Text style={[styles.requirement, passwordStrength.hasUpperCase && styles.requirementMet]}>
+            • At least one uppercase letter
+          </Text>
+          <Text style={[styles.requirement, passwordStrength.hasLowerCase && styles.requirementMet]}>
+            • At least one lowercase letter
+          </Text>
+          <Text style={[styles.requirement, passwordStrength.hasNumber && styles.requirementMet]}>
+            • At least one number
+          </Text>
+          <Text style={[styles.requirement, passwordStrength.hasSymbol && styles.requirementMet]}>
+            • At least one special character
+          </Text>
         </View>
 
         {loading ? (
@@ -215,5 +277,27 @@ const styles = StyleSheet.create({
   link: {
     color: '#1E90FF',
     fontWeight: '600',
+  },
+  passwordRequirements: {
+    marginTop: 10,
+    padding: 15,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+  },
+  requirementTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#666666',
+    marginBottom: 8,
+  },
+  requirement: {
+    fontSize: 12,
+    color: '#999999',
+    marginBottom: 4,
+  },
+  requirementMet: {
+    color: '#4CAF50',
   },
 });
