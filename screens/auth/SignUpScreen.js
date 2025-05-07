@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, SafeAreaView, ActivityIndicator, Alert, Text, TouchableOpacity } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../../context/LanguageContext';
+import LanguageSelector from '../../components/LanguageSelector';
 
 export default function SignUpScreen({ navigation }) {
   const [fullName, setFullName] = useState('');
@@ -18,6 +20,7 @@ export default function SignUpScreen({ navigation }) {
     hasMinLength: false
   });
   const { register } = useAuth();
+  const { translate } = useLanguage();
 
   // SVG Icons
   const PersonIcon = () => (
@@ -82,17 +85,17 @@ export default function SignUpScreen({ navigation }) {
 
   const handleSignUp = async () => {
     if (!fullName || !email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(translate('errors.title'), translate('errors.fillAllFields'));
       return;
     }
 
     if (!validateEmail(email)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address');
+      Alert.alert(translate('errors.title'), translate('errors.invalidEmail'));
       return;
     }
 
     if (!isPasswordValid()) {
-      Alert.alert('Error', 'Password does not meet the requirements');
+      Alert.alert(translate('errors.title'), translate('errors.passwordTooShort'));
       return;
     }
 
@@ -100,10 +103,10 @@ export default function SignUpScreen({ navigation }) {
       setLoading(true);
       // Create user with email and password
       await register(email, password, fullName);
-      Alert.alert('Success', 'Account created successfully!');
+      Alert.alert(translate('errors.title'), translate('errors.signupFailed'));
       navigation.navigate('Login');
     } catch (error) {
-      Alert.alert('Registration Failed', error.message);
+      Alert.alert(translate('errors.signupFailed'), error.message);
     } finally {
       setLoading(false);
     }
@@ -111,8 +114,11 @@ export default function SignUpScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Language Selector */}
+      <LanguageSelector />
+      
       <View style={styles.container}>
-        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.title}>{translate('auth.signup')}</Text>
         
         <View style={styles.inputContainer}>
           <View style={styles.inputIcon}>
@@ -120,7 +126,7 @@ export default function SignUpScreen({ navigation }) {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="Full Name"
+            placeholder={translate('auth.name')}
             value={fullName}
             onChangeText={setFullName}
             autoCapitalize="words"
@@ -133,7 +139,7 @@ export default function SignUpScreen({ navigation }) {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder={translate('auth.email')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -147,7 +153,7 @@ export default function SignUpScreen({ navigation }) {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder={translate('auth.password')}
             secureTextEntry={!passwordVisible}
             value={password}
             onChangeText={handlePasswordChange}
@@ -185,22 +191,18 @@ export default function SignUpScreen({ navigation }) {
           <>
             <View style={styles.buttonContainer}>
               <Button
-                title="Sign Up"
+                title={translate('auth.signup')}
                 onPress={handleSignUp}
                 color="#1E90FF"
               />
             </View>
             
             <View style={styles.linkContainer}>
-              <Text style={styles.linkText}>
-                Already have an account?{' '}
-                <Text 
-                  style={styles.link}
-                  onPress={() => navigation.navigate('Login')}
-                >
-                  Login
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.linkText}>
+               {translate('auth.haveAccount')}
                 </Text>
-              </Text>
+              </TouchableOpacity>
             </View>
           </>
         )}

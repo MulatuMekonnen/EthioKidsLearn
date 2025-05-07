@@ -9,6 +9,8 @@ import {
   Dimensions 
 } from 'react-native';
 import * as Animatable from 'react-native-animatable';
+import LanguageSelector from '../components/LanguageSelector';
+import { useLanguage } from '../context/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -40,28 +42,34 @@ const WelcomeText = () => {
   );
 };
 
-const WelcomeScreen = ({ navigation }) => (
-  <SafeAreaView style={styles.container}>
-    <WelcomeText />
+const WelcomeScreen = ({ navigation }) => {
+  const { translate } = useLanguage();
+  
+  return (
+    <SafeAreaView style={styles.container}>
+      <LanguageSelector isDark={true} />
+      
+      <WelcomeText />
 
-    <Animatable.View animation="fadeIn" delay={800} style={styles.illustrationContainer}>
-      <Image
-        source={require('../assets/images/children-reading.png')}
-        style={styles.illustration}
-        resizeMode="contain"
-      />
-    </Animatable.View>
+      <Animatable.View animation="fadeIn" delay={800} style={styles.illustrationContainer}>
+        <Image
+          source={require('../assets/images/children-reading.png')}
+          style={styles.illustration}
+          resizeMode="contain"
+        />
+      </Animatable.View>
 
-    <Animatable.View animation="fadeInUp" delay={1200} style={styles.buttonContainer}>
-      <TouchableOpacity
-        style={styles.loginButton}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.buttonText}>LOGIN</Text>
-      </TouchableOpacity>
-    </Animatable.View>
-  </SafeAreaView>
-);
+      <Animatable.View animation="fadeInUp" delay={1200} style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={styles.buttonText}>{translate('auth.login')}</Text>
+        </TouchableOpacity>
+      </Animatable.View>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {

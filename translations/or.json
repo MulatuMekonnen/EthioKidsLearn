@@ -1,25 +1,26 @@
 {
   "auth": {
     "login": "Seeni",
-    "signup": "Galchuu",
-    "childLogin": "Seeni Ilma",
-    "parentLogin": "Seeni Waalidhaa",
-    "noAccount": "Akkaawuntii hin qabduu? Galchaa",
-    "name": "Maqaa",
+    "signup": "Galmaa'i",
+    "childLogin": "seensi daa’immanii",
+    "parentLogin": "Seeni maattin",
+    "noAccount": "Akkaawuntii hin qabduu? Galmaa'i",
+    "haveAccount": "Akkaawuntii qabdaa? Seeni",
+    "name": "Maqaa Guutuu",
     "email": "Imeelii",
     "password": "Jecha Iccitii",
     "childName": "Maqaa Ilmaa",
     "age": "Umurii",
     "grade": "Dareesaa",
     "pin": "Piinii",
-    "addChild": "Ilma Dabalchaa",
+    "addChild": "Ilma Dabali",
     "children": "Ilmaan",
     "role": "Gahe"
   },
   "roles": {
-    "parent": "Waalidhaa",
+    "parent": "Maatii",
     "teacher": "Barsiisaa",
-    "admin": "Muddee"
+    "admin": "Bulchiinsa"
   },
   "errors": {
     "title": "Dogoggorri",

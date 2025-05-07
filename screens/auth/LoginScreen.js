@@ -12,6 +12,8 @@ import {
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
+import { useLanguage } from '../../context/LanguageContext';
+import LanguageSelector from '../../components/LanguageSelector';
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
@@ -19,6 +21,7 @@ export default function LoginScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const { login } = useAuth();
+  const { translate } = useLanguage();
 
   // SVG Icons
   const BackIcon = () => (
@@ -57,7 +60,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(translate('errors.title'), translate('errors.fillAllFields'));
       return;
     }
 
@@ -67,7 +70,7 @@ export default function LoginScreen({ navigation }) {
       // on success, AuthContext will handle navigation
     } catch (error) {
       console.log('[LoginScreen] login error:', error, 'code:', error.code, 'message:', error.message);
-      Alert.alert('Login Failed', error.message);
+      Alert.alert(translate('errors.loginFailed'), error.message);
     } finally {
       setLoading(false);
     }
@@ -75,6 +78,9 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Language Selector */}
+      <LanguageSelector />
+      
       {/* Go Back Button to Welcome */}
       <View style={styles.backContainer}>
         <TouchableOpacity
@@ -94,7 +100,7 @@ export default function LoginScreen({ navigation }) {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="Email"
+            placeholder={translate('auth.email')}
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -108,7 +114,7 @@ export default function LoginScreen({ navigation }) {
           </View>
           <TextInput
             style={styles.input}
-            placeholder="Password"
+            placeholder={translate('auth.password')}
             secureTextEntry={!passwordVisible}
             value={password}
             onChangeText={setPassword}
@@ -127,22 +133,18 @@ export default function LoginScreen({ navigation }) {
           <>
             <View style={styles.buttonContainer}>
               <Button
-                title="Login"
+                title={translate('auth.login')}
                 onPress={handleLogin}
                 color="#1E90FF"
               />
             </View>
             
             <View style={styles.linkContainer}>
-              <Text style={styles.linkText}>
-                Don't have an account?{' '}
-                <Text 
-                  style={styles.link}
-                  onPress={() => navigation.navigate('SignUp')}
-                >
-                  Sign up
+              <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+                <Text style={styles.linkText}>
+                  {translate('auth.noAccount')}
                 </Text>
-              </Text>
+              </TouchableOpacity>
             </View>
           </>
         )}

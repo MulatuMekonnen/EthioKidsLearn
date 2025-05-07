@@ -2,10 +2,11 @@
   "auth": {
     "login": "ግባ",
     "signup": "ተመዝገብ",
-    "childLogin": "የልጅ ግባት",
-    "parentLogin": "የወላጅ ግባት",
-    "noAccount": "መለያ የሎትም? ተመዝገብ",
-    "name": "ስም",
+    "childLogin": "የልጅ መግቢያ",
+    "parentLogin": "የወላጅ መግቢያ",
+    "noAccount": "መለያ የሎትም? እዚህ ይመዝገቡ",
+    "haveAccount": "መለያ አለዎት? እዚህ ይግቡ",
+    "name": "ሙሉ ስም",
     "email": "ኢሜይል",
     "password": "የይለፍ ቃል",
     "childName": "የልጅ ስም",
@@ -14,7 +15,7 @@
     "pin": "ፒን",
     "addChild": "ልጅ ጨምር",
     "children": "ልጆች",
-    "role": "ተዛማጅነት"
+    "role": "ሚና"
   },
   "roles": {
     "parent": "ወላጅ",
