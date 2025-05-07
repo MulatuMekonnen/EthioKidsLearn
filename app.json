@@ -30,7 +30,8 @@
     },
     "plugins": [
       "expo-av",
-      "expo-file-system"
+      "expo-file-system",
+      "expo-font"
     ],
     "newArchEnabled": true,
     "developmentClient": {

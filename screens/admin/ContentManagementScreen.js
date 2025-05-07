@@ -11,7 +11,7 @@ import {
   StatusBar,
   Image
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { useContent } from '../../context/ContentContext';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -41,6 +41,124 @@ export default function ContentManagementScreen({ navigation }) {
     
     loadContent();
   }, []);
+
+  // Back Arrow Icon
+  const BackArrowIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path d="M19 12H5" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M12 19L5 12L12 5" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Refresh Icon
+  const RefreshIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path d="M1 4V10H7" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M23 20V14H17" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M20.49 9.00001C19.9828 7.56675 19.1209 6.28541 17.9845 5.27543C16.8482 4.26545 15.4745 3.55976 13.9917 3.22427C12.5089 2.88878 10.9652 2.93436 9.50481 3.35677C8.04437 3.77919 6.71475 4.56497 5.64 5.64001L1 10M23 14L18.36 18.36C17.2853 19.435 15.9556 20.2208 14.4952 20.6432C13.0348 21.0656 11.4911 21.1112 10.0083 20.7757C8.52547 20.4402 7.1518 19.7346 6.01547 18.7246C4.87913 17.7146 4.01717 16.4333 3.51 15" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Checkmark Icon
+  const CheckmarkIcon = () => (
+    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="10" stroke="#FFF" strokeWidth="2" />
+      <Path d="M8 12L11 15L16 9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Close Icon
+  const CloseIcon = () => (
+    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="10" stroke="#D32F2F" strokeWidth="2" />
+      <Path d="M15 9L9 15" stroke="#D32F2F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M9 9L15 15" stroke="#D32F2F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Hourglass Icon
+  const HourglassIcon = ({color}) => (
+    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <Path d="M6.5 3H17.5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M6.5 21H17.5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M7 3L12 10L17 3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M7 21L12 14L17 21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Document Icon
+  const DocumentIcon = ({color}) => (
+    <Svg width="60" height="60" viewBox="0 0 24 24" fill="none">
+      <Path d="M14 3V7H18" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H14L19 8V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M9 9H10" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <Path d="M9 13H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <Path d="M9 17H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+
+  // Category Icons
+  const CategoryIcon = ({type, color}) => {
+    switch(type.toLowerCase()) {
+      case 'calculator-outline':
+        return (
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Rect x="4" y="3" width="16" height="18" rx="2" stroke={color} strokeWidth="2" />
+            <Path d="M8 7H16" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 11H10" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M14 11H16" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 15H10" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M14 15H16" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        );
+      case 'flask-outline':
+        return (
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Path d="M9 3H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M12 3V7" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 14L6 21H18L16 14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M6.5 13C8.5 10 10 7 10 7H14C14 7 15.5 10 17.5 13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M9 17H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        );
+      case 'book-outline':
+        return (
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Path d="M4 19.5V4.5C4 3.4 4.9 2.5 6 2.5H19.5V19.5H6C4.9 19.5 4 18.6 4 17.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 7H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 11H13" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 15H12" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        );
+      case 'time-outline': 
+        return (
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
+            <Path d="M12 6V12L16 14" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+      case 'color-palette-outline':
+        return (
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Path d="M12 3C16.9706 3 21 7.02944 21 12C21 12.9334 20.3943 13.5 19.5 13.5C18.6057 13.5 18 12.8943 18 12C18 11.1057 17.3943 10.5 16.5 10.5C15.6057 10.5 15 11.1057 15 12C15 14.4853 12.9853 16.5 10.5 16.5C8.01472 16.5 6 14.4853 6 12C6 7.02944 8.02944 3 12 3Z" stroke={color} strokeWidth="2" strokeLinejoin="round" />
+            <Circle cx="7.5" cy="10.5" r="1.5" fill={color} />
+            <Circle cx="11" cy="7.5" r="1.5" fill={color} />
+            <Circle cx="15.5" cy="7.5" r="1.5" fill={color} />
+          </Svg>
+        );
+      case 'document-text-outline':
+      default:
+        return (
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Path d="M14 3V7H18" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H14L19 8V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M9 9H10" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M9 13H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M9 17H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        );
+    }
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -108,7 +226,7 @@ export default function ContentManagementScreen({ navigation }) {
       <View style={[styles.card, { backgroundColor: currentTheme.card }]}>
         <View style={styles.cardHeader}>
           <View style={[styles.categoryIconContainer, { backgroundColor: categoryInfo.color + '20' }]}>
-            <Ionicons name={categoryInfo.icon} size={24} color={categoryInfo.color} />
+            <CategoryIcon type={categoryInfo.icon} color={categoryInfo.color} />
           </View>
           <View style={styles.titleContainer}>
             <Text style={[styles.title, { color: currentTheme.text }]}>{item.title}</Text>
@@ -132,14 +250,14 @@ export default function ContentManagementScreen({ navigation }) {
             style={[styles.button, { backgroundColor: currentTheme.primary }]}
             onPress={() => handleApprove(item.id)}
           >
-            <Ionicons name="checkmark-circle-outline" size={20} color="#FFF" style={styles.buttonIcon} />
+            <CheckmarkIcon />
             <Text style={styles.buttonText}>Approve</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.button, { backgroundColor: '#F5F5F5' }]}
             onPress={() => handleReject(item.id)}
           >
-            <Ionicons name="close-circle-outline" size={20} color="#D32F2F" style={styles.buttonIcon} />
+            <CloseIcon />
             <Text style={[styles.buttonText, {color: '#D32F2F'}]}>Reject</Text>
           </TouchableOpacity>
         </View>
@@ -155,7 +273,7 @@ export default function ContentManagementScreen({ navigation }) {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <BackArrowIcon />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Content Management</Text>
         <TouchableOpacity 
@@ -163,13 +281,13 @@ export default function ContentManagementScreen({ navigation }) {
           onPress={handleRefresh}
           disabled={refreshing}
         >
-          <Ionicons name="refresh" size={24} color="#FFF" />
+          <RefreshIcon />
         </TouchableOpacity>
       </View>
       
       <View style={styles.statusCard}>
         <View style={[styles.statusBadge, { backgroundColor: currentTheme.primary + '15' }]}>
-          <Ionicons name="hourglass-outline" size={20} color={currentTheme.primary} />
+          <HourglassIcon color={currentTheme.primary} />
           <Text style={[styles.statusText, { color: currentTheme.primary }]}>
             Pending Review
           </Text>
@@ -188,7 +306,7 @@ export default function ContentManagementScreen({ navigation }) {
         </View>
       ) : pending.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Ionicons name="document-outline" size={60} color={currentTheme.textSecondary} />
+          <DocumentIcon color={currentTheme.textSecondary} />
           <Text style={[styles.empty, { color: currentTheme.textSecondary }]}>
             No pending content to review
           </Text>
@@ -196,7 +314,9 @@ export default function ContentManagementScreen({ navigation }) {
             style={[styles.refreshEmptyButton, { backgroundColor: currentTheme.primary }]}
             onPress={handleRefresh}
           >
-            <Ionicons name="refresh" size={18} color="#FFF" style={{marginRight: 8}} />
+            <View style={{marginRight: 8}}>
+              <RefreshIcon />
+            </View>
             <Text style={styles.refreshEmptyText}>Refresh</Text>
           </TouchableOpacity>
         </View>

@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail,
+  updateProfile,
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -64,7 +65,7 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const register = async (email, password) => {
+  const register = async (email, password, fullName = '') => {
     setLoading(true);
     try {
       // Create the user in Firebase Auth
@@ -74,6 +75,7 @@ export function AuthProvider({ children }) {
       const userDocRef = doc(db, 'users', userCredential.user.uid);
       await setDoc(userDocRef, {
         email: email,
+        displayName: fullName,
         role: 'parent', // Default role as parent
         createdAt: new Date().toISOString(),
         children: [],
@@ -82,6 +84,13 @@ export function AuthProvider({ children }) {
       // Set the user state
       setUser(userCredential.user);
       setUserRole('parent');
+      
+      if (fullName) {
+        // Update the auth profile with the display name
+        await updateProfile(userCredential.user, {
+          displayName: fullName
+        });
+      }
       
       return userCredential.user;
     } catch (err) {

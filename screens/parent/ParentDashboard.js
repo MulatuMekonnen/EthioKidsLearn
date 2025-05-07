@@ -21,6 +21,7 @@ import { collection, addDoc, getDocs, doc, setDoc, deleteDoc, query, orderBy, ge
 import { useAuth } from '../../context/AuthContext';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { Svg, Path, Circle, Rect } from 'react-native-svg';
 
 export default function ParentDashboard() {
   const navigation = useNavigation();
@@ -412,7 +413,15 @@ export default function ParentDashboard() {
         style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <Path 
+              d="M19 12H5M5 12L12 19M5 12L12 5" 
+              stroke="#FFF" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            />
+          </Svg>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Parent Dashboard</Text>
         <View style={{ width: 40 }} />
@@ -444,7 +453,22 @@ export default function ParentDashboard() {
                 pickImage();
               }}
             >
-              <Ionicons name="camera" size={18} color="#FFF" />
+              <Svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z"
+                  stroke="#FFF"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M3 16.8V9.2C3 8.0799 3 7.51984 3.21799 7.09202C3.40973 6.71569 3.71569 6.40973 4.09202 6.21799C4.51984 6 5.0799 6 6.2 6H7.25464C7.37758 6 7.43905 6 7.49576 5.9935C7.79166 5.95961 8.05705 5.82688 8.2432 5.62353C8.29848 5.56215 8.34911 5.49119 8.45038 5.34926L9.45038 3.94926C9.55164 3.80733 9.60228 3.73637 9.65756 3.67499C9.84371 3.47164 10.1091 3.33891 10.405 3.30502C10.4617 3.29852 10.5232 3.29852 10.6461 3.29852H13.3539C13.4768 3.29852 13.5383 3.29852 13.595 3.30502C13.8909 3.33891 14.1563 3.47164 14.3424 3.67499C14.3977 3.73637 14.4484 3.80733 14.5496 3.94926L15.5496 5.34926C15.6509 5.49119 15.7015 5.56215 15.7568 5.62353C15.943 5.82688 16.2083 5.95961 16.5042 5.9935C16.561 6 16.6224 6 16.7454 6H17.8C18.9201 6 19.4802 6 19.908 6.21799C20.2843 6.40973 20.5903 6.71569 20.782 7.09202C21 7.51984 21 8.0799 21 9.2V16.8C21 17.9201 21 18.4802 20.782 18.908C20.5903 19.2843 20.2843 19.5903 19.908 19.782C19.4802 20 18.9201 20 17.8 20H6.2C5.0799 20 4.51984 20 4.09202 19.782C3.71569 19.5903 3.40973 19.2843 3.21799 18.908C3 18.4802 3 17.9201 3 16.8Z"
+                  stroke="#FFF"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
             </TouchableOpacity>
           </View>
           
@@ -452,13 +476,50 @@ export default function ParentDashboard() {
             <Text style={[styles.profileName, { color: currentTheme.text }]}>{getDisplayName()}</Text>
             <Text style={[styles.profileEmail, { color: currentTheme.textSecondary }]}>{user?.email}</Text>
             <View style={styles.profileStat}>
-              <Ionicons name="people" size={16} color={currentTheme.primary} />
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M3 21V19C3 16.7909 4.79086 15 7 15H11C13.2091 15 15 16.7909 15 19V21"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <Text style={[styles.profileStatText, { color: currentTheme.text }]}>
                 {children.length} {children.length === 1 ? 'Child' : 'Children'}
               </Text>
             </View>
             <View style={[styles.editProfileButton, { borderColor: currentTheme.primary }]}>
-              <Ionicons name="pencil-outline" size={14} color={currentTheme.primary} />
+              <Svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M18 10L14 6M2.5 21.5L5.88437 21.124C6.29786 21.0781 6.5046 21.0551 6.69785 20.9925C6.87149 20.9373 7.03509 20.8577 7.18333 20.7562C7.35061 20.6421 7.49232 20.4945 7.77573 20.1992L21 7C22.1046 5.89543 22.1046 4.10457 21 3C19.8954 1.89543 18.1046 1.89543 17 3L3.8008 16.2243C3.50546 16.5077 3.35779 16.6494 3.24383 16.8167C3.14234 16.9649 3.06269 17.1285 3.00748 17.3022C2.94496 17.4954 2.92192 17.7021 2.87584 18.1156L2.5 21.5Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <Text style={[styles.editProfileText, { color: currentTheme.primary }]}>Edit Profile</Text>
             </View>
           </View>
@@ -471,13 +532,43 @@ export default function ParentDashboard() {
               style={[styles.addButton, { backgroundColor: currentTheme.primary }]}
               onPress={() => setModalVisible(true)}
             >
-              <Ionicons name="add" size={24} color="#FFF" />
+              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <Path 
+                  d="M12 5V19M5 12H19" 
+                  stroke="#FFF" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                />
+              </Svg>
             </TouchableOpacity>
           </View>
           
           {children.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="person-add-outline" size={48} color={currentTheme.primary} />
+              <Svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M16 8H20M18 6V10"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <Text style={[styles.emptyStateText, { color: currentTheme.text }]}>
                 No children added yet
               </Text>
@@ -517,19 +608,47 @@ export default function ParentDashboard() {
                       style={[styles.childActionButton, { borderColor: currentTheme.border }]}
                       onPress={() => handleSetPin(child)}
                   >
-                      <Ionicons name="key-outline" size={20} color={currentTheme.primary} />
+                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <Path 
+                        d="M12 10V14M19 15V10C19 6.13401 15.866 3 12 3C8.13401 3 5 6.13401 5 10V15C5 16.6569 6.34315 18 8 18H16C17.6569 18 19 16.6569 19 15Z"
+                        stroke={currentTheme.primary}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                      <Path 
+                        d="M12 18V21"
+                        stroke={currentTheme.primary}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </Svg>
                   </TouchableOpacity>
                   <TouchableOpacity 
                       style={[styles.childActionButton, { borderColor: currentTheme.border }]}
                       onPress={() => handleViewChildProgress(child)}
                   >
-                      <Ionicons name="bar-chart-outline" size={20} color={currentTheme.primary} />
+                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <Path 
+                        d="M7 18V9M12 18V5M17 18V13"
+                        stroke={currentTheme.primary}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                      />
+                    </Svg>
                   </TouchableOpacity>
                   <TouchableOpacity 
                       style={[styles.childActionButton, { borderColor: currentTheme.border }]}
                     onPress={() => handleRemoveChild(child.id)}
                   >
-                      <Ionicons name="trash-outline" size={20} color="#F44336" />
+                    <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <Path 
+                        d="M4 6H20M10 10V16M14 10V16M5 6L6 19C6 19.5304 6.21071 20.0391 6.58579 20.4142C6.96086 20.7893 7.46957 21 8 21H16C16.5304 21 17.0391 20.7893 17.4142 20.4142C17.7893 20.0391 18 19.5304 18 19L19 6M15 6V5C15 4.46957 14.7893 3.96086 14.4142 3.58579C14.0391 3.21071 13.5304 3 13 3H11C10.4696 3 9.96086 3.21071 9.58579 3.58579C9.21071 3.96086 9 4.46957 9 5V6"
+                        stroke="#F44336"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -545,7 +664,22 @@ export default function ParentDashboard() {
               style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
               onPress={() => navigation.navigate('Profile')}
             >
-              <Ionicons name="person" size={28} color={currentTheme.primary} />
+              <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>My Profile</Text>
             </TouchableOpacity>
             
@@ -553,7 +687,29 @@ export default function ParentDashboard() {
               style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
               onPress={() => navigation.navigate('ProgressReport')}
             >
-              <Ionicons name="stats-chart" size={28} color={currentTheme.primary} />
+              <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M3 8L6.39 10.09C6.49 10.15 6.6 10.13 6.68 10.05L11.7 5.1"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M12.2 5.1L17.3 10.05C17.4 10.14 17.55 10.14 17.65 10.05L21.8 6"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M20 12V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V12"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>Progress Report</Text>
             </TouchableOpacity>
           </View>
@@ -563,7 +719,22 @@ export default function ParentDashboard() {
               style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border, marginHorizontal: 0 }]}
               onPress={() => navigation.navigate('Settings')}
             >
-              <Ionicons name="settings" size={28} color={currentTheme.primary} />
+              <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <Path
+                  d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <Path
+                  d="M18.7273 14.7273C18.6063 15.0254 18.5702 15.3496 18.6226 15.6652C18.6751 15.9808 18.8142 16.2761 19.0273 16.5182L19.0818 16.5727C19.2509 16.7417 19.3853 16.9422 19.4765 17.1639C19.5677 17.3855 19.6142 17.6237 19.6142 17.8636C19.6142 18.1036 19.5677 18.3418 19.4765 18.5634C19.3853 18.785 19.2509 18.9856 19.0818 19.1545C18.9128 19.3236 18.7123 19.458 18.4906 19.5492C18.269 19.6404 18.0308 19.6869 17.7909 19.6869C17.5509 19.6869 17.3127 19.6404 17.0911 19.5492C16.8695 19.458 16.6689 19.3236 16.5 19.1545L16.4455 19.1C16.2033 18.8869 15.908 18.7478 15.5924 18.6953C15.2768 18.6429 14.9526 18.679 14.6545 18.8C14.363 18.9161 14.1092 19.1139 13.9274 19.3708C13.7456 19.6277 13.6435 19.9318 13.6364 20.2455V20.3636C13.6364 20.8485 13.4435 21.3138 13.0998 21.6575C12.756 22.0013 12.2908 22.1941 11.8059 22.1941C11.3209 22.1941 10.8557 22.0013 10.512 21.6575C10.1682 21.3138 9.97532 20.8485 9.97532 20.3636V20.2818C9.96114 19.9568 9.84751 19.6442 9.6502 19.3842C9.45288 19.1241 9.18083 18.9297 8.87727 18.8227C8.57916 18.7018 8.25497 18.6656 7.93936 18.7181C7.62376 18.7705 7.32846 18.9096 7.08636 19.1227L7.03182 19.1773C6.86287 19.3463 6.66233 19.4808 6.44067 19.572C6.21901 19.6632 5.98078 19.7097 5.74086 19.7097C5.50094 19.7097 5.26271 19.6632 5.04105 19.572C4.81939 19.4808 4.61885 19.3463 4.44991 19.1773C4.28088 19.0083 4.14648 18.8078 4.05526 18.5861C3.96405 18.3645 3.91756 18.1262 3.91756 17.8863C3.91756 17.6464 3.96405 17.4082 4.05526 17.1865C4.14648 16.9649 4.28088 16.7643 4.44991 16.5954L4.50445 16.5409C4.71759 16.2988 4.85668 16.0035 4.9091 15.6879C4.96152 15.3723 4.92542 15.0481 4.80445 14.75C4.68836 14.4585 4.49057 14.2047 4.23373 14.0229C3.97689 13.8411 3.67272 13.739 3.35909 13.7318H3.24091C2.75595 13.7318 2.29071 13.539 1.94695 13.1952C1.6032 12.8515 1.41037 12.3862 1.41037 11.9013C1.41037 11.4163 1.6032 10.9511 1.94695 10.6073C2.29071 10.2636 2.75595 10.0707 3.24091 10.0707H3.32273C3.64768 10.0565 3.96034 9.94291 4.22039 9.74559C4.48043 9.54828 4.67482 9.27623 4.78182 8.97273C4.90279 8.67461 4.93889 8.35042 4.88647 8.03482C4.83405 7.71921 4.69496 7.42391 4.48182 7.18182L4.42727 7.12727C4.25824 6.95833 4.12384 6.75779 4.03263 6.53613C3.94142 6.31447 3.89493 6.07624 3.89493 5.83632C3.89493 5.5964 3.94142 5.35817 4.03263 5.13651C4.12384 4.91485 4.25824 4.71431 4.42727 4.54536C4.59622 4.37634 4.79676 4.24193 5.01842 4.15072C5.24008 4.05951 5.47831 4.01302 5.71823 4.01302C5.95815 4.01302 6.19638 4.05951 6.41804 4.15072C6.6397 4.24193 6.84024 4.37634 7.00918 4.54536L7.06373 4.59991C7.30582 4.81305 7.60112 4.95213 7.91673 5.00455C8.23233 5.05698 8.55652 5.02087 8.85464 4.89991H8.86373C9.15522 4.78382 9.40903 4.58603 9.59086 4.32919C9.77268 4.07235 9.87476 3.76818 9.88191 3.45455V3.33636C9.88191 2.8514 10.0747 2.38616 10.4185 2.04241C10.7622 1.69865 11.2275 1.50582 11.7125 1.50582C12.1974 1.50582 12.6627 1.69865 13.0064 2.04241C13.3502 2.38616 13.543 2.8514 13.543 3.33636V3.41818C13.5502 3.73182 13.6523 4.03598 13.8341 4.29282C14.0159 4.54966 14.2697 4.74746 14.5612 4.86354C14.8593 4.98451 15.1835 5.02062 15.4991 4.96819C15.8147 4.91577 16.11 4.77669 16.3521 4.56354L16.4066 4.50899C16.5756 4.33997 16.7761 4.20556 16.9978 4.11435C17.2194 4.02314 17.4577 3.97665 17.6976 3.97665C17.9375 3.97665 18.1757 4.02314 18.3974 4.11435C18.619 4.20556 18.8196 4.33997 18.9885 4.50899C19.1575 4.67794 19.2919 4.87848 19.3831 5.10014C19.4744 5.3218 19.5208 5.56003 19.5208 5.79995C19.5208 6.03987 19.4744 6.2781 19.3831 6.49976C19.2919 6.72142 19.1575 6.92196 18.9885 7.09091L18.9339 7.14545C18.7208 7.38755 18.5817 7.68285 18.5293 7.99846C18.4769 8.31406 18.513 8.63825 18.6339 8.93636V8.94545C18.75 9.23695 18.9478 9.49076 19.2046 9.67259C19.4615 9.85441 19.7657 9.95649 20.0793 9.96364H20.1975C20.6824 9.96364 21.1477 10.1565 21.4914 10.5002C21.8352 10.844 22.028 11.3092 22.028 11.7941C22.028 12.2791 21.8352 12.7443 21.4914 13.0881C21.1477 13.4318 20.6824 13.6247 20.1975 13.6247H20.1157C19.802 13.6318 19.4979 13.7339 19.241 13.9157C18.9842 14.0975 18.7864 14.3513 18.6703 14.6427V14.6427"
+                  stroke={currentTheme.primary}
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
               <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>Settings</Text>
             </TouchableOpacity>
           </View>

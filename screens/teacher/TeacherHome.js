@@ -10,7 +10,7 @@ import {
   Image
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function TeacherHome({ navigation }) {
@@ -18,6 +18,96 @@ export default function TeacherHome({ navigation }) {
   const { currentTheme } = useTheme();
 
   const teacherName = user?.displayName || 'Teacher';
+  
+  // SVG Icons
+  const LogoutIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path d="M16 17L21 12M21 12L16 7M21 12H9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+
+  const SchoolIcon = ({color}) => (
+    <Svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+      <Path d="M22 10V18C22 19.1046 21.1046 20 20 20H4C2.89543 20 2 19.1046 2 18V10" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M12 2L2 10H22L12 2Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M12 15H12.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  const PeopleIcon = () => (
+    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <Path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="#4285F4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  const DocumentIcon = () => (
+    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <Path d="M14 3V7H18" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H14L19 8V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M9 9H10" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" />
+      <Path d="M9 13H15" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" />
+      <Path d="M9 17H15" stroke="#EA4335" strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+
+  const CheckmarkIcon = () => (
+    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <Circle cx="12" cy="12" r="10" stroke="#34A853" strokeWidth="2" />
+      <Path d="M8 12L11 15L16 9" stroke="#34A853" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  const ChevronIcon = () => (
+    <Svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <Path d="M9 18L15 12L9 6" stroke={currentTheme.textSecondary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Menu Icons
+  const getMenuIcon = (iconName, color) => {
+    switch(iconName) {
+      case 'analytics-outline':
+        return (
+          <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <Path d="M21 21H3.8C3.51997 21 3.37996 21 3.273 20.945C3.17892 20.8969 3.10307 20.8211 3.05496 20.727C3 20.62 3 20.48 3 20.2V3" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M7 14.5V17.5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M11.5 11.5V17.5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M16 8.5V17.5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+      case 'create-outline':
+        return (
+          <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <Path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+      case 'book-outline':
+        return (
+          <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <Path d="M4 19.5V4.5C4 3.4 4.9 2.5 6 2.5H19.5V19.5H6C4.9 19.5 4 18.6 4 17.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 7H15" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 11H13" stroke={color} strokeWidth="2" strokeLinecap="round" />
+            <Path d="M8 15H12" stroke={color} strokeWidth="2" strokeLinecap="round" />
+          </Svg>
+        );
+      case 'calendar-outline':
+        return (
+          <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+            <Rect x="3" y="4" width="18" height="18" rx="2" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M16 2V6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M8 2V6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <Path d="M3 10H21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </Svg>
+        );
+      default:
+        return null;
+    }
+  };
   
   const menuItems = [
     {
@@ -59,7 +149,7 @@ export default function TeacherHome({ navigation }) {
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>Teacher Dashboard</Text>
           <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-            <Ionicons name="log-out-outline" size={24} color="#FFF" />
+            <LogoutIcon />
           </TouchableOpacity>
         </View>
       </View>
@@ -85,24 +175,24 @@ export default function TeacherHome({ navigation }) {
             </Text>
           </View>
           <View style={[styles.avatarContainer, { backgroundColor: currentTheme.primary + '20' }]}>
-            <Ionicons name="school" size={40} color={currentTheme.primary} />
+            <SchoolIcon color={currentTheme.primary} />
           </View>
         </View>
         
         {/* Quick Stats */}
         <View style={styles.statsContainer}>
           <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
-            <Ionicons name="people-outline" size={22} color="#4285F4" style={styles.statIcon} />
+            <PeopleIcon />
             <Text style={[styles.statValue, { color: currentTheme.text }]}>24</Text>
             <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Students</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
-            <Ionicons name="document-text-outline" size={22} color="#EA4335" style={styles.statIcon} />
+            <DocumentIcon />
             <Text style={[styles.statValue, { color: currentTheme.text }]}>14</Text>
             <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Lessons</Text>
           </View>
           <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
-            <Ionicons name="checkmark-circle-outline" size={22} color="#34A853" style={styles.statIcon} />
+            <CheckmarkIcon />
             <Text style={[styles.statValue, { color: currentTheme.text }]}>92%</Text>
             <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Completion</Text>
           </View>
@@ -118,7 +208,7 @@ export default function TeacherHome({ navigation }) {
               onPress={item.onPress}
             >
               <View style={[styles.iconBubble, { backgroundColor: item.color + '20' }]}>
-                <Ionicons name={item.icon} size={28} color={item.color} />
+                {getMenuIcon(item.icon, item.color)}
               </View>
               <View style={styles.menuTextContainer}>
                 <Text style={[styles.menuTitle, { color: currentTheme.text }]}>{item.title}</Text>
@@ -126,7 +216,7 @@ export default function TeacherHome({ navigation }) {
                   {item.description}
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={22} color={currentTheme.textSecondary} />
+              <ChevronIcon />
             </TouchableOpacity>
           ))}
         </View>
