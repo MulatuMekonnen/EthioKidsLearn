@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableWithoutFeedback, Dimensions, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
@@ -71,45 +71,40 @@ export default function LearnToCountScreen() {
   }
 
   const NumberTile = ({ number, color, borderColor, textColor, delay, sound }) => {
-  const [isPressed, setIsPressed] = useState(false);
-  
-  const handlePress = () => {
-    setIsPressed(true);
+    const handlePress = () => {
       playSound(sound);
-    setTimeout(() => setIsPressed(false), 300);
-  };
+    };
 
-  return (
-    <Animatable.View
-      animation="zoomIn"
-      delay={delay}
-      style={styles.tileWrapper}
-    >
-      <TouchableOpacity
-        onPress={handlePress}
-        activeOpacity={0.7}
-        style={[
-          styles.tile,
-          { 
-            backgroundColor: color,
-            borderColor: borderColor || color,
-            transform: [{ scale: isPressed ? 0.95 : 1 }]
-          }
-        ]}
+    return (
+      <Animatable.View
+        animation="zoomIn"
+        delay={delay}
+        style={styles.tileWrapper}
       >
-        <Text style={[
-          styles.number,
-          { color: textColor || '#000000' }
-        ]}>
-          {number}
-        </Text>
-          <View style={styles.soundIcon}>
-            <Ionicons name="volume-high" size={20} color="#FFF" />
+        <TouchableWithoutFeedback onPress={handlePress}>
+          <View
+            style={[
+              styles.tile,
+              { 
+                backgroundColor: color,
+                borderColor: borderColor || color
+              }
+            ]}
+          >
+            <Text style={[
+              styles.number,
+              { color: textColor || '#000000' }
+            ]}>
+              {number}
+            </Text>
+            <View style={styles.soundIcon}>
+              <Ionicons name="volume-high" size={20} color="#FFF" />
+            </View>
           </View>
-      </TouchableOpacity>
-    </Animatable.View>
-  );
-};
+        </TouchableWithoutFeedback>
+      </Animatable.View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -134,12 +129,13 @@ export default function LearnToCountScreen() {
         delay={2000}
         style={styles.backButtonContainer}
       >
-        <TouchableOpacity
-          style={styles.backButton}
+        <TouchableWithoutFeedback
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
+          <View style={styles.backButton}>
+            <Text style={styles.backButtonText}>Back</Text>
+          </View>
+        </TouchableWithoutFeedback>
       </Animatable.View>
     </SafeAreaView>
   );

@@ -1,20 +1,48 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
+import { Audio } from 'expo-av';
 
 const days = [
-  { name: 'MONDAY', color: '#FF9B54', icon: '😊' },
-  { name: 'TUESDAY', color: '#CE2D4F', icon: '🌟' },
-  { name: 'WEDNESDAY', color: '#4B878B', icon: '🐸' },
-  { name: 'THURSDAY', color: '#8B5FBF', icon: '🦄' },
-  { name: 'FRIDAY', color: '#01A7C2', icon: '🎉' },
-  { name: 'SATURDAY', color: '#F76C5E', icon: '🚀' },
-  { name: 'SUNDAY', color: '#6DC066', icon: '🌈' }
+  { name: 'MONDAY', color: '#FF9B54', icon: '😊', sound: require('../../../assets/sounds/days/Monday .m4a') },
+  { name: 'TUESDAY', color: '#CE2D4F', icon: '🌟', sound: require('../../../assets/sounds/days/Tuesday .m4a') },
+  { name: 'WEDNESDAY', color: '#4B878B', icon: '🐸', sound: require('../../../assets/sounds/days/Wednesday .m4a') },
+  { name: 'THURSDAY', color: '#8B5FBF', icon: '🦄', sound: require('../../../assets/sounds/days/Thursday .m4a') },
+  { name: 'FRIDAY', color: '#01A7C2', icon: '🎉', sound: require('../../../assets/sounds/days/Friday .m4a') },
+  { name: 'SATURDAY', color: '#F76C5E', icon: '🚀', sound: require('../../../assets/sounds/days/Saturday .m4a') },
+  { name: 'SUNDAY', color: '#6DC066', icon: '🌈', sound: require('../../../assets/sounds/days/Sunday .m4a') }
 ];
 
 export default function DaysOfWeekScreen() {
   const navigation = useNavigation();
+  const [sound, setSound] = useState();
+
+  // Clean up sound resources when component unmounts
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  // Function to play day name sound
+  async function playSound(soundFile) {
+    try {
+      // Unload any previous sound
+      if (sound) {
+        await sound.unloadAsync();
+      }
+      
+      // Load and play the new sound
+      const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
+      setSound(newSound);
+      await newSound.playAsync();
+    } catch (error) {
+      console.log('Error playing sound:', error);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -40,9 +68,7 @@ export default function DaysOfWeekScreen() {
             <TouchableOpacity
               style={[styles.dayButton, { backgroundColor: day.color }]}
               activeOpacity={0.8}
-              onPress={() => {
-                // Handle day selection
-              }}
+              onPress={() => playSound(day.sound)}
             >
               <Text style={styles.dayIcon}>{day.icon}</Text>
               <Text style={styles.dayText}>{day.name}</Text>

@@ -26,7 +26,7 @@ const oromoContent = [
     pronunciation: 'aa',
     example: 'Aadaa',
     meaning: 'Culture',
-    sound: require('../../assets/sounds/oromo/a.mp3'),
+    sound: require('../../assets/sounds/oromo/qube/A.m4a'),
     category: 'Qubee'
   },
   {
@@ -34,7 +34,7 @@ const oromoContent = [
     pronunciation: 'ba',
     example: 'Buna',
     meaning: 'Coffee',
-    sound: require('../../assets/sounds/oromo/b.mp3'),
+    sound: require('../../assets/sounds/oromo/qube/B.m4a'),
     category: 'Qubee'
   },
   {
@@ -42,7 +42,7 @@ const oromoContent = [
     pronunciation: 'ca',
     example: 'Cabbii',
     meaning: 'Butter',
-    sound: require('../../assets/sounds/oromo/c.mp3'),
+    sound: require('../../assets/sounds/oromo/qube/C.m4a'),
     category: 'Qubee'
   },
   {
@@ -50,7 +50,7 @@ const oromoContent = [
     pronunciation: 'da',
     example: 'Damma',
     meaning: 'Honey',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/D.m4a'),
     category: 'Qubee'
   },
   {
@@ -58,7 +58,7 @@ const oromoContent = [
     pronunciation: 'ee',
     example: 'Eeboo',
     meaning: 'Spear',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/E.m4a'),
     category: 'Qubee'
   },
   {
@@ -66,7 +66,7 @@ const oromoContent = [
     pronunciation: 'fa',
     example: 'Farda',
     meaning: 'Horse',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/F.m4a'),
     category: 'Qubee'
   },
   {
@@ -74,7 +74,7 @@ const oromoContent = [
     pronunciation: 'ga',
     example: 'Gurbaa',
     meaning: 'Boy',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/G.m4a'),
     category: 'Qubee'
   },
   {
@@ -82,7 +82,7 @@ const oromoContent = [
     pronunciation: 'ha',
     example: 'Hoolaa',
     meaning: 'Sheep',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/H.m4a'),
     category: 'Qubee'
   },
   {
@@ -90,7 +90,7 @@ const oromoContent = [
     pronunciation: 'i',
     example: 'Ijoollee',
     meaning: 'Children',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/I.m4a'),
     category: 'Qubee'
   },
   {
@@ -98,7 +98,7 @@ const oromoContent = [
     pronunciation: 'ja',
     example: 'Jabbii',
     meaning: 'Calf',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/J.m4a'),
     category: 'Qubee'
   },
   {
@@ -106,7 +106,7 @@ const oromoContent = [
     pronunciation: 'ka',
     example: 'Kitaaba',
     meaning: 'Book',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/k.m4a'),
     category: 'Qubee'
   },
   {
@@ -114,7 +114,7 @@ const oromoContent = [
     pronunciation: 'la',
     example: 'Laga',
     meaning: 'River',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/L.m4a'),
     category: 'Qubee'
   },
   {
@@ -122,7 +122,7 @@ const oromoContent = [
     pronunciation: 'ma',
     example: 'Mana',
     meaning: 'House',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/M.m4a'),
     category: 'Qubee'
   },
   {
@@ -130,7 +130,7 @@ const oromoContent = [
     pronunciation: 'na',
     example: 'Nama',
     meaning: 'Person',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/N.m4a'),
     category: 'Qubee'
   },
   {
@@ -138,7 +138,7 @@ const oromoContent = [
     pronunciation: 'o',
     example: 'Oromiyaa',
     meaning: 'Oromia',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/o.m4a'),
     category: 'Qubee'
   },
   {
@@ -146,7 +146,7 @@ const oromoContent = [
     pronunciation: 'pa',
     example: 'Paappaya',
     meaning: 'Papaya',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/p.m4a'),
     category: 'Qubee'
   },
   {
@@ -154,7 +154,7 @@ const oromoContent = [
     pronunciation: 'qa',
     example: 'Qabeenya',
     meaning: 'Wealth',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/Q.m4a'),
     category: 'Qubee'
   },
   {
@@ -162,7 +162,7 @@ const oromoContent = [
     pronunciation: 'ra',
     example: 'Rooba',
     meaning: 'Rain',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/R.m4a'),
     category: 'Qubee'
   },
   {
@@ -170,7 +170,7 @@ const oromoContent = [
     pronunciation: 'sa',
     example: 'Sagalee',
     meaning: 'Voice',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/s.m4a'),
     category: 'Qubee'
   },
   {
@@ -178,7 +178,7 @@ const oromoContent = [
     pronunciation: 'ta',
     example: 'Tulluu',
     meaning: 'Mountain',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/T.m4a'),
     category: 'Qubee'
   },
   {
@@ -186,7 +186,7 @@ const oromoContent = [
     pronunciation: 'u',
     example: 'Urjii',
     meaning: 'Star',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/U.m4a'),
     category: 'Qubee'
   },
   {
@@ -194,7 +194,7 @@ const oromoContent = [
     pronunciation: 'va',
     example: 'Vaayirusii',
     meaning: 'Virus',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/v.m4a'),
     category: 'Qubee'
   },
   {
@@ -202,7 +202,7 @@ const oromoContent = [
     pronunciation: 'wa',
     example: 'Waaqa',
     meaning: 'God/Sky',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/W.m4a'),
     category: 'Qubee'
   },
   {
@@ -210,7 +210,7 @@ const oromoContent = [
     pronunciation: 'xa',
     example: 'Xalayaa',
     meaning: 'Letter',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/x.m4a'),
     category: 'Qubee'
   },
   {
@@ -218,7 +218,7 @@ const oromoContent = [
     pronunciation: 'ya',
     example: 'Yaada',
     meaning: 'Idea',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/Y.m4a'),
     category: 'Qubee'
   },
   {
@@ -226,7 +226,7 @@ const oromoContent = [
     pronunciation: 'za',
     example: 'Zeyituuna',
     meaning: 'Olive',
-    sound: require('../../assets/sounds/oromo/a.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/qube/Z.m4a'),
     category: 'Qubee'
   },
 

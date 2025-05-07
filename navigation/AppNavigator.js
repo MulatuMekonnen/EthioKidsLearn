@@ -107,6 +107,26 @@ export default function AppNavigator() {
                 <Stack.Screen name="CreateContent" component={CreateContentScreen} />
                 <Stack.Screen name="ScoresByChild" component={ScoresByChild} />
                 <Stack.Screen name="QuizScoresScreen" component={QuizScoresScreen} />
+                {/* Add child screens for teacher access */}
+                <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
+                <Stack.Screen name="MathLessons" component={MathLessons} />
+                <Stack.Screen name="LearnCount" component={LearnCount} />
+                <Stack.Screen name="Addition" component={Addition} />
+                <Stack.Screen name="Subtraction" component={Subtraction} />
+                <Stack.Screen name="Multiplication" component={Multiplication} />
+                <Stack.Screen name="Division" component={Division} />
+                <Stack.Screen name="MathQuiz" component={MathQuiz} />
+                <Stack.Screen name="EnglishLessons" component={EnglishLessons} />
+                <Stack.Screen name="Alphabets" component={Alphabets} />
+                <Stack.Screen name="Words" component={Words} />
+                <Stack.Screen name="DaysOfWeek" component={DaysOfWeek} />
+                <Stack.Screen name="Months" component={Months} />
+                <Stack.Screen name="Colors" component={Colors} />
+                <Stack.Screen name="EnglishQuiz" component={EnglishQuiz} />
+                <Stack.Screen name="AmharicLessonsScreen" component={AmharicLessonsScreen} />
+                <Stack.Screen name="OromoLessonScreen" component={OromoLessonScreen} />
+                <Stack.Screen name="AnimalSoundsScreen" component={AnimalSoundsScreen} />
+                <Stack.Screen name="TimeNavigationScreen" component={TimeNavigationScreen} />
               </>
             )}
             {userRole === 'parent' && (
@@ -136,6 +156,30 @@ export default function AppNavigator() {
                 <Stack.Screen name="EnglishQuiz" component={EnglishQuiz} />
                 <Stack.Screen name="AmharicLessonsScreen" component={AmharicLessonsScreen} />
                 <Stack.Screen name="OromoLessonScreen" component={OromoLessonScreen} />
+                <Stack.Screen name="AnimalSoundsScreen" component={AnimalSoundsScreen} />
+                <Stack.Screen name="TimeNavigationScreen" component={TimeNavigationScreen} />
+              </>
+            )}
+            {userRole === 'child' && (
+              <>
+                <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
+                <Stack.Screen name="MathLessons" component={MathLessons} />
+                <Stack.Screen name="LearnCount" component={LearnCount} />
+                <Stack.Screen name="Addition" component={Addition} />
+                <Stack.Screen name="Subtraction" component={Subtraction} />
+                <Stack.Screen name="Multiplication" component={Multiplication} />
+                <Stack.Screen name="Division" component={Division} />
+                <Stack.Screen name="MathQuiz" component={MathQuiz} />
+                <Stack.Screen name="EnglishLessons" component={EnglishLessons} />
+                <Stack.Screen name="Alphabets" component={Alphabets} />
+                <Stack.Screen name="Words" component={Words} />
+                <Stack.Screen name="DaysOfWeek" component={DaysOfWeek} />
+                <Stack.Screen name="Months" component={Months} />
+                <Stack.Screen name="Colors" component={Colors} />
+                <Stack.Screen name="EnglishQuiz" component={EnglishQuiz} />
+                <Stack.Screen name="AmharicLessonsScreen" component={AmharicLessonsScreen} />
+                <Stack.Screen name="OromoLessonScreen" component={OromoLessonScreen} />
+                <Stack.Screen name="AnimalSoundsScreen" component={AnimalSoundsScreen} />
                 <Stack.Screen name="TimeNavigationScreen" component={TimeNavigationScreen} />
               </>
             )}
