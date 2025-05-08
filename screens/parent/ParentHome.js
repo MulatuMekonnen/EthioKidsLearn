@@ -1,14 +1,49 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Modal, TouchableWithoutFeedback, Platform, Alert } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { Svg, Path, Circle, G } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import * as ImagePicker from 'expo-image-picker';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db } from '../../services/firebase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ParentHome() {
   const { user, logout } = useAuth();
   const navigation = useNavigation();
-  const { currentTheme } = useTheme();
+  const { currentTheme, toggleTheme } = useTheme();
+  const [profileImage, setProfileImage] = useState(null);
+  const [userName, setUserName] = useState('Parent');
+  const [userEmail, setUserEmail] = useState('');
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  useEffect(() => {
+    fetchUserProfile();
+  }, [user]);
+
+  const fetchUserProfile = async () => {
+    if (user?.uid) {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.profileImage) {
+            setProfileImage(userData.profileImage);
+          }
+          if (userData.displayName) {
+            setUserName(userData.displayName);
+          }
+          setUserEmail(userData.email || user.email || '');
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    }
+  };
 
   // Function to capitalize first letter of each word
   const capitalizeWords = (text) => {
@@ -19,16 +54,228 @@ export default function ParentHome() {
       .join(' ');
   };
 
-  // Get display name with proper capitalization
-  const getDisplayName = () => {
-    if (user?.displayName) {
-      return capitalizeWords(user.displayName);
-    } else if (user?.email) {
-      const name = user.email.split('@')[0];
-      return capitalizeWords(name);
+  // Pick image from device
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.5,
+      });
+      
+      if (!result.canceled && result.assets && result.assets[0].uri) {
+        await uploadProfileImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      Alert.alert('Error', 'Failed to pick image');
     }
-    return 'Parent';
   };
+
+  // Upload image to Firebase Storage
+  const uploadProfileImage = async (uri) => {
+    if (!user?.uid) return;
+    
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      
+      const storage = getStorage();
+      const storageRef = ref(storage, `profileImages/${user.uid}`);
+      
+      await uploadBytes(storageRef, blob);
+      const downloadURL = await getDownloadURL(storageRef);
+      
+      // Update user document with image URL
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        profileImage: downloadURL
+      });
+      
+      setProfileImage(downloadURL);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      Alert.alert('Error', 'Failed to upload image');
+    }
+  };
+
+  // Go to profile settings
+  const goToProfileSettings = () => {
+    setShowProfileMenu(false);
+    // Navigate to profile settings page
+    navigation.navigate('Profile');
+  };
+
+  // Toggle theme
+  const handleToggleTheme = () => {
+    toggleTheme();
+    setShowProfileMenu(false);
+  };
+
+  // Get initials from name
+  const getInitials = () => {
+    if (!userName) return 'P';
+    
+    const names = userName.split(' ');
+    const firstInitial = names[0].charAt(0).toUpperCase();
+    
+    return firstInitial;
+  };
+
+  // Generate a color for profile icon
+  const generateProfileColor = () => {
+    // Fixed green color for all profile icons
+    return '#4CAF50'; // Green
+  };
+
+  // Custom profile picture component
+  const ProfilePicture = () => {
+    const profileColor = generateProfileColor();
+    
+    return (
+      <TouchableOpacity 
+        style={styles.profilePicContainer} 
+        onPress={() => setShowProfileMenu(!showProfileMenu)}
+      >
+        {profileImage ? (
+          <Image 
+            source={{ uri: profileImage }} 
+            style={styles.profilePic} 
+          />
+        ) : (
+          <View style={[styles.profilePlaceholder, { 
+            backgroundColor: profileColor,
+          }]}>
+            <View style={styles.profileInnerShadow}>
+              <Text style={styles.profilePlaceholderText}>{getInitials()}</Text>
+            </View>
+          </View>
+        )}
+        {showProfileMenu && (
+          <Modal
+            transparent={true}
+            visible={showProfileMenu}
+            animationType="fade"
+            onRequestClose={() => setShowProfileMenu(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setShowProfileMenu(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={[styles.profileMenu, { 
+                    backgroundColor: currentTheme.card,
+                    top: Platform.OS === 'ios' ? 100 : 80,
+                    right: 20
+                  }]}>
+                    <View style={styles.profileMenuHeader}>
+                      <View style={styles.profileImageContainer}>
+                        {profileImage ? (
+                          <Image 
+                            source={{ uri: profileImage }} 
+                            style={styles.profileMenuImage} 
+                          />
+                        ) : (
+                          <View style={[styles.menuProfilePlaceholder, { 
+                            backgroundColor: profileColor
+                          }]}>
+                            <View style={styles.menuProfileInnerShadow}>
+                              <Text style={styles.menuProfilePlaceholderText}>{getInitials()}</Text>
+                            </View>
+                          </View>
+                        )}
+                        <TouchableOpacity 
+                          style={styles.editProfileButton}
+                          onPress={pickImage}
+                        >
+                          <View style={styles.editIconContainer}>
+                            <EditIcon />
+                          </View>
+                        </TouchableOpacity>
+                      </View>
+                      <Text style={[styles.profileMenuName, { color: currentTheme.text }]}>{userName}</Text>
+                      <Text style={[styles.profileMenuEmail, { color: currentTheme.textSecondary }]}>{userEmail}</Text>
+                    </View>
+                    
+                    <View style={[styles.profileMenuDivider, { backgroundColor: currentTheme.border }]} />
+                    
+                    <TouchableOpacity 
+                      style={styles.profileMenuItem}
+                      onPress={goToProfileSettings}
+                    >
+                      <View style={styles.profileMenuItemIcon}>
+                        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="8" r="4" stroke={currentTheme.text} strokeWidth="2" />
+                          <Path d="M20 21C20 16.5817 16.4183 13 12 13C7.58172 13 4 16.5817 4 21" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
+                      </View>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>My Profile</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.profileMenuItem}
+                      onPress={handleToggleTheme}
+                    >
+                      <View style={styles.profileMenuItemIcon}>
+                        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="12" r="4" stroke={currentTheme.text} strokeWidth="2" />
+                          <Path d="M12 2V4" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M12 20V22" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M4 12L2 12" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M22 12L20 12" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M19.7782 4.22166L18.364 5.63587" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M5.63599 18.364L4.22177 19.7782" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M19.7782 19.7782L18.364 18.364" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M5.63599 5.63589L4.22177 4.22168" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
+                      </View>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>
+                        {currentTheme.mode === 'dark' ? 'Light Theme' : 'Dark Theme'}
+                      </Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.profileMenuItem}
+                      onPress={logout}
+                    >
+                      <View style={[styles.profileMenuItemIcon, { marginLeft: -3 }]}>
+                        <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                          <Path d="M16 17L21 12M21 12L16 7M21 12H9" stroke={currentTheme.danger || "#F44336"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke={currentTheme.danger || "#F44336"} strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
+                      </View>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger || "#F44336" }]}>Logout</Text>
+                    </TouchableOpacity>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        )}
+      </TouchableOpacity>
+    );
+  };
+
+  // Custom edit icon
+  const EditIcon = () => (
+    <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+      <Path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
+  // Custom logout icon
+  const LogoutIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path d="M16 17L21 12M21 12L16 7M21 12H9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" />
+    </Svg>
+  );
+
+  const ChevronRightIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path d="M9 18L15 12L9 6" stroke={currentTheme.textSecondary || currentTheme.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
 
   const menuItems = [
     {
@@ -73,53 +320,16 @@ export default function ParentHome() {
       ),
       route: 'ChildLogin',
       backgroundColor: '#4CAF50',
-    },
-    {
-      id: 5,
-      title: 'Settings',
-      description: 'Customize app preferences and themes',
-      icon: (color) => (
-        <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-          <Path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke={color} strokeWidth="2" />
-          <Path d="M19.4 15C19.2669 15.3016 19.2272 15.6362 19.287 15.9606C19.3468 16.285 19.5043 16.5843 19.73 16.82L19.79 16.88C19.976 17.0657 20.1235 17.2863 20.2241 17.5291C20.3248 17.7719 20.3766 18.0322 20.3766 18.295C20.3766 18.5578 20.3248 18.8181 20.2241 19.0609C20.1235 19.3037 19.976 19.5243 19.79 19.71C19.6043 19.896 19.3837 20.0435 19.1409 20.1441C18.8981 20.2448 18.6378 20.2966 18.375 20.2966C18.1122 20.2966 17.8519 20.2448 17.6091 20.1441C17.3663 20.0435 17.1457 19.896 16.96 19.71L16.9 19.65C16.6643 19.4243 16.365 19.2668 16.0406 19.207C15.7162 19.1472 15.3816 19.1869 15.08 19.32C14.7842 19.4468 14.532 19.6572 14.3543 19.9255C14.1766 20.1938 14.0813 20.5082 14.08 20.83V21C14.08 21.5304 13.8693 22.0391 13.4942 22.4142C13.1191 22.7893 12.6104 23 12.08 23C11.5496 23 11.0409 22.7893 10.6658 22.4142C10.2907 22.0391 10.08 21.5304 10.08 21V20.91C10.0723 20.579 9.96512 20.258 9.77251 19.9887C9.5799 19.7194 9.31074 19.5143 9 19.4C8.69838 19.2669 8.36381 19.2272 8.03941 19.287C7.71502 19.3468 7.41568 19.5043 7.18 19.73L7.12 19.79C6.93425 19.976 6.71368 20.1235 6.47088 20.2241C6.22808 20.3248 5.96783 20.3766 5.705 20.3766C5.44217 20.3766 5.18192 20.3248 4.93912 20.2241C4.69632 20.1235 4.47575 19.976 4.29 19.79C4.10405 19.6043 3.95653 19.3837 3.85588 19.1409C3.75523 18.8981 3.70343 18.6378 3.70343 18.375C3.70343 18.1122 3.75523 17.8519 3.85588 17.6091C3.95653 17.3663 4.10405 17.1457 4.29 16.96L4.35 16.9C4.57568 16.6643 4.73325 16.365 4.793 16.0406C4.85275 15.7162 4.81312 15.3816 4.68 15.08C4.55324 14.7842 4.34276 14.532 4.07447 14.3543C3.80618 14.1766 3.49179 14.0813 3.17 14.08H3C2.46957 14.08 1.96086 13.8693 1.58579 13.4942C1.21071 13.1191 1 12.6104 1 12.08C1 11.5496 1.21071 11.0409 1.58579 10.6658C1.96086 10.2907 2.46957 10.08 3 10.08H3.09C3.42099 10.0723 3.742 9.96512 4.0113 9.77251C4.28059 9.5799 4.48572 9.31074 4.6 9C4.73312 8.69838 4.77275 8.36381 4.713 8.03941C4.65325 7.71502 4.49568 7.41568 4.27 7.18L4.21 7.12C4.02405 6.93425 3.87653 6.71368 3.77588 6.47088C3.67523 6.22808 3.62343 5.96783 3.62343 5.705C3.62343 5.44217 3.67523 5.18192 3.77588 4.93912C3.87653 4.69632 4.02405 4.47575 4.21 4.29C4.39575 4.10405 4.61632 3.95653 4.85912 3.85588C5.10192 3.75523 5.36217 3.70343 5.625 3.70343C5.88783 3.70343 6.14808 3.75523 6.39088 3.85588C6.63368 3.95653 6.85425 4.10405 7.04 4.29L7.1 4.35C7.33568 4.57568 7.63502 4.73325 7.95941 4.793C8.28381 4.85275 8.61838 4.81312 8.92 4.68H9C9.29577 4.55324 9.54802 4.34276 9.72569 4.07447C9.90337 3.80618 9.99872 3.49179 10 3.17V3C10 2.46957 10.2107 1.96086 10.5858 1.58579C10.9609 1.21071 11.4696 1 12 1C12.5304 1 13.0391 1.21071 13.4142 1.58579C13.7893 1.96086 14 2.46957 14 3V3.09C14.0013 3.41179 14.0966 3.72618 14.2743 3.99447C14.452 4.26276 14.7042 4.47324 15 4.6C15.3016 4.73312 15.6362 4.77275 15.9606 4.713C16.285 4.65325 16.5843 4.49568 16.82 4.27L16.88 4.21C17.0657 4.02405 17.2863 3.87653 17.5291 3.77588C17.7719 3.67523 18.0322 3.62343 18.295 3.62343C18.5578 3.62343 18.8181 3.67523 19.0609 3.77588C19.3037 3.87653 19.5243 4.02405 19.71 4.21C19.896 4.39575 20.0435 4.61632 20.1441 4.85912C20.2448 5.10192 20.2966 5.36217 20.2966 5.625C20.2966 5.88783 20.2448 6.14808 20.1441 6.39088C20.0435 6.63368 19.896 6.85425 19.71 7.04L19.65 7.1C19.4243 7.33568 19.2668 7.63502 19.207 7.95941C19.1472 8.28381 19.1869 8.61838 19.32 8.92V9C19.4468 9.29577 19.6572 9.54802 19.9255 9.72569C20.1938 9.90337 20.5082 9.99872 20.83 10H21C21.5304 10 22.0391 10.2107 22.4142 10.5858C22.7893 10.9609 23 11.4696 23 12C23 12.5304 22.7893 13.0391 22.4142 13.4142C22.0391 13.7893 21.5304 14 21 14H20.91C20.5882 14.0013 20.2738 14.0966 20.0055 14.2743C19.7372 14.452 19.5268 14.7042 19.4 15" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </Svg>
-      ),
-      route: 'Settings',
-      backgroundColor: '#795548',
     }
   ];
-
-  // Custom logout icon
-  const LogoutIcon = () => (
-    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <Path d="M16 17L21 12M21 12L16 7M21 12H9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke="#FFF" strokeWidth="2" strokeLinecap="round" />
-    </Svg>
-  );
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    }
-  };
-
-  const ChevronRightIcon = () => (
-    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-      <Path d="M9 18L15 12L9 6" stroke={currentTheme.border} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </Svg>
-  );
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
       <View style={[styles.header, { backgroundColor: currentTheme.primary }]}>
         <View style={styles.headerContent}>
-          <Text style={styles.welcomeText}>Welcome, <Text style={styles.userName}>{getDisplayName()}</Text></Text>
+          <Text style={styles.welcomeText}>Welcome, <Text style={styles.userName}>{capitalizeWords(userName)}</Text></Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-          <LogoutIcon />
-        </TouchableOpacity>
+        <ProfilePicture />
       </View>
 
       <ScrollView style={styles.content}>
@@ -127,7 +337,7 @@ export default function ParentHome() {
           {menuItems.map((item) => (
             <TouchableOpacity
               key={item.id}
-              style={styles.menuItem}
+              style={[styles.menuItem, { backgroundColor: currentTheme.card }]}
               onPress={() => navigation.navigate(item.route)}
             >
               <View
@@ -137,7 +347,7 @@ export default function ParentHome() {
               </View>
               <View style={styles.menuItemContent}>
                 <Text style={[styles.menuItemTitle, { color: currentTheme.text }]}>{item.title}</Text>
-                <Text style={styles.menuItemDescription}>{item.description}</Text>
+                <Text style={[styles.menuItemDescription, { color: currentTheme.textSecondary || '#757575' }]}>{item.description}</Text>
               </View>
               <ChevronRightIcon />
             </TouchableOpacity>
@@ -212,7 +422,145 @@ const styles = StyleSheet.create({
   },
   menuItemDescription: {
     fontSize: 14,
-    color: '#757575',
     marginTop: 4,
+  },
+  profilePicContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
+  },
+  profilePic: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 22,
+  },
+  profilePlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profileInnerShadow: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Subtle inner highlight
+  },
+  profilePlaceholderText: {
+    fontSize: 22,
+    color: 'white',
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  profileMenu: {
+    position: 'absolute',
+    width: 250,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+  },
+  profileMenuHeader: {
+    alignItems: 'center',
+    padding: 16,
+  },
+  profileImageContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  profileMenuImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+  },
+  menuProfilePlaceholder: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  menuProfileInnerShadow: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Subtle inner highlight
+  },
+  menuProfilePlaceholderText: {
+    fontSize: 36,
+    color: 'white',
+    fontWeight: 'bold',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+  },
+  editProfileButton: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+  },
+  editIconContainer: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#2196F3',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  profileMenuName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  profileMenuEmail: {
+    fontSize: 14,
+  },
+  profileMenuDivider: {
+    height: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    marginVertical: 8,
+  },
+  profileMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  profileMenuItemIcon: {
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  profileMenuItemText: {
+    fontSize: 16,
   },
 });

@@ -111,11 +111,11 @@ export default function Settings() {
         {/* Account Section */}
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
           <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Account</Text>
-          <View style={styles.settingItem}>
+          <View style={[styles.settingItem, { borderBottomColor: currentTheme.border }]}>
             <PersonIcon />
             <View style={styles.settingInfo}>
               <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Email</Text>
-              <Text style={[styles.settingValue, { color: currentTheme.text }]}>{user?.email}</Text>
+              <Text style={[styles.settingValue, { color: currentTheme.textSecondary || currentTheme.text }]}>{user?.email}</Text>
             </View>
           </View>
         </View>
@@ -129,7 +129,10 @@ export default function Settings() {
                 key={theme.id}
                 style={[
                   styles.themeOption,
-                  { borderColor: currentTheme.border },
+                  { 
+                    borderColor: currentTheme.border,
+                    backgroundColor: currentTheme.id === theme.id ? currentTheme.primary + '20' : 'transparent'
+                  },
                   currentTheme.id === theme.id && { borderColor: currentTheme.primary },
                 ]}
                 onPress={() => handleThemeChange(theme.id)}
@@ -149,39 +152,42 @@ export default function Settings() {
         {/* Preferences Section */}
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
           <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Preferences</Text>
-          <View style={styles.settingItem}>
+          <View style={[styles.settingItem, { borderBottomColor: currentTheme.border }]}>
             <NotificationIcon />
             <View style={styles.settingInfo}>
               <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Notifications</Text>
               <Switch
                 value={notifications}
                 onValueChange={handleNotificationToggle}
-                trackColor={{ false: '#767577', true: currentTheme.primary }}
-                thumbColor={notifications ? currentTheme.primary : '#f4f3f4'}
+                trackColor={{ false: currentTheme.mode === 'dark' ? '#444' : '#ccc', true: currentTheme.primary }}
+                thumbColor={notifications ? '#fff' : currentTheme.mode === 'dark' ? '#f4f3f4' : '#f4f3f4'}
+                ios_backgroundColor={currentTheme.mode === 'dark' ? '#444' : '#ccc'}
               />
             </View>
           </View>
-          <View style={styles.settingItem}>
+          <View style={[styles.settingItem, { borderBottomColor: currentTheme.border }]}>
             <VolumeIcon />
             <View style={styles.settingInfo}>
               <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Sound Effects</Text>
               <Switch
                 value={soundEffects}
                 onValueChange={handleSoundEffectsToggle}
-                trackColor={{ false: '#767577', true: currentTheme.primary }}
-                thumbColor={soundEffects ? currentTheme.primary : '#f4f3f4'}
+                trackColor={{ false: currentTheme.mode === 'dark' ? '#444' : '#ccc', true: currentTheme.primary }}
+                thumbColor={soundEffects ? '#fff' : currentTheme.mode === 'dark' ? '#f4f3f4' : '#f4f3f4'}
+                ios_backgroundColor={currentTheme.mode === 'dark' ? '#444' : '#ccc'}
               />
             </View>
           </View>
-          <View style={styles.settingItem}>
+          <View style={[styles.settingItem, { borderBottomColor: 'transparent' }]}>
             <ChartIcon />
             <View style={styles.settingInfo}>
               <Text style={[styles.settingLabel, { color: currentTheme.text }]}>Progress Tracking</Text>
               <Switch
                 value={progressTracking}
                 onValueChange={handleProgressTrackingToggle}
-                trackColor={{ false: '#767577', true: currentTheme.primary }}
-                thumbColor={progressTracking ? currentTheme.primary : '#f4f3f4'}
+                trackColor={{ false: currentTheme.mode === 'dark' ? '#444' : '#ccc', true: currentTheme.primary }}
+                thumbColor={progressTracking ? '#fff' : currentTheme.mode === 'dark' ? '#f4f3f4' : '#f4f3f4'}
+                ios_backgroundColor={currentTheme.mode === 'dark' ? '#444' : '#ccc'}
               />
             </View>
           </View>
@@ -189,7 +195,11 @@ export default function Settings() {
 
         {/* Logout Button */}
         <TouchableOpacity
-          style={[styles.logoutButton, { backgroundColor: currentTheme.card, borderColor: '#FF3B30' }]}
+          style={[styles.logoutButton, { 
+            backgroundColor: currentTheme.card, 
+            borderColor: '#FF3B30',
+            marginBottom: 24
+          }]}
           onPress={handleLogout}
         >
           <LogoutIcon />
@@ -241,7 +251,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'transparent',
   },
   settingInfo: {
     flex: 1,

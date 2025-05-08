@@ -43,13 +43,13 @@ export default function CreateTeacherScreen({ navigation }) {
       }
 
       try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists() && userDoc.data().role === 'admin') {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (userDoc.exists() && userDoc.data().role === 'admin') {
           console.log('User verified as admin');
-          setAdminVerified(true);
-        } else {
+            setAdminVerified(true);
+          } else {
           console.log('User is not admin in Firestore:', userDoc.exists() ? userDoc.data().role : 'document does not exist');
           setAdminVerified(false);
           

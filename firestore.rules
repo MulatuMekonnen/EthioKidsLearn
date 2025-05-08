@@ -49,7 +49,7 @@ service cloud.firestore {
 
       // Allow users to create their own document during registration
       allow create: if isAuthenticated() && request.auth.uid == userId && 
-                       request.resource.data.role == 'parent';
+                      request.resource.data.role == 'parent';
       
       // Allow users to read their own document
       allow read: if isOwner(userId);
@@ -59,7 +59,7 @@ service cloud.firestore {
       
       // Allow users to update their own document, but not change their role
       allow update: if isOwner(userId) && 
-                       request.resource.data.role == resource.data.role;
+                      request.resource.data.role == resource.data.role;
 
       // Children subcollection rules
       match /children/{childId} {

@@ -64,7 +64,7 @@ export function AuthProvider({ children }) {
         const userDocRef = doc(db, 'users', cred.user.uid);
         const userDocSnap = await getDoc(userDocRef);
         
-        if (userDocSnap.exists()) {
+      if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
           console.log('User role found:', userData.role);
           setUserRole(userData.role);
@@ -87,7 +87,7 @@ export function AuthProvider({ children }) {
               console.log('Created missing teacher document during login');
             } catch (docCreateError) {
               console.error('Failed to create missing document:', docCreateError);
-            }
+      }
           } else {
             // Default to parent if we can't determine role
             console.log('No role found, defaulting to parent');
@@ -175,11 +175,11 @@ export function AuthProvider({ children }) {
       // Step 2: Create the teacher document in Firestore
       try {
         const teacherData = {
-          email,
+        email,
           displayName: name,
           name: name,
-          role: 'teacher',
-          createdAt: new Date().toISOString(),
+        role: 'teacher',
+        createdAt: new Date().toISOString(),
           createdBy: adminUser.uid
         };
         

@@ -27,9 +27,13 @@ import CreateContentScreen from '../screens/teacher/CreateContentScreen';
 import ChildScores from '../screens/teacher/ChildScores';
 import ScoresByChild from '../screens/teacher/ScoresByChild';
 import QuizScoresScreen from '../screens/teacher/QuizScoresScreen';
+import TeacherProfileScreen from '../screens/teacher/ProfileScreen';
+import StudentReports from '../screens/teacher/StudentReports';
+import StudentProgress from '../screens/teacher/StudentProgress';
 
 // Child Screens
 import LessonsScreen from '../screens/child/LessonsScreen';
+import StudentDashboard from '../screens/child/StudentDashboard';
 import MathLessons from '../screens/child/MathLessons';
 import LearnCount from '../screens/child/math/LearnCount';
 import Addition from '../screens/child/math/Addition';
@@ -109,6 +113,9 @@ export default function AppNavigator() {
                 <Stack.Screen name="CreateContent" component={CreateContentScreen} />
                 <Stack.Screen name="ScoresByChild" component={ScoresByChild} />
                 <Stack.Screen name="QuizScoresScreen" component={QuizScoresScreen} />
+                <Stack.Screen name="StudentReports" component={StudentReports} />
+                <Stack.Screen name="StudentProgress" component={StudentProgress} />
+                <Stack.Screen name="Profile" component={TeacherProfileScreen} />
                 {/* Add child screens for teacher access */}
                 <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
                 <Stack.Screen name="MathLessons" component={MathLessons} />
@@ -164,6 +171,7 @@ export default function AppNavigator() {
             )}
             {userRole === 'child' && (
               <>
+                <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
                 <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
                 <Stack.Screen name="MathLessons" component={MathLessons} />
                 <Stack.Screen name="LearnCount" component={LearnCount} />

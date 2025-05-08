@@ -15,6 +15,8 @@ import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../context/AuthContext';
+import { db } from '../../services/firebase';
+import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
 
 // Subject categories with colors
 const subjects = [
@@ -38,7 +40,9 @@ export default function ProgressReport() {
     categories: {},
     timeSpent: {},
     weeklyActivity: Array(7).fill(0),
+    childProgress: {}
   });
+  const [teacherReports, setTeacherReports] = useState({});
 
   // Get the current week's start date (Sunday)
   const getWeekStartDate = () => {
@@ -77,7 +81,8 @@ export default function ProgressReport() {
           score: Math.floor(Math.random() * 7) + 4, // 4-10 score
           totalQuestions: 10,
           timestamp: date.toISOString(),
-          timeSpentMinutes: Math.floor(Math.random() * 15) + 10 // 10-25 min
+          timeSpentMinutes: Math.floor(Math.random() * 15) + 10, // 10-25 min
+          isDemo: true // Mark as demo data
         });
       }
       
@@ -94,7 +99,8 @@ export default function ProgressReport() {
           score: Math.floor(Math.random() * 7) + 4,
           totalQuestions: 10,
           timestamp: date.toISOString(),
-          timeSpentMinutes: Math.floor(Math.random() * 15) + 10
+          timeSpentMinutes: Math.floor(Math.random() * 15) + 10,
+          isDemo: true // Mark as demo data
         });
       }
       
@@ -111,7 +117,8 @@ export default function ProgressReport() {
           score: Math.floor(Math.random() * 7) + 4,
           totalQuestions: 10,
           timestamp: date.toISOString(),
-          timeSpentMinutes: Math.floor(Math.random() * 15) + 10
+          timeSpentMinutes: Math.floor(Math.random() * 15) + 10,
+          isDemo: true // Mark as demo data
         });
       }
       
@@ -128,7 +135,8 @@ export default function ProgressReport() {
           score: Math.floor(Math.random() * 7) + 4,
           totalQuestions: 10,
           timestamp: date.toISOString(),
-          timeSpentMinutes: Math.floor(Math.random() * 15) + 10
+          timeSpentMinutes: Math.floor(Math.random() * 15) + 10,
+          isDemo: true // Mark as demo data
         });
       }
     });
@@ -150,23 +158,43 @@ export default function ProgressReport() {
       
       setChildData(filteredChildren);
       
-      // Then load or generate quiz results
+      // Then load quiz results
       let resultsJson = await AsyncStorage.getItem('quizResults');
       let results = resultsJson ? JSON.parse(resultsJson) : [];
       
-      // If we have no quiz results or they're empty, generate test data
-      if (!results || results.length === 0) {
-        if (filteredChildren.length > 0) {
-          console.log("No quiz results found, generating test data");
-          results = generateTestData(filteredChildren);
+      // Filter quiz results for only the children of this parent
+      if (filteredChildren.length > 0) {
+        const childIds = filteredChildren.map(child => child.id);
+        
+        // Filter results to only include this parent's children
+        const childResults = results.filter(result => childIds.includes(result.childId));
+        
+        // Separate real quiz results from demo data
+        const realResults = childResults.filter(result => !result.isDemo);
+        
+        // If we have real results, use them; otherwise generate demo data
+        if (realResults.length > 0) {
+          console.log("Using real quiz data, found", realResults.length, "results");
+          results = realResults;
+        } else {
+          // Only generate demo data if we have no real quiz results for these children
+          console.log("No real quiz results found for these children, generating test data");
+          const demoResults = generateTestData(filteredChildren);
           
           // Save the generated data
-          await AsyncStorage.setItem('quizResults', JSON.stringify(results));
+          await AsyncStorage.setItem('quizResults', JSON.stringify([...results, ...demoResults]));
+          
+          // Use the newly generated demo data
+          results = demoResults;
+          
           Alert.alert("Demo Data", "Sample quiz data has been generated for demonstration purposes.");
         }
       }
       
       setQuizResults(results);
+      
+      // Load teacher reports
+      await loadTeacherReports(filteredChildren);
       
       // Now process all the data
       processResultsData(results, filteredChildren);
@@ -175,6 +203,115 @@ export default function ProgressReport() {
       Alert.alert("Error", "Failed to load progress data.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTeacherReports = async (children) => {
+    if (!children || children.length === 0) return;
+    
+    try {
+      // First check if we have cached reports
+      const cachedReportsJson = await AsyncStorage.getItem('teacherReports');
+      let cachedReports = cachedReportsJson ? JSON.parse(cachedReportsJson) : null;
+      
+      if (cachedReports && Object.keys(cachedReports).length > 0) {
+        console.log("Using cached teacher reports");
+        setTeacherReports(cachedReports);
+        return;
+      }
+      
+      // If no cached reports or they're expired, fetch from Firebase
+      console.log("Fetching teacher reports from Firebase");
+      
+      if (!user) {
+        console.log("No authenticated user, skipping Firebase fetch");
+        return;
+      }
+      
+      const childIds = children.map(child => child.id);
+      
+      // Initialize reports structure
+      const reports = {};
+      subjects.forEach(subject => {
+        reports[subject.id] = {};
+        childIds.forEach(childId => {
+          reports[subject.id][childId] = [];
+        });
+      });
+      
+      // Fetch reports from Firebase
+      // First try to get reports directly connected to the parent
+      const parentReportsQuery = query(
+        collection(db, 'reports'),
+        where('parentId', '==', user.uid),
+        orderBy('timestamp', 'desc')
+      );
+      
+      const parentReportsSnapshot = await getDocs(parentReportsQuery);
+      
+      if (!parentReportsSnapshot.empty) {
+        parentReportsSnapshot.forEach(doc => {
+          const reportData = doc.data();
+          const { childId, quizType, report, score, timestamp } = reportData;
+          
+          // Make sure this is a child of this parent
+          if (childIds.includes(childId) && subjects.some(s => s.id === quizType)) {
+            if (!reports[quizType][childId]) {
+              reports[quizType][childId] = [];
+            }
+            
+            reports[quizType][childId].push({
+              id: doc.id,
+              childId,
+              subject: quizType,
+              report,
+              score,
+              timestamp: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString()
+            });
+          }
+        });
+      } else {
+        // If no direct parent reports, try fetching by childIds
+        for (const childId of childIds) {
+          const childReportsQuery = query(
+            collection(db, 'reports'),
+            where('childId', '==', childId),
+            orderBy('timestamp', 'desc')
+          );
+          
+          const childReportsSnapshot = await getDocs(childReportsQuery);
+          
+          if (!childReportsSnapshot.empty) {
+            childReportsSnapshot.forEach(doc => {
+              const reportData = doc.data();
+              const { quizType, report, score, timestamp } = reportData;
+              
+              // Make sure it's a subject we recognize
+              if (subjects.some(s => s.id === quizType)) {
+                if (!reports[quizType][childId]) {
+                  reports[quizType][childId] = [];
+                }
+                
+                reports[quizType][childId].push({
+                  id: doc.id,
+                  childId,
+                  subject: quizType,
+                  report,
+                  score,
+                  timestamp: timestamp ? timestamp.toDate().toISOString() : new Date().toISOString()
+                });
+              }
+            });
+          }
+        }
+      }
+      
+      // Save reports to state and cache them
+      setTeacherReports(reports);
+      await AsyncStorage.setItem('teacherReports', JSON.stringify(reports));
+      
+    } catch (error) {
+      console.error('Error loading teacher reports:', error);
     }
   };
 
@@ -335,7 +472,9 @@ export default function ProgressReport() {
         <Text style={[styles.scoreLabel, { color: currentTheme?.text || '#333' }]}>
           Test {index + 1} - {date}
         </Text>
-        <View style={[styles.scoreBarBackground, { backgroundColor: currentTheme?.border || '#e0e0e0' }]}>
+        <View style={[styles.scoreBarBackground, { 
+          backgroundColor: currentTheme?.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+        }]}>
           <View
             style={[
               styles.scoreBar,
@@ -362,7 +501,7 @@ export default function ProgressReport() {
           const height = (activity / maxActivity) * 100;
           return (
             <View style={styles.activityDayContainer} key={index}>
-              <View style={styles.activityBarContainer}>
+              <View style={[styles.activityBarContainer, { backgroundColor: currentTheme?.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }]}>
                 <View
                   style={[
                     styles.activityBar,
@@ -410,8 +549,18 @@ export default function ProgressReport() {
       <View style={styles.subjectDistributionContainer}>
         {filteredCounts.map((subject, index) => (
           <View key={index} style={styles.subjectDistributionItem}>
-            <View style={[styles.subjectDistributionBar, { backgroundColor: subject.color }]}>
-              <Text style={[styles.subjectDistributionText, { color: subject.legendFontColor }]}>
+            <View style={[styles.subjectDistributionBar, { 
+              backgroundColor: subject.color,
+              minWidth: 80, // Ensure the bar is wide enough to show text
+              paddingHorizontal: 8, // Add padding for text
+              paddingVertical: 4 // Add padding for text
+            }]}>
+              <Text style={[styles.subjectDistributionText, { 
+                color: 'white', // Always use white text on colored background
+                textShadowColor: 'rgba(0, 0, 0, 0.3)',
+                textShadowOffset: { width: 0, height: 1 },
+                textShadowRadius: 2,
+              }]}>
                 {subject.name}
               </Text>
             </View>
@@ -454,7 +603,12 @@ export default function ProgressReport() {
           return (
             <View 
               key={index} 
-              style={[styles.childCard, { backgroundColor: currentTheme?.background || '#f5f5f5', borderColor: currentTheme?.border || '#e0e0e0' }]}
+              style={[styles.childCard, { 
+                backgroundColor: currentTheme?.card || '#fff', 
+                borderColor: currentTheme?.border || '#e0e0e0',
+                shadowColor: currentTheme?.mode === 'dark' ? '#000' : '#000',
+                shadowOpacity: currentTheme?.mode === 'dark' ? 0.2 : 0.1,
+              }]}
             >
               <View style={styles.childHeader}>
                 <View style={[styles.childAvatar, { backgroundColor: getSubjectColor(selectedSubject) }]}>
@@ -478,7 +632,9 @@ export default function ProgressReport() {
                     <Text style={[styles.subjectScoreName, { color: currentTheme?.text || '#333' }]}>
                       {subject.name}
                     </Text>
-                    <View style={styles.subjectScoreBarContainer}>
+                    <View style={[styles.subjectScoreBarContainer, {
+                      backgroundColor: currentTheme?.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'
+                    }]}>
                       <View 
                         style={[
                           styles.subjectScoreBar,
@@ -492,6 +648,64 @@ export default function ProgressReport() {
                   </View>
                 ))}
               </View>
+            </View>
+          );
+        })}
+      </View>
+    );
+  };
+
+  // Add a new render function for teacher reports
+  const renderTeacherReports = () => {
+    const childReports = teacherReports[selectedSubject] || {};
+    const hasAnyReports = Object.values(childReports).some(reports => reports && reports.length > 0);
+    
+    if (!hasAnyReports) {
+      return (
+        <View style={[styles.emptyReportsContainer, { backgroundColor: currentTheme?.cardAlt || '#f5f5f5' }]}>
+          <Text style={[styles.emptyReportsText, { color: currentTheme?.textSecondary || '#666' }]}>
+            No teacher reports available for this subject
+          </Text>
+        </View>
+      );
+    }
+    
+    return (
+      <View style={styles.teacherReportsContainer}>
+        {Object.entries(childReports).map(([childId, reports]) => {
+          if (!reports || reports.length === 0) return null;
+          
+          // Find child name
+          const child = childData.find(c => c.id === childId);
+          if (!child) return null;
+          
+          return (
+            <View key={childId} style={[styles.childReportCard, { 
+              backgroundColor: currentTheme?.cardAlt || '#f9f9f9',
+              borderColor: currentTheme?.border || '#e0e0e0'
+            }]}>
+              <Text style={[styles.childReportName, { color: currentTheme?.text || '#333' }]}>
+                {child.name}
+              </Text>
+              
+              {reports.map((report, idx) => (
+                <View key={report.id || idx} style={styles.reportEntry}>
+                  <View style={styles.reportHeader}>
+                    <Text style={[styles.reportDate, { color: currentTheme?.textSecondary || '#666' }]}>
+                      {report.timestamp ? new Date(report.timestamp).toLocaleDateString() : 'No date'}
+                    </Text>
+                    {report.score && (
+                      <View style={[styles.scoreChip, { backgroundColor: getScoreColor(report.score) }]}>
+                        <Text style={styles.scoreText}>{report.score}%</Text>
+                      </View>
+                    )}
+                  </View>
+                  
+                  <Text style={[styles.reportText, { color: currentTheme?.text || '#333' }]}>
+                    {report.report || 'No details provided'}
+                  </Text>
+                </View>
+              ))}
             </View>
           );
         })}
@@ -529,31 +743,20 @@ export default function ProgressReport() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme?.background || '#f5f5f5' }]}>
       <View style={[styles.header, { backgroundColor: currentTheme?.primary || '#2196F3' }]}>
-      <TouchableOpacity
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-      >
+        >
           <Ionicons name="arrow-back" size={24} color="#fff" />
-      </TouchableOpacity>
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Progress Report</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={async () => {
             setLoading(true);
             try {
-              // Clear existing quiz results
-              await AsyncStorage.removeItem('quizResults');
-              // Generate new test data
-              const newResults = generateTestData(childData);
-              // Save the new data
-              await AsyncStorage.setItem('quizResults', JSON.stringify(newResults));
-              // Process the new data
-              processResultsData(newResults, childData);
-              setQuizResults(newResults);
-              Alert.alert("Success", "New demo data has been generated.");
-            } catch (error) {
-              console.error('Error regenerating data:', error);
-              Alert.alert("Error", "Failed to regenerate demo data.");
+              // Reload real data
+              await loadData();
             } finally {
               setLoading(false);
             }
@@ -566,6 +769,14 @@ export default function ProgressReport() {
       <ScrollView style={styles.content}>
         <View style={styles.subjectTabsContainer}>
           {subjects.map(subject => renderSubjectTab(subject))}
+        </View>
+
+        <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Teacher Reports</Text>
+          <Text style={[styles.sectionSubtitle, { color: currentTheme?.textSecondary || '#666' }]}>
+            Feedback from teachers for {subjects.find(s => s.id === selectedSubject)?.name}
+          </Text>
+          {renderTeacherReports()}
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
@@ -622,7 +833,7 @@ export default function ProgressReport() {
           <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>Performance by child</Text>
           {renderChildProgress()}
         </View>
-    </ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -882,5 +1093,58 @@ const styles = StyleSheet.create({
   subjectDistributionValue: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  teacherReportsContainer: {
+    marginTop: 12,
+  },
+  childReportCard: {
+    marginBottom: 12,
+    borderRadius: 8,
+    padding: 12,
+    borderWidth: 1,
+  },
+  childReportName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+  },
+  reportEntry: {
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.05)',
+  },
+  reportHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  reportDate: {
+    fontSize: 12,
+  },
+  scoreChip: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
+  scoreText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  reportText: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  emptyReportsContainer: {
+    padding: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  emptyReportsText: {
+    fontSize: 14,
+    textAlign: 'center',
   },
 });
