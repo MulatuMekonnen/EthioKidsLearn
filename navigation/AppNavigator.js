@@ -22,6 +22,7 @@ import Profile from '../screens/parent/Profile';
 import CreateTeacherScreen from '../screens/admin/CreateTeacherScreen';
 import ContentManagementScreen from '../screens/admin/ContentManagementScreen';
 import UserManagementScreen from '../screens/admin/UserManagementScreen';
+import ProfileScreen from '../screens/admin/ProfileScreen';
 import CreateContentScreen from '../screens/teacher/CreateContentScreen';
 import ChildScores from '../screens/teacher/ChildScores';
 import ScoresByChild from '../screens/teacher/ScoresByChild';
@@ -99,6 +100,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
                 <Stack.Screen name="ManageUsers" component={UserManagementScreen} />
                 <Stack.Screen name="ManageContent" component={ContentManagementScreen} />
+                <Stack.Screen name="Profile" component={ProfileScreen} />
               </>
             )}
             {userRole === 'teacher' && (
