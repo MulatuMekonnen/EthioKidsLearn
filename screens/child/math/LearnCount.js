@@ -71,40 +71,40 @@ export default function LearnToCountScreen() {
   }
 
   const NumberTile = ({ number, color, borderColor, textColor, delay, sound }) => {
-    const handlePress = () => {
+  const handlePress = () => {
       playSound(sound);
-    };
+  };
 
-    return (
-      <Animatable.View
-        animation="zoomIn"
-        delay={delay}
-        style={styles.tileWrapper}
-      >
+  return (
+    <Animatable.View
+      animation="zoomIn"
+      delay={delay}
+      style={styles.tileWrapper}
+    >
         <TouchableWithoutFeedback onPress={handlePress}>
           <View
-            style={[
-              styles.tile,
-              { 
-                backgroundColor: color,
+        style={[
+          styles.tile,
+          { 
+            backgroundColor: color,
                 borderColor: borderColor || color
-              }
-            ]}
-          >
-            <Text style={[
-              styles.number,
-              { color: textColor || '#000000' }
-            ]}>
-              {number}
-            </Text>
-            <View style={styles.soundIcon}>
-              <Ionicons name="volume-high" size={20} color="#FFF" />
-            </View>
+          }
+        ]}
+      >
+        <Text style={[
+          styles.number,
+          { color: textColor || '#000000' }
+        ]}>
+          {number}
+        </Text>
+          <View style={styles.soundIcon}>
+            <Ionicons name="volume-high" size={20} color="#FFF" />
+          </View>
           </View>
         </TouchableWithoutFeedback>
-      </Animatable.View>
-    );
-  };
+    </Animatable.View>
+  );
+};
 
   return (
     <SafeAreaView style={styles.container}>
@@ -133,7 +133,7 @@ export default function LearnToCountScreen() {
           onPress={() => navigation.goBack()}
         >
           <View style={styles.backButton}>
-            <Text style={styles.backButtonText}>Back</Text>
+          <Text style={styles.backButtonText}>Back</Text>
           </View>
         </TouchableWithoutFeedback>
       </Animatable.View>

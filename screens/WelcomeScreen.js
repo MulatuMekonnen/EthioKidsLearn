@@ -46,29 +46,29 @@ const WelcomeScreen = ({ navigation }) => {
   const { translate } = useLanguage();
   
   return (
-    <SafeAreaView style={styles.container}>
+  <SafeAreaView style={styles.container}>
       <LanguageSelector isDark={true} />
       
-      <WelcomeText />
+    <WelcomeText />
 
-      <Animatable.View animation="fadeIn" delay={800} style={styles.illustrationContainer}>
-        <Image
-          source={require('../assets/images/children-reading.png')}
-          style={styles.illustration}
-          resizeMode="contain"
-        />
-      </Animatable.View>
+    <Animatable.View animation="fadeIn" delay={800} style={styles.illustrationContainer}>
+      <Image
+        source={require('../assets/images/children-reading.png')}
+        style={styles.illustration}
+        resizeMode="contain"
+      />
+    </Animatable.View>
 
-      <Animatable.View animation="fadeInUp" delay={1200} style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.loginButton}
-          onPress={() => navigation.navigate('Login')}
-        >
+    <Animatable.View animation="fadeInUp" delay={1200} style={styles.buttonContainer}>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate('Login')}
+      >
           <Text style={styles.buttonText}>{translate('auth.login')}</Text>
-        </TouchableOpacity>
-      </Animatable.View>
-    </SafeAreaView>
-  );
+      </TouchableOpacity>
+    </Animatable.View>
+  </SafeAreaView>
+);
 };
 
 const styles = StyleSheet.create({

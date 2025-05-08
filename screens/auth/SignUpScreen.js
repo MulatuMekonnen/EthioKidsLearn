@@ -199,7 +199,7 @@ export default function SignUpScreen({ navigation }) {
             
             <View style={styles.linkContainer}>
               <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.linkText}>
+              <Text style={styles.linkText}>
                {translate('auth.haveAccount')}
                 </Text>
               </TouchableOpacity>

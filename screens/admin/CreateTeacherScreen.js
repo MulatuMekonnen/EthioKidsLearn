@@ -12,13 +12,15 @@ import {
   StatusBar,
   KeyboardAvoidingView,
   Platform,
-  ScrollView
+  ScrollView,
+  Linking
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { getDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../../services/firebase';
+import { signOut } from 'firebase/auth';
 
 export default function CreateTeacherScreen({ navigation }) {
   const { createTeacherAccount, userRole, user } = useAuth();
@@ -29,28 +31,68 @@ export default function CreateTeacherScreen({ navigation }) {
   const [loading, setLoading] = useState(false);
   const [adminVerified, setAdminVerified] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [permissionError, setPermissionError] = useState(false);
 
   // Check admin status directly from Firestore
   useEffect(() => {
     const verifyAdmin = async () => {
+      if (!user || !user.uid) {
+        console.log('No user logged in');
+        setAdminVerified(false);
+        return;
+      }
+
       try {
-        if (user && user.uid) {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists() && userDoc.data().role === 'admin') {
+          console.log('User verified as admin');
+          setAdminVerified(true);
+        } else {
+          console.log('User is not admin in Firestore:', userDoc.exists() ? userDoc.data().role : 'document does not exist');
+          setAdminVerified(false);
           
-          if (userDoc.exists() && userDoc.data().role === 'admin') {
-            setAdminVerified(true);
-          } else {
-            console.log('User is not admin in Firestore:', userDoc.data()?.role);
+          // If we're on this screen but not an admin, show alert and go back
+          if (!userDoc.exists() || userDoc.data().role !== 'admin') {
+            Alert.alert(
+              'Permission Denied',
+              'You do not have administrator privileges to create teacher accounts.',
+              [{ text: 'OK', onPress: () => navigation.goBack() }]
+            );
           }
         }
       } catch (error) {
         console.error('Error verifying admin status:', error);
+        setAdminVerified(false);
+        Alert.alert('Error', 'Failed to verify admin permissions: ' + error.message);
       }
     };
     
     verifyAdmin();
-  }, [user]);
+  }, [user, navigation]);
+
+  const showSuccessWithCredentials = (teacherEmail, teacherPassword) => {
+    Alert.alert(
+      'Teacher Account Created',
+      `The account has been created successfully.\n\nTeacher Email: ${teacherEmail}\nPassword: ${teacherPassword}\n\nPlease share these credentials with the teacher.`,
+      [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Reset form fields
+            setName('');
+            setEmail('');
+            setPassword('');
+            
+            // Navigate back to manage users
+            navigation.navigate('ManageUsers');
+          }
+        }
+      ],
+      { cancelable: false }
+    );
+  };
 
   const handleCreate = async () => {
     if (!name || !email || !password) {
@@ -65,41 +107,57 @@ export default function CreateTeacherScreen({ navigation }) {
       return Alert.alert('Error', 'Please enter a valid email address');
     }
     
-    if (!adminVerified) {
-      // Re-verify admin status directly
-      try {
-        const userDocRef = doc(db, 'users', user.uid);
-        const userDoc = await getDoc(userDocRef);
-        
-        if (!userDoc.exists() || userDoc.data().role !== 'admin') {
-          return Alert.alert('Error', `Only administrators can create teacher accounts.\nYour role: ${userDoc.exists() ? userDoc.data().role : 'unknown'}`);
-        }
-      } catch (error) {
-        return Alert.alert('Error', `Failed to verify admin permissions: ${error.message}`);
-      }
-    }
-    
     setLoading(true);
+    setPermissionError(false);
+    
     try {
-      // Create a new user in Firebase Authentication
-      await createTeacherAccount(email, password, name);
+      // Create the teacher account
+      const teacherUser = await createTeacherAccount(email, password, name);
+      console.log('Teacher account created successfully with UID:', teacherUser.uid);
       
-      Alert.alert(
-        'Success',
-        'Teacher account created',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('ManageUsers'),
-          },
-        ],
-        { cancelable: false }
-      );
+      // Show success message with credentials
+      showSuccessWithCredentials(email, password);
     } catch (err) {
-      Alert.alert('Failed', err.message || 'An error occurred while creating the account');
+      console.error('Error creating teacher account:', err);
+      
+      // Check for permissions error specifically
+      if (err.message && err.message.includes('permission')) {
+        setPermissionError(true);
+      }
+      
+      // More specific error handling
+      let errorMessage = 'An error occurred while creating the account';
+      
+      if (err.message) {
+        if (err.message.includes('permissions') || err.message.includes('Unauthorized')) {
+          errorMessage = 'Firebase security rules are preventing document creation. Please update your rules to allow admin access.';
+        } else if (err.message.includes('email-already-in-use')) {
+          errorMessage = 'This email is already registered. Please use a different email.';
+        } else if (err.message.includes('network-request-failed')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        } else {
+          errorMessage = err.message;
+        }
+      }
+      
+      Alert.alert('Failed', errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Function to help guide admin to fix Firebase rules
+  const openFirebaseConsole = () => {
+    Alert.alert(
+      'Firebase Console',
+      'To fix permission issues, update your Firestore rules in the Firebase Console.',
+      [
+        {
+          text: 'OK',
+          onPress: () => {}
+        }
+      ]
+    );
   };
 
   const togglePasswordVisibility = () => {
@@ -288,6 +346,36 @@ export default function CreateTeacherScreen({ navigation }) {
                 New teachers will be able to login immediately with these credentials
               </Text>
             </View>
+
+            {permissionError && (
+              <View style={styles.errorCard}>
+                <View style={styles.errorIconContainer}>
+                  <Svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                    <Circle cx="12" cy="12" r="10" stroke="#FF3B30" strokeWidth="2" />
+                    <Path d="M12 8V13" stroke="#FF3B30" strokeWidth="2" strokeLinecap="round" />
+                    <Circle cx="12" cy="16" r="1" fill="#FF3B30" />
+                  </Svg>
+                </View>
+                <Text style={styles.errorTitle}>Firebase Permission Error</Text>
+                <Text style={styles.errorText}>
+                  Firebase security rules are preventing teacher account creation. Please update your Firestore rules in the Firebase Console to allow admins to create user documents:
+                  {"\n\n"}
+                  1. Open the Firebase Console
+                  {"\n"}
+                  2. Navigate to Firestore {'>>'} Rules
+                  {"\n"}
+                  3. Update the rule for /users/{'{'}userId{'}'} to allow admins to create documents
+                  {"\n\n"}
+                  Rule example: allow create: if isAdmin() || (isAuthenticated() && request.auth.uid == userId);
+                </Text>
+                <TouchableOpacity 
+                  style={styles.fixButton}
+                  onPress={openFirebaseConsole}
+                >
+                  <Text style={styles.fixButtonText}>Open Firebase Console</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -408,5 +496,42 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginLeft: 8,
     flex: 1,
+  },
+  errorCard: {
+    marginTop: 30,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: '#FF3B30',
+    borderRadius: 12,
+    backgroundColor: '#FFF1F0',
+  },
+  errorIconContainer: {
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#FF3B30',
+    marginBottom: 8,
+    textAlign: 'center',
+  },
+  errorText: {
+    fontSize: 14,
+    color: '#FF3B30',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  fixButton: {
+    backgroundColor: '#FF3B30',
+    padding: 12,
+    borderRadius: 8,
+    alignSelf: 'center',
+    paddingHorizontal: 20,
+  },
+  fixButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

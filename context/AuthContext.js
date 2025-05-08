@@ -7,6 +7,7 @@ import {
   signOut,
   sendPasswordResetEmail,
   updateProfile,
+  deleteUser
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 
@@ -54,12 +55,61 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     setLoading(true);
     try {
+      // Log the user in with Firebase Authentication
       const cred = await signInWithEmailAndPassword(auth, email, password);
-      const userDocSnap = await getDoc(doc(db, 'users', cred.user.uid));
-      if (userDocSnap.exists()) {
-        setUserRole(userDocSnap.data().role);
+      console.log('User logged in:', cred.user.uid);
+      
+      try {
+        // Try to get the user document
+        const userDocRef = doc(db, 'users', cred.user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        
+        if (userDocSnap.exists()) {
+          const userData = userDocSnap.data();
+          console.log('User role found:', userData.role);
+          setUserRole(userData.role);
+        } else {
+          console.warn('User document not found in Firestore. Checking email domain for role determination...');
+          
+          // Fallback: Try to determine role from email if document doesn't exist
+          // This could be useful if Firestore document creation failed but auth succeeded
+          if (cred.user.email.includes('@teacher.')) {
+            console.log('Setting role to teacher based on email domain');
+            setUserRole('teacher');
+            
+            // Try to create the missing document
+            try {
+              await setDoc(userDocRef, {
+                email: cred.user.email,
+                role: 'teacher',
+                createdAt: new Date().toISOString()
+              }, { merge: true });
+              console.log('Created missing teacher document during login');
+            } catch (docCreateError) {
+              console.error('Failed to create missing document:', docCreateError);
+            }
+          } else {
+            // Default to parent if we can't determine role
+            console.log('No role found, defaulting to parent');
+            setUserRole('parent');
+          }
+        }
+        
+        // Set the user state regardless
+        setUser(cred.user);
+        
+        return cred.user;
+      } catch (firestoreError) {
+        console.error('Error fetching user document during login:', firestoreError);
+        // Still set the user even if we can't get the document
+        // This ensures they at least log in to the app
+        setUser(cred.user);
+        setUserRole('unknown');
+        return cred.user;
       }
-      return cred.user;
+    } catch (authError) {
+      console.error('Login authentication error:', authError);
+      throw authError;
     } finally {
       setLoading(false);
     }
@@ -107,20 +157,79 @@ export function AuthProvider({ children }) {
 
   // Admin-created teacher (collects name)
   const createTeacherAccount = async (email, password, name) => {
-    if (userRole !== 'admin') {
-      throw new Error('Unauthorized: Only admins can create teachers');
+    if (!user) {
+      throw new Error('Not authenticated');
     }
+    
     setLoading(true);
+    let createdUserCred = null;
+    
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
-      await setDoc(doc(db, 'users', cred.user.uid), {
-        email,
-        name,
-        role: 'teacher',
-        createdAt: new Date().toISOString(),
-        assignedClasses: [],
-      });
-      return cred.user;
+      // Step 1: Create the user in Firebase Auth
+      createdUserCred = await createUserWithEmailAndPassword(auth, email, password);
+      console.log('Teacher auth account created:', createdUserCred.user.uid);
+      
+      // Remember the current user to switch back later
+      const adminUser = auth.currentUser;
+      
+      // Step 2: Create the teacher document in Firestore
+      try {
+        const teacherData = {
+          email,
+          displayName: name,
+          name: name,
+          role: 'teacher',
+          createdAt: new Date().toISOString(),
+          createdBy: adminUser.uid
+        };
+        
+        console.log('Creating teacher document with data:', teacherData);
+        
+        // Set the document with merge option
+        await setDoc(doc(db, 'users', createdUserCred.user.uid), teacherData, { merge: true });
+        console.log('Teacher document created successfully in Firestore');
+        
+        // Step 3: Update Auth profile
+        await updateProfile(createdUserCred.user, { displayName: name });
+        console.log('Auth profile updated with displayName');
+        
+        // Step 4: Handle auth state if needed
+        if (auth.currentUser.uid !== adminUser.uid) {
+          console.log('Auth state changed, signing out to restore admin session');
+          await signOut(auth);
+        }
+        
+        return createdUserCred.user;
+      } catch (firestoreError) {
+        console.error('Failed to create teacher Firestore document:', firestoreError);
+        
+        // If we're using open rules, we shouldn't get permission errors
+        // But let's keep some retry logic just in case
+        try {
+          console.log('Attempting with minimal document');
+          await setDoc(doc(db, 'users', createdUserCred.user.uid), {
+            email,
+            role: 'teacher',
+          });
+          console.log('Created minimal teacher document');
+          return createdUserCred.user;
+        } catch (retryError) {
+          console.error('All attempts to create teacher document failed:', retryError);
+          
+          // Try to delete the orphaned auth account
+          try {
+            await deleteUser(createdUserCred.user);
+            console.log('Deleted orphaned auth user');
+          } catch (cleanupError) {
+            console.error('Failed to delete orphaned user:', cleanupError);
+          }
+          
+          throw retryError;
+        }
+      }
+    } catch (error) {
+      console.error('Error in teacher account creation:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
