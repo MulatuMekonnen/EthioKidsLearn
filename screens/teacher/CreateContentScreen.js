@@ -14,6 +14,8 @@ import {
   Platform,
   TouchableOpacity,
   Image,
+  PermissionsAndroid,
+  Linking,
 } from 'react-native';
 import * as DocumentPicker from 'expo-document-picker';
 import { Picker } from '@react-native-picker/picker';
@@ -22,6 +24,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { serverTimestamp, addDoc, collection } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import { uploadToCloudinary } from '../../services/cloudinary';
+import * as ImagePicker from 'expo-image-picker';
+import * as MediaLibrary from 'expo-media-library';
+import { Video } from 'expo-av';
+import { useContent } from '../../context/ContentContext';
 
 const CONTENT_TYPES = {
   DOCUMENT: 'document',
@@ -32,6 +38,7 @@ const CONTENT_TYPES = {
 
 export default function CreateContentScreen({ navigation }) {
   const { user } = useAuth();
+  const { createContent } = useContent();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -50,50 +57,163 @@ export default function CreateContentScreen({ navigation }) {
     console.log('Component mounted, content type initialized to:', contentType);
   }, []);
 
+  // Request storage permission for Android
+  const requestStoragePermission = async () => {
+    if (Platform.OS !== 'android') return true;
+    
+    try {
+      const granted = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE
+      ]);
+
+      const allGranted = Object.values(granted).every(
+        permission => permission === PermissionsAndroid.RESULTS.GRANTED
+      );
+
+      if (!allGranted) {
+        Alert.alert(
+          'Permission Required',
+          'Storage permission is required to select files. Please grant permission in Settings.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { 
+              text: 'Open Settings', 
+              onPress: () => {
+                if (Platform.OS === 'android') {
+                  Linking.openSettings();
+                }
+              }
+            }
+          ]
+        );
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.warn('Permission request error:', err);
+      return false;
+    }
+  };
+
   // Pick file based on content type
   const pickFile = async () => {
     try {
-      console.log(`Picking file for content type: ${contentType}`);
-      let fileTypeOptions;
-      
-      switch (contentType) {
-        case 'video':
-          console.log('Selecting video file');
-          fileTypeOptions = { type: ['video/*'] };
-          break;
-        case 'audio':
-          console.log('Selecting audio file');
-          fileTypeOptions = { type: ['audio/*'] };
-          break;
-        case 'image':
-          console.log('Selecting image file');
-          fileTypeOptions = { type: ['image/*'] };
-          break;
-        case 'document':
-        default:
-          console.log('Selecting document file');
-          fileTypeOptions = { 
-            type: [
-              'application/pdf', 
-              'application/msword',
-              'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-              'application/vnd.ms-powerpoint',
-              'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-              'text/plain'
-            ] 
-          };
+      // Request permission first
+      const hasPermission = await requestStoragePermission();
+      if (!hasPermission) {
+        return;
       }
 
-      const res = await DocumentPicker.pickSingle(fileTypeOptions);
-      console.log('File selected:', res.name, res.type);
-      setFileInfo(res);
-    } catch (err) {
-      if (!DocumentPicker.isCancel(err)) {
-        console.error('DocumentPicker Error:', err);
-        Alert.alert('Error', 'Could not pick file');
+      console.log(`Picking file for content type: ${contentType}`);
+      
+      let result;
+      
+      if (contentType === 'image') {
+        // Use ImagePicker for images
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 1,
+        });
+
+        if (!result.canceled && result.assets && result.assets[0]) {
+          const asset = result.assets[0];
+          setFileInfo({
+            uri: asset.uri,
+            name: asset.uri.split('/').pop(),
+            type: 'image/jpeg',
+            size: asset.fileSize || 0
+          });
+        }
+      } else if (contentType === 'video') {
+        // Use DocumentPicker for videos
+        console.log('Opening video picker...');
+        try {
+          result = await DocumentPicker.getDocumentAsync({
+            type: ['video/*'],
+            copyToCacheDirectory: true,
+            presentationStyle: 'fullScreen'
+          });
+          console.log('Video picker result:', result);
+
+          if (!result.canceled && result.assets && result.assets[0]) {
+            const asset = result.assets[0];
+            const fileInfo = {
+              uri: asset.uri,
+              name: asset.name,
+              type: asset.mimeType,
+              size: asset.size
+            };
+            console.log('Setting video file info:', fileInfo);
+            setFileInfo(fileInfo);
+          }
+        } catch (pickerError) {
+          if (pickerError.code === 'E_DOCUMENT_PICKER_CANCELED') {
+            console.log('User cancelled video picker');
+          } else {
+            console.error('Video picker error:', pickerError);
+            Alert.alert('Error', 'Failed to pick video file. Please try again.');
+          }
+        }
+      } else if (contentType === 'audio') {
+        // Use DocumentPicker for audio
+        console.log('Opening audio picker...');
+        try {
+          result = await DocumentPicker.getDocumentAsync({
+            type: ['audio/*'],
+            copyToCacheDirectory: true,
+            presentationStyle: 'fullScreen'
+          });
+          console.log('Audio picker result:', result);
+
+          if (result.type === 'success') {
+            setFileInfo({
+              uri: result.uri,
+              name: result.name,
+              type: result.mimeType,
+              size: result.size
+            });
+          }
+        } catch (pickerError) {
+          if (pickerError.code === 'E_DOCUMENT_PICKER_CANCELED') {
+            console.log('User cancelled audio picker');
+          } else {
+            console.error('Audio picker error:', pickerError);
+            Alert.alert('Error', 'Failed to pick audio file. Please try again.');
+          }
+        }
       } else {
-        console.log('Document picking cancelled by user');
+        // Use DocumentPicker for documents
+        console.log('Opening document picker...');
+        try {
+          result = await DocumentPicker.getDocumentAsync({
+            type: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+            copyToCacheDirectory: true,
+            presentationStyle: 'fullScreen'
+          });
+          console.log('Document picker result:', result);
+
+          if (result.type === 'success') {
+            setFileInfo({
+              uri: result.uri,
+              name: result.name,
+              type: result.mimeType,
+              size: result.size
+            });
+          }
+        } catch (pickerError) {
+          if (pickerError.code === 'E_DOCUMENT_PICKER_CANCELED') {
+            console.log('User cancelled document picker');
+          } else {
+            console.error('Document picker error:', pickerError);
+            Alert.alert('Error', 'Failed to pick document. Please try again.');
+          }
+        }
       }
+    } catch (error) {
+      console.error('Error in pickFile:', error);
+      Alert.alert('Error', 'Failed to pick file. Please try again.');
     }
   };
 
@@ -124,7 +244,7 @@ export default function CreateContentScreen({ navigation }) {
       
       setProgress(70);
       
-      // 2. Save metadata to Firebase
+      // 2. Save metadata to Firebase using ContentContext
       const contentData = {
         title,
         description,
@@ -140,12 +260,10 @@ export default function CreateContentScreen({ navigation }) {
         createdBy: user.uid,
         createdByName: user.displayName || user.email,
         status: 'pending', // Set as pending for admin approval
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
       };
       
-      // Add to content collection
-      const docRef = await addDoc(collection(db, 'content'), contentData);
+      console.log('Creating content with data:', contentData);
+      await createContent(contentData);
       setProgress(100);
       
       Alert.alert(

@@ -10,6 +10,11 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import ChildLoginScreen from '../screens/auth/ChildLoginScreen';
 
+// Content Viewer Screens
+import ImageViewer from '../screens/child/ImageViewer';
+import VideoPlayer from '../screens/child/VideoPlayer';
+import DocumentViewer from '../screens/child/DocumentViewer';
+
 // Role-based Screens
 import AdminPanel from '../screens/admin/AdminPanel';
 import TeacherHome from '../screens/teacher/TeacherHome';
@@ -52,6 +57,7 @@ import AmharicLessonsScreen from '../screens/child/AmharicLessonsScreen';
 import OromoLessonScreen from '../screens/child/OromoLessonScreen';
 import AnimalSoundsScreen from '../screens/child/AnimalSoundsScreen';
 import TimeNavigationScreen from '../screens/child/TimeNavigationScreen';
+import ContentsScreen from '../screens/child/ContentsScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -116,6 +122,10 @@ export default function AppNavigator() {
                 <Stack.Screen name="StudentReports" component={StudentReports} />
                 <Stack.Screen name="StudentProgress" component={StudentProgress} />
                 <Stack.Screen name="Profile" component={TeacherProfileScreen} />
+                <Stack.Screen name="ContentsScreen" component={ContentsScreen} />
+                <Stack.Screen name="ImageViewer" component={ImageViewer} />
+                <Stack.Screen name="VideoPlayer" component={VideoPlayer} />
+                <Stack.Screen name="DocumentViewer" component={DocumentViewer} />
                 {/* Add child screens for teacher access */}
                 <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
                 <Stack.Screen name="MathLessons" component={MathLessons} />
@@ -147,6 +157,10 @@ export default function AppNavigator() {
                 <Stack.Screen name="ChildProgress" component={ChildProgress} />
                 <Stack.Screen name="Settings" component={Settings} />
                 <Stack.Screen name="ChildLogin" component={ChildLoginScreen} />
+                <Stack.Screen name="ContentsScreen" component={ContentsScreen} />
+                <Stack.Screen name="ImageViewer" component={ImageViewer} />
+                <Stack.Screen name="VideoPlayer" component={VideoPlayer} />
+                <Stack.Screen name="DocumentViewer" component={DocumentViewer} />
                 {/* Child Screens accessible from Parent */}
                 <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
                 <Stack.Screen name="MathLessons" component={MathLessons} />
@@ -173,6 +187,10 @@ export default function AppNavigator() {
               <>
                 <Stack.Screen name="StudentDashboard" component={StudentDashboard} />
                 <Stack.Screen name="LessonsScreen" component={LessonsScreen} />
+                <Stack.Screen name="ContentsScreen" component={ContentsScreen} />
+                <Stack.Screen name="ImageViewer" component={ImageViewer} />
+                <Stack.Screen name="VideoPlayer" component={VideoPlayer} />
+                <Stack.Screen name="DocumentViewer" component={DocumentViewer} />
                 <Stack.Screen name="MathLessons" component={MathLessons} />
                 <Stack.Screen name="LearnCount" component={LearnCount} />
                 <Stack.Screen name="Addition" component={Addition} />

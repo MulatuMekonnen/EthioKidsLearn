@@ -59,6 +59,15 @@ const EnglishLessons = () => {
       screen: 'EnglishQuiz',
       color: '#2196F3',
       description: 'Test your English knowledge with fun and interactive quizzes.'
+    },
+    {
+      id: 7,
+      title: 'English Content',
+      icon: 'library-outline',
+      screen: 'ContentsScreen',
+      color: '#9C27B0',
+      description: 'View and download approved English content from teachers.',
+      params: { category: 'english' }
     }
   ];
 
@@ -87,7 +96,7 @@ const EnglishLessons = () => {
             borderWidth: isDarkMode ? 1 : 0,
           }
         ]}
-        onPress={() => navigation.navigate(topic.screen, { childId, childName })}
+        onPress={() => navigation.navigate(topic.screen, topic.params || { childId, childName })}
         activeOpacity={0.7}
       >
         <View style={[styles.cardContent, { borderLeftColor: topicColor, borderLeftWidth: 5 }]}>

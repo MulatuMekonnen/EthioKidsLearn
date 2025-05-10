@@ -8,32 +8,44 @@ const cloudinaryConfig = {
   apiSecret: '' // Keep this empty for client-side code for security
 };
 
-// Function to upload image to Cloudinary
-export const uploadToCloudinary = async (uri) => {
+// Function to upload file to Cloudinary
+export const uploadToCloudinary = async (uri, options = {}) => {
   try {
-    // First convert URI to base64
-    const response = await fetch(uri);
-    const blob = await response.blob();
+    // Get the file extension from the URI
+    const fileExtension = uri.split('.').pop().toLowerCase();
     
-    const base64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(blob);
-      reader.onloadend = () => {
-        const base64data = reader.result;
-        resolve(base64data);
-      };
-      reader.onerror = (error) => reject(error);
-    });
-    
+    // Determine resource type based on file extension or options
+    let resourceType = 'auto';
+    if (options.resource_type) {
+      resourceType = options.resource_type;
+    } else if (['mp4', 'mov', 'avi', 'wmv'].includes(fileExtension)) {
+      resourceType = 'video';
+    } else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+      resourceType = 'image';
+    }
+
     // Create form data for upload
     const formData = new FormData();
-    formData.append('file', base64);
-    formData.append('upload_preset', 'ethiokidslearn'); // Updated to match your preset name
+    
+    // Append the file
+    formData.append('file', {
+      uri: uri,
+      type: `application/octet-stream`,
+      name: `upload.${fileExtension}`
+    });
+    
+    // Append other parameters
+    formData.append('upload_preset', 'ethiokidslearn');
     formData.append('cloud_name', cloudinaryConfig.cloudName);
+    
+    // Add folder if specified
+    if (options.folder) {
+      formData.append('folder', options.folder);
+    }
     
     // Upload to Cloudinary
     const uploadResponse = await fetch(
-      `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/${resourceType}/upload`,
       {
         method: 'POST',
         body: formData,
@@ -62,7 +74,7 @@ export const uploadToCloudinary = async (uri) => {
   }
 };
 
-// Function to delete image from Cloudinary
+// Function to delete file from Cloudinary
 export const deleteFromCloudinary = async (publicId) => {
   try {
     // For security reasons, you should use a server-side function to delete

@@ -14,6 +14,9 @@ import {
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { useContent } from '../../context/ContentContext';
 import { useTheme } from '../../context/ThemeContext';
+import { Video } from 'expo-av';
+import { WebView } from 'react-native-webview';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ContentManagementScreen({ navigation }) {
   const {
@@ -26,6 +29,8 @@ export default function ContentManagementScreen({ navigation }) {
   const { currentTheme } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [previewContent, setPreviewContent] = useState(null);
+  const [previewType, setPreviewType] = useState(null);
 
   useEffect(() => {
     const loadContent = async () => {
@@ -202,6 +207,59 @@ export default function ContentManagementScreen({ navigation }) {
     );
   };
 
+  const handlePreview = (content) => {
+    setPreviewContent(content);
+    setPreviewType(content.contentType);
+  };
+
+  const renderPreview = () => {
+    if (!previewContent) return null;
+
+    return (
+      <View style={styles.previewWrapper}>
+        <View style={styles.previewHeader}>
+          <Text style={styles.previewTitle}>Content Preview</Text>
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={() => {
+              setPreviewContent(null);
+              setPreviewType(null);
+            }}
+          >
+            <Ionicons name="close" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.previewContainer}>
+          {previewType === 'image' && (
+            <Image
+              source={{ uri: previewContent.fileUrl }}
+              style={styles.previewImage}
+              resizeMode="contain"
+            />
+          )}
+          {previewType === 'video' && (
+            <Video
+              source={{ uri: previewContent.fileUrl }}
+              style={styles.previewVideo}
+              useNativeControls
+              resizeMode="contain"
+            />
+          )}
+          {previewType === 'document' && (
+            <WebView
+              source={{ uri: previewContent.fileUrl }}
+              style={styles.previewDocument}
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+              startInLoadingState={true}
+              scalesPageToFit={true}
+            />
+          )}
+        </View>
+      </View>
+    );
+  };
+
   const getCategoryIcon = (category) => {
     switch(category.toLowerCase()) {
       case 'math':
@@ -235,7 +293,7 @@ export default function ContentManagementScreen({ navigation }) {
                 Category: <Text style={{color: categoryInfo.color, fontWeight: '600'}}>{item.category}</Text>
               </Text>
               <Text style={[styles.meta, { color: currentTheme.textSecondary }]}>
-                By: {item.createdBy}
+                By: {item.createdByName || 'Unknown Teacher'}
               </Text>
             </View>
           </View>
@@ -244,7 +302,37 @@ export default function ContentManagementScreen({ navigation }) {
         <View style={styles.descriptionContainer}>
           <Text style={[styles.description, { color: currentTheme.text }]}>{item.description}</Text>
         </View>
+
+        <View style={styles.fileInfoContainer}>
+          <Text style={[styles.fileInfo, { color: currentTheme.textSecondary }]}>
+            Type: {item.contentType}
+          </Text>
+          <Text style={[styles.fileInfo, { color: currentTheme.textSecondary }]}>
+            Level: {item.level}
+          </Text>
+          {item.tags && item.tags.length > 0 && (
+            <View style={styles.tagsContainer}>
+              {item.tags.map((tag, index) => (
+                <View key={index} style={[styles.tag, { backgroundColor: currentTheme.primary + '15' }]}>
+                  <Text style={[styles.tagText, { color: currentTheme.primary }]}>{tag}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+        </View>
         
+        <View style={styles.previewSection}>
+          <TouchableOpacity 
+            style={[styles.previewButton, { backgroundColor: currentTheme.primary + '15' }]}
+            onPress={() => handlePreview(item)}
+          >
+            <Ionicons name="eye-outline" size={20} color={currentTheme.primary} />
+            <Text style={[styles.previewButtonText, { color: currentTheme.primary }]}>
+              Preview Content
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.buttons}>
           <TouchableOpacity 
             style={[styles.button, { backgroundColor: currentTheme.primary }]}
@@ -331,6 +419,8 @@ export default function ContentManagementScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
         />
       )}
+
+      {renderPreview()}
     </SafeAreaView>
   );
 }
@@ -485,5 +575,83 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontWeight: '600',
     fontSize: 15,
-  }
+  },
+  fileInfoContainer: {
+    marginTop: 8,
+    marginBottom: 12,
+  },
+  fileInfo: {
+    fontSize: 14,
+    marginBottom: 4,
+  },
+  tagsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 8,
+    gap: 8,
+  },
+  tag: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 16,
+  },
+  tagText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  previewWrapper: {
+    backgroundColor: '#000',
+    margin: 16,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  previewHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 12,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+  },
+  previewTitle: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  previewContainer: {
+    height: 300,
+  },
+  previewImage: {
+    width: '100%',
+    height: '100%',
+  },
+  previewVideo: {
+    width: '100%',
+    height: '100%',
+  },
+  previewDocument: {
+    flex: 1,
+  },
+  previewSection: {
+    marginVertical: 12,
+  },
+  previewButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 8,
+  },
+  previewButtonText: {
+    fontWeight: '600',
+    marginLeft: 8,
+    fontSize: 15,
+  },
 });

@@ -59,6 +59,15 @@ const MathLessons = () => {
       screen: 'MathQuiz',
       color: '#2196F3',
       description: 'Test your math skills with quizzes covering all the topics you\'ve learned.'
+    },
+    {
+      id: 7,
+      title: 'Math Content',
+      icon: 'library-outline',
+      screen: 'ContentsScreen',
+      color: '#9C27B0',
+      description: 'View and download approved math content from teachers.',
+      params: { category: 'math' }
     }
   ];
 
@@ -87,7 +96,7 @@ const MathLessons = () => {
             borderWidth: isDarkMode ? 1 : 0,
           }
         ]}
-        onPress={() => navigation.navigate(topic.screen, { childId, childName })}
+        onPress={() => navigation.navigate(topic.screen, topic.params || { childId, childName })}
         activeOpacity={0.7}
       >
         <View style={[styles.cardContent, { borderLeftColor: topicColor, borderLeftWidth: 5 }]}>

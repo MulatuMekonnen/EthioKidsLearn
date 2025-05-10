@@ -9,6 +9,7 @@ import {
   doc,
   query,
   where,
+  serverTimestamp,
 } from 'firebase/firestore';
 import { db, storage } from '../services/firebase'; // ✅ use storage from firebase.js
 
@@ -52,85 +53,152 @@ export const ContentProvider = ({ children }) => {
   };
 
   const fetchAllContent = async () => {
-    const snap = await getDocs(contentsRef);
-    setContents(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    try {
+      const snap = await getDocs(contentsRef);
+      const contentList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log('Fetched all content:', contentList.length, 'items');
+      setContents(contentList);
+    } catch (error) {
+      console.error('Error fetching all content:', error);
+    }
   };
 
   const fetchPending = async () => {
-    const q = query(contentsRef, where('status', '==', 'pending'));
-    const snap = await getDocs(q);
-    setPending(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+    try {
+      console.log('Fetching pending content...');
+      const q = query(contentsRef, where('status', '==', 'pending'));
+      const snap = await getDocs(q);
+      const pendingList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log('Fetched pending content:', pendingList.length, 'items');
+      console.log('Pending content details:', pendingList);
+      setPending(pendingList);
+    } catch (error) {
+      console.error('Error fetching pending content:', error);
+    }
   };
 
   const createContent = async (data) => {
-    await addDoc(contentsRef, {
-      ...data,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    });
-    await fetchPending();
+    try {
+      const contentData = {
+        ...data,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      console.log('Creating content with data:', contentData);
+      await addDoc(contentsRef, contentData);
+      await fetchPending();
+    } catch (error) {
+      console.error('Error creating content:', error);
+      throw error;
+    }
   };
 
   const createContentWithFile = async (data, localUri, fileName, onProgress) => {
-    let fileUrl = null;
-    if (localUri) {
-      const remotePath = `contentFiles/${Date.now()}_${fileName}`;
-      fileUrl = await uploadFile(localUri, remotePath, onProgress);
+    try {
+      let fileUrl = null;
+      if (localUri) {
+        const remotePath = `contentFiles/${Date.now()}_${fileName}`;
+        fileUrl = await uploadFile(localUri, remotePath, onProgress);
+      }
+      const contentData = {
+        ...data,
+        fileUrl,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      console.log('Creating content with file:', contentData);
+      await addDoc(contentsRef, contentData);
+      await fetchPending();
+    } catch (error) {
+      console.error('Error creating content with file:', error);
+      throw error;
     }
-    await addDoc(contentsRef, {
-      ...data,
-      fileUrl,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-    });
-    await fetchPending();
   };
 
   const updateContent = async (id, updates) => {
-    await updateDoc(doc(db, 'contents', id), {
-      ...updates,
-      updatedAt: new Date().toISOString(),
-    });
-    await fetchAllContent();
-    await fetchPending();
+    try {
+      const updateData = {
+        ...updates,
+        updatedAt: serverTimestamp(),
+      };
+      console.log('Updating content:', id, updateData);
+      await updateDoc(doc(db, 'contents', id), updateData);
+      await fetchAllContent();
+      await fetchPending();
+    } catch (error) {
+      console.error('Error updating content:', error);
+      throw error;
+    }
   };
 
   const deleteContent = async (id) => {
-    await deleteDoc(doc(db, 'contents', id));
-    await fetchAllContent();
-    await fetchPending();
+    try {
+      console.log('Deleting content:', id);
+      await deleteDoc(doc(db, 'contents', id));
+      await fetchAllContent();
+      await fetchPending();
+    } catch (error) {
+      console.error('Error deleting content:', error);
+      throw error;
+    }
   };
 
   const approveContent = async (id) => {
-    await updateDoc(doc(db, 'contents', id), {
-      status: 'approved',
-      approvedAt: new Date().toISOString(),
-    });
-    await fetchPending();
+    try {
+      const updateData = {
+        status: 'approved',
+        approvedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      console.log('Approving content:', id, updateData);
+      await updateDoc(doc(db, 'contents', id), updateData);
+      await fetchPending();
+    } catch (error) {
+      console.error('Error approving content:', error);
+      throw error;
+    }
   };
 
   const rejectContent = async (id) => {
-    await updateDoc(doc(db, 'contents', id), {
-      status: 'rejected',
-      rejectedAt: new Date().toISOString(),
-    });
-    await fetchPending();
+    try {
+      const updateData = {
+        status: 'rejected',
+        rejectedAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      };
+      console.log('Rejecting content:', id, updateData);
+      await updateDoc(doc(db, 'contents', id), updateData);
+      await fetchPending();
+    } catch (error) {
+      console.error('Error rejecting content:', error);
+      throw error;
+    }
   };
 
   const fetchApprovedByCategory = async (category) => {
-    const q = query(
-      contentsRef,
-      where('status', '==', 'approved'),
-      where('category', '==', category)
-    );
-    const snap = await getDocs(q);
-    setApprovedByCat(prev => ({
-      ...prev,
-      [category]: snap.docs.map(d => ({ id: d.id, ...d.data() })),
-    }));
+    try {
+      console.log('Fetching approved content for category:', category);
+      const q = query(
+        contentsRef,
+        where('status', '==', 'approved'),
+        where('category', '==', category)
+      );
+      const snap = await getDocs(q);
+      const categoryContent = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      console.log('Fetched approved content for category:', category, categoryContent.length, 'items');
+      setApprovedByCat(prev => ({
+        ...prev,
+        [category]: categoryContent,
+      }));
+    } catch (error) {
+      console.error('Error fetching approved content by category:', error);
+    }
   };
 
   useEffect(() => {
+    console.log('ContentProvider mounted, fetching initial data...');
     fetchAllContent();
     fetchPending();
   }, []);
