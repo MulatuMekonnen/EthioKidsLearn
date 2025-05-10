@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image, Modal, TouchableWithoutFeedback, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Modal, TouchableWithoutFeedback, Platform, Alert } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
-import { Svg, Path, Circle, G } from 'react-native-svg';
+import { Svg, Path, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
-import * as ImagePicker from 'expo-image-picker';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import ProfileImageManager from '../../components/ProfileImageManager';
 
 export default function ParentHome() {
   const { user, logout } = useAuth();
@@ -54,52 +53,6 @@ export default function ParentHome() {
       .join(' ');
   };
 
-  // Pick image from device
-  const pickImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.5,
-      });
-      
-      if (!result.canceled && result.assets && result.assets[0].uri) {
-        await uploadProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
-    }
-  };
-
-  // Upload image to Firebase Storage
-  const uploadProfileImage = async (uri) => {
-    if (!user?.uid) return;
-    
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      
-      const storage = getStorage();
-      const storageRef = ref(storage, `profileImages/${user.uid}`);
-      
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      // Update user document with image URL
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        profileImage: downloadURL
-      });
-      
-      setProfileImage(downloadURL);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
-    }
-  };
-
   // Go to profile settings
   const goToProfileSettings = () => {
     setShowProfileMenu(false);
@@ -113,45 +66,21 @@ export default function ParentHome() {
     setShowProfileMenu(false);
   };
 
-  // Get initials from name
-  const getInitials = () => {
-    if (!userName) return 'P';
-    
-    const names = userName.split(' ');
-    const firstInitial = names[0].charAt(0).toUpperCase();
-    
-    return firstInitial;
-  };
-
-  // Generate a color for profile icon
-  const generateProfileColor = () => {
-    // Fixed green color for all profile icons
-    return '#4CAF50'; // Green
-  };
-
   // Custom profile picture component
   const ProfilePicture = () => {
-    const profileColor = generateProfileColor();
-    
     return (
       <TouchableOpacity 
         style={styles.profilePicContainer} 
         onPress={() => setShowProfileMenu(!showProfileMenu)}
       >
-        {profileImage ? (
-          <Image 
-            source={{ uri: profileImage }} 
-            style={styles.profilePic} 
-          />
-        ) : (
-          <View style={[styles.profilePlaceholder, { 
-            backgroundColor: profileColor,
-          }]}>
-            <View style={styles.profileInnerShadow}>
-              <Text style={styles.profilePlaceholderText}>{getInitials()}</Text>
-            </View>
-          </View>
-        )}
+        <ProfileImageManager 
+          userId={user?.uid}
+          imageUrl={profileImage}
+          size={44}
+          name={userName}
+          editable={false}
+        />
+        
         {showProfileMenu && (
           <Modal
             transparent={true}
@@ -169,28 +98,13 @@ export default function ParentHome() {
                   }]}>
                     <View style={styles.profileMenuHeader}>
                       <View style={styles.profileImageContainer}>
-                        {profileImage ? (
-                          <Image 
-                            source={{ uri: profileImage }} 
-                            style={styles.profileMenuImage} 
-                          />
-                        ) : (
-                          <View style={[styles.menuProfilePlaceholder, { 
-                            backgroundColor: profileColor
-                          }]}>
-                            <View style={styles.menuProfileInnerShadow}>
-                              <Text style={styles.menuProfilePlaceholderText}>{getInitials()}</Text>
-                            </View>
-                          </View>
-                        )}
-                        <TouchableOpacity 
-                          style={styles.editProfileButton}
-                          onPress={pickImage}
-                        >
-                          <View style={styles.editIconContainer}>
-                            <EditIcon />
-                          </View>
-                        </TouchableOpacity>
+                        <ProfileImageManager 
+                          userId={user?.uid}
+                          imageUrl={profileImage}
+                          size={80}
+                          name={userName}
+                          onImageChange={(url) => setProfileImage(url)}
+                        />
                       </View>
                       <Text style={[styles.profileMenuName, { color: currentTheme.text }]}>{userName}</Text>
                       <Text style={[styles.profileMenuEmail, { color: currentTheme.textSecondary }]}>{userEmail}</Text>

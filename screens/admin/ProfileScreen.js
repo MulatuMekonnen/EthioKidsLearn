@@ -17,10 +17,9 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { Svg, Path, Circle } from 'react-native-svg';
-import * as ImagePicker from 'expo-image-picker';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '../../services/firebase';
+import ProfileImageManager from '../../components/ProfileImageManager';
 
 export default function ProfileScreen({ navigation }) {
   const { user } = useAuth();
@@ -64,53 +63,6 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  const pickImage = async () => {
-    try {
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.5,
-      });
-      
-      if (!result.canceled && result.assets && result.assets[0].uri) {
-        await uploadProfileImage(result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
-    }
-  };
-
-  const uploadProfileImage = async (uri) => {
-    if (!user?.uid) return;
-    
-    setSaving(true);
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      
-      const storage = getStorage();
-      const storageRef = ref(storage, `profileImages/${user.uid}`);
-      
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      // Update user document with image URL
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        profileImage: downloadURL
-      });
-      
-      setProfileImage(downloadURL);
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const saveProfile = async () => {
     if (!user?.uid) return;
     
@@ -148,6 +100,10 @@ export default function ProfileScreen({ navigation }) {
     </Svg>
   );
 
+  const handleProfileImageChange = (imageUrl) => {
+    setProfileImage(imageUrl);
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={currentTheme.primary} />
@@ -180,26 +136,13 @@ export default function ProfileScreen({ navigation }) {
             <>
               {/* Profile Image */}
               <View style={styles.profileImageSection}>
-                <View style={styles.profileImageContainer}>
-                  {profileImage ? (
-                    <Image 
-                      source={{ uri: profileImage }} 
-                      style={styles.profileImage} 
-                    />
-                  ) : (
-                    <View style={[styles.profilePlaceholder, { backgroundColor: currentTheme.primary }]}>
-                      <Text style={styles.profilePlaceholderText}>{name ? name.charAt(0).toUpperCase() : 'A'}</Text>
-                    </View>
-                  )}
-                  <TouchableOpacity 
-                    style={styles.cameraButton}
-                    onPress={pickImage}
-                  >
-                    <View style={styles.cameraIconContainer}>
-                      <CameraIcon />
-                    </View>
-                  </TouchableOpacity>
-                </View>
+                <ProfileImageManager
+                  userId={user?.uid}
+                  imageUrl={profileImage}
+                  size={120}
+                  name={name}
+                  onImageChange={handleProfileImageChange}
+                />
                 <Text style={[styles.profileRole, { color: currentTheme.textSecondary }]}>
                   Administrator
                 </Text>

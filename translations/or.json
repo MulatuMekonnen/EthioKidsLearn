@@ -15,7 +15,16 @@
     "pin": "Piinii",
     "addChild": "Ilma Dabali",
     "children": "Ilmaan",
-    "role": "Gahe"
+    "role": "Gahe",
+    "welcome": "Baga Nagaan Dhuftan",
+    "selectRole": "Gaheen Filadhu",
+    "getStarted": "Jalqabi",
+    "progress": "Dhufta",
+    "lessonsCompleted": "barnootaXumurame",
+    "quizzesCompleted": "quizzesXumurameera",
+    "totalLessons": "waliigalaBarnoota",
+    "totalQuizzes": "quizzes waliigala",
+    "ethiokidslearn": "Ijoolleen Ethio Baradha"
   },
   "roles": {
     "parent": "Maatii",

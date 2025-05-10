@@ -8,18 +8,16 @@ import {
   ScrollView,
   TextInput,
   Alert,
-  Image,
   ActivityIndicator
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Svg, Path } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db, auth, storage } from '../../services/firebase';
+import { db, auth } from '../../services/firebase';
 import { updateProfile } from 'firebase/auth';
-import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import ProfileImageManager from '../../components/ProfileImageManager';
 
 export default function Profile() {
   const navigation = useNavigation();
@@ -32,7 +30,6 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [userData, setUserData] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     loadUserData();
@@ -63,56 +60,8 @@ export default function Profile() {
     }
   };
 
-  const pickImage = async () => {
-    if (!user) {
-      Alert.alert("Error", "You must be logged in to upload a profile picture");
-      return;
-    }
-    
-    try {
-      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (!permissionResult.granted) {
-        Alert.alert("Permission Required", "You need to grant permission to access your photos");
-        return;
-      }
-      
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 0.8,
-      });
-      
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        setUploadingImage(true);
-        const imageUri = result.assets[0].uri;
-        
-        // Upload to Firebase Storage
-        const response = await fetch(imageUri);
-        const blob = await response.blob();
-        const filename = `profile_${user.uid}_${Date.now()}`;
-        const storageRef = ref(storage, `profiles/${user.uid}/${filename}`);
-        
-        await uploadBytes(storageRef, blob);
-        const downloadURL = await getDownloadURL(storageRef);
-        
-        // Update user document in Firestore
-        const userDocRef = doc(db, 'users', user.uid);
-        await updateDoc(userDocRef, {
-          profileImage: downloadURL,
-          updatedAt: new Date().toISOString()
-        });
-        
-        setProfileImage(downloadURL);
-        setUploadingImage(false);
-        Alert.alert("Success", "Profile picture uploaded successfully");
-      }
-    } catch (error) {
-      console.error('Error picking or uploading image:', error);
-      setUploadingImage(false);
-      Alert.alert("Error", "Failed to upload profile picture");
-    }
+  const handleProfileImageChange = (url) => {
+    setProfileImage(url);
   };
 
   const handleSaveProfile = async () => {
@@ -145,6 +94,13 @@ export default function Profile() {
     }
   };
 
+  // Back Icon Component
+  const BackIcon = () => (
+    <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <Path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="#FFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+
   if (loading) {
     return (
       <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
@@ -163,7 +119,7 @@ export default function Profile() {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <BackIcon />
         </TouchableOpacity>
         <View style={styles.headerContent}>
           <Text style={styles.headerTitle}>My Profile</Text>
@@ -173,27 +129,14 @@ export default function Profile() {
       <ScrollView style={styles.content}>
         <View style={[styles.profileCard, { backgroundColor: currentTheme.card }]}>
           <View style={styles.avatarContainer}>
-            {uploadingImage ? (
-              <View style={[styles.avatar, { backgroundColor: currentTheme.border }]}>
-                <ActivityIndicator size="large" color={currentTheme.primary} />
-              </View>
-            ) : profileImage ? (
-              <Image source={{ uri: profileImage }} style={styles.avatar} />
-            ) : (
-              <View style={[styles.avatar, { backgroundColor: currentTheme.primary }]}>
-                <Text style={styles.avatarText}>
-                  {(user?.displayName?.charAt(0) || user?.email?.charAt(0) || 'U').toUpperCase()}
-                </Text>
-              </View>
-            )}
-            {editing && (
-              <TouchableOpacity 
-                style={[styles.uploadButton, { backgroundColor: currentTheme.primary }]}
-                onPress={pickImage}
-              >
-                <Ionicons name="camera" size={18} color="#FFF" />
-              </TouchableOpacity>
-            )}
+            <ProfileImageManager
+              userId={user?.uid}
+              imageUrl={profileImage}
+              size={120}
+              name={displayName || (user?.email?.split('@')[0] || '')}
+              onImageChange={handleProfileImageChange}
+              editable={editing}
+            />
           </View>
           
           <View style={styles.infoContainer}>
@@ -243,34 +186,13 @@ export default function Profile() {
               style={[styles.editButton, { backgroundColor: currentTheme.primary }]}
               onPress={() => setEditing(true)}
             >
-              <Ionicons name="pencil" size={16} color="#FFF" />
+              <Svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                <Path d="M11 4H4C3.46957 4 2.96086 4.21071 2.58579 4.58579C2.21071 4.96086 2 5.46957 2 6V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V13" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <Path d="M18.5 2.50001C18.8978 2.10219 19.4374 1.87869 20 1.87869C20.5626 1.87869 21.1022 2.10219 21.5 2.50001C21.8978 2.89784 22.1213 3.4374 22.1213 4.00001C22.1213 4.56262 21.8978 5.10219 21.5 5.50001L12 15L8 16L9 12L18.5 2.50001Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
               <Text style={styles.editButtonText}>Edit Profile</Text>
             </TouchableOpacity>
           )}
-        </View>
-        
-        <View style={[styles.accountSection, { backgroundColor: currentTheme.card }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Account Information</Text>
-          
-          <View style={styles.accountItem}>
-            <Ionicons name="calendar-outline" size={20} color={currentTheme.primary} />
-            <View style={styles.accountItemContent}>
-              <Text style={[styles.accountItemTitle, { color: currentTheme.text }]}>Account Created</Text>
-              <Text style={[styles.accountItemValue, { color: currentTheme.textSecondary }]}>
-                {userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'Unknown'}
-              </Text>
-            </View>
-          </View>
-          
-          <View style={styles.accountItem}>
-            <Ionicons name="people-outline" size={20} color={currentTheme.primary} />
-            <View style={styles.accountItemContent}>
-              <Text style={[styles.accountItemTitle, { color: currentTheme.text }]}>Children</Text>
-              <Text style={[styles.accountItemValue, { color: currentTheme.textSecondary }]}>
-                {userData?.children?.length || 0} child profiles
-              </Text>
-            </View>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -290,149 +212,93 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
+    paddingTop: 20,
   },
   backButton: {
-    marginRight: 12,
     padding: 8,
   },
   headerContent: {
     flex: 1,
+    alignItems: 'center',
   },
   headerTitle: {
+    color: '#FFF',
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#FFF',
   },
   content: {
     flex: 1,
     padding: 16,
   },
   profileCard: {
-    padding: 20,
     borderRadius: 12,
+    padding: 24,
+    marginBottom: 16,
     alignItems: 'center',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    marginBottom: 20,
   },
   avatarContainer: {
+    marginBottom: 20,
     alignItems: 'center',
-    marginBottom: 16,
-    position: 'relative',
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  avatarText: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    color: '#FFF',
-  },
-  uploadButton: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#FFF',
-  },
-  changePhotoButton: {
-    marginTop: 8,
   },
   infoContainer: {
-    width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
+    width: '100%',
   },
   userName: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
-  },
-  nameInput: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    borderBottomWidth: 1,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    minWidth: 200,
-    textAlign: 'center',
     marginBottom: 8,
   },
   userEmail: {
     fontSize: 16,
-    marginTop: 5,
+    marginBottom: 8,
   },
   userRole: {
     fontSize: 16,
-    marginTop: 5,
-    fontWeight: '500',
+    marginBottom: 16,
   },
-  editButton: {
-    flexDirection: 'row',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    alignItems: 'center',
-  },
-  editButtonText: {
-    color: '#FFF',
+  nameInput: {
+    fontSize: 22,
     fontWeight: 'bold',
-    marginLeft: 6,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderRadius: 8,
+    width: '100%',
+    textAlign: 'center',
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-around',
     width: '100%',
-    gap: 12,
+    marginTop: 16,
   },
   actionButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-    minWidth: 100,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 24,
+    minWidth: 120,
     alignItems: 'center',
   },
   buttonText: {
     color: '#FFF',
     fontWeight: 'bold',
+    fontSize: 16,
   },
-  accountSection: {
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  accountItem: {
+  editButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 24,
+    marginTop: 16,
   },
-  accountItemContent: {
-    marginLeft: 12,
-  },
-  accountItemTitle: {
+  editButtonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
     fontSize: 16,
-    fontWeight: '500',
-  },
-  accountItemValue: {
-    fontSize: 14,
-    marginTop: 2,
-  },
+    marginLeft: 8,
+  }
 }); 

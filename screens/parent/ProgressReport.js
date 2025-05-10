@@ -163,7 +163,7 @@ export default function ProgressReport() {
       let results = resultsJson ? JSON.parse(resultsJson) : [];
       
       // Filter quiz results for only the children of this parent
-      if (filteredChildren.length > 0) {
+        if (filteredChildren.length > 0) {
         const childIds = filteredChildren.map(child => child.id);
         
         // Filter results to only include this parent's children
@@ -743,12 +743,12 @@ export default function ProgressReport() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme?.background || '#f5f5f5' }]}>
       <View style={[styles.header, { backgroundColor: currentTheme?.primary || '#2196F3' }]}>
-        <TouchableOpacity
+      <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
-        >
+      >
           <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
+      </TouchableOpacity>
         <Text style={styles.headerTitle}>Progress Report</Text>
         <TouchableOpacity
           style={styles.refreshButton}
@@ -833,7 +833,7 @@ export default function ProgressReport() {
           <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>Performance by child</Text>
           {renderChildProgress()}
         </View>
-      </ScrollView>
+    </ScrollView>
     </SafeAreaView>
   );
 }

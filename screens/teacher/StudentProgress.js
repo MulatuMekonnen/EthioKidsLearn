@@ -8,6 +8,7 @@ import {
   FlatList,
   ActivityIndicator,
   ScrollView,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -15,7 +16,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../../services/firebase';
-import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, getDocs, orderBy, limit, getDoc, doc, collectionGroup } from 'firebase/firestore';
 
 export default function StudentProgress() {
   const navigation = useNavigation();
@@ -27,7 +28,6 @@ export default function StudentProgress() {
   const [selectedSubject, setSelectedSubject] = useState('all');
 
   const subjects = [
-    { id: 'all', name: 'All Subjects', color: '#673AB7' },
     { id: 'math', name: 'Math', color: '#2196F3' },
     { id: 'english', name: 'English', color: '#4CAF50' },
     { id: 'amharic', name: 'Amharic', color: '#FF9800' },
@@ -179,45 +179,152 @@ export default function StudentProgress() {
     try {
       // Initialize progress data structure
       const progress = {};
+      const progressCacheKey = 'student_progress_cache';
+      const cacheExpiry = 'student_progress_cache_timestamp';
+      let shouldRefreshCache = true;
+      
+      // Check if we have a recent cache (less than 15 minutes old)
+      try {
+        const lastCacheTime = await AsyncStorage.getItem(cacheExpiry);
+        if (lastCacheTime) {
+          const cacheAge = Date.now() - parseInt(lastCacheTime);
+          // If cache is less than 15 minutes old, use it
+          if (cacheAge < 15 * 60 * 1000) {
+            shouldRefreshCache = false;
+            const cachedProgress = await AsyncStorage.getItem(progressCacheKey);
+            if (cachedProgress) {
+              const parsedCache = JSON.parse(cachedProgress);
+              setProgressData(parsedCache);
+              return; // Exit early if using cache
+            }
+          }
+        }
+      } catch (cacheError) {
+        console.log('Error checking cache:', cacheError);
+      }
+      
+      // Only continue if we need to refresh the data
+      if (!shouldRefreshCache) return;
       
       // First try to get quiz results from Firebase
       if (user) {
         try {
-          const reportsQuery = query(
-            collection(db, 'reports'),
-            orderBy('timestamp', 'desc')
-          );
-          
-          const reportsSnapshot = await getDocs(reportsQuery);
-          
-          if (!reportsSnapshot.empty) {
-            reportsSnapshot.forEach(doc => {
-              const reportData = doc.data();
-              const { childId, quizType, score } = reportData;
-              
-              // Check if this report is for one of our loaded students
-              if (studentsData.some(student => student.id === childId) && quizType) {
-                if (!progress[childId]) {
-                  progress[childId] = {
-                    math: { scores: [], average: 0, count: 0 },
-                    english: { scores: [], average: 0, count: 0 },
-                    amharic: { scores: [], average: 0, count: 0 },
-                    oromo: { scores: [], average: 0, count: 0 },
-                    all: { scores: [], average: 0, count: 0 }
-                  };
-                }
+          // Process each student individually for better indexed queries
+          for (const student of studentsData) {
+            if (!progress[student.id]) {
+              progress[student.id] = {
+                math: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                english: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                amharic: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                oromo: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                all: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } }
+              };
+            }
+            
+            // 1. Get reports for this student
+            const studentReportsQuery = query(
+              collection(db, 'reports'),
+              where('childId', '==', student.id),
+              orderBy('timestamp', 'desc'),
+              limit(50)
+            );
+            
+            const reportsSnapshot = await getDocs(studentReportsQuery);
+            
+            if (!reportsSnapshot.empty) {
+              reportsSnapshot.forEach(doc => {
+                const reportData = doc.data();
+                const { quizType, score } = reportData;
                 
                 // Add score to the appropriate subject
-                if (score !== null && score !== undefined) {
-                  if (progress[childId][quizType]) {
-                    progress[childId][quizType].scores.push(score);
-                    progress[childId][quizType].count++;
-                    progress[childId].all.scores.push(score);
-                    progress[childId].all.count++;
+                if (score !== null && score !== undefined && quizType) {
+                  if (progress[student.id][quizType]) {
+                    progress[student.id][quizType].scores.push(score);
+                    progress[student.id][quizType].count++;
+                    progress[student.id].all.scores.push(score);
+                    progress[student.id].all.count++;
                   }
                 }
+              });
+            }
+            
+            // 2. Try to get individual quiz results from quiz_results collection
+            try {
+              const quizResultsQuery = query(
+                collection(db, 'quiz_results'),
+                where('childId', '==', student.id),
+                orderBy('timestamp', 'desc'),
+                limit(50)
+              );
+              
+              const quizResultsSnapshot = await getDocs(quizResultsQuery);
+              
+              if (!quizResultsSnapshot.empty) {
+                quizResultsSnapshot.forEach(doc => {
+                  const quizData = doc.data();
+                  const { category, score, totalQuestions } = quizData;
+                  
+                  if (category && score !== undefined && totalQuestions !== undefined) {
+                    const percentageScore = Math.round((score / totalQuestions) * 100);
+                    
+                    if (progress[student.id][category]) {
+                      progress[student.id][category].scores.push(percentageScore);
+                      progress[student.id][category].count++;
+                      progress[student.id].all.scores.push(percentageScore);
+                      progress[student.id].all.count++;
+                    }
+                  }
+                });
               }
-            });
+            } catch (error) {
+              console.log('Error fetching quiz_results:', error);
+            }
+            
+            // 3. Get lesson completion data from 'lesson_progress' collection if it exists
+            try {
+              const lessonProgressQuery = query(
+                collection(db, 'lesson_progress'),
+                where('childId', '==', student.id),
+                limit(100)
+              );
+              
+              const lessonProgressSnapshot = await getDocs(lessonProgressQuery);
+              
+              if (!lessonProgressSnapshot.empty) {
+                // Group lesson progress by subject
+                const lessonsBySubject = {
+                  math: { total: 0, completed: 0 },
+                  english: { total: 0, completed: 0 },
+                  amharic: { total: 0, completed: 0 },
+                  oromo: { total: 0, completed: 0 },
+                  all: { total: 0, completed: 0 }
+                };
+                
+                lessonProgressSnapshot.forEach(doc => {
+                  const lessonData = doc.data();
+                  const { subject, isCompleted, lessonId } = lessonData;
+                  
+                  if (subject && lessonsBySubject[subject]) {
+                    lessonsBySubject[subject].total++;
+                    lessonsBySubject.all.total++;
+                    
+                    if (isCompleted) {
+                      lessonsBySubject[subject].completed++;
+                      lessonsBySubject.all.completed++;
+                    }
+                  }
+                });
+                
+                // Add lesson data to progress object
+                Object.keys(lessonsBySubject).forEach(subject => {
+                  if (progress[student.id][subject]) {
+                    progress[student.id][subject].lessons = lessonsBySubject[subject];
+                  }
+                });
+              }
+            } catch (error) {
+              console.log('Error fetching lesson_progress:', error);
+            }
           }
         } catch (error) {
           console.error('Error fetching reports from Firebase:', error);
@@ -243,11 +350,11 @@ export default function StudentProgress() {
           if (studentsData.some(student => student.id === childId)) {
             if (!progress[childId]) {
               progress[childId] = {
-                math: { scores: [], average: 0, count: 0 },
-                english: { scores: [], average: 0, count: 0 },
-                amharic: { scores: [], average: 0, count: 0 },
-                oromo: { scores: [], average: 0, count: 0 },
-                all: { scores: [], average: 0, count: 0 }
+                math: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                english: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                amharic: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                oromo: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
+                all: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } }
               };
             }
             
@@ -265,6 +372,29 @@ export default function StudentProgress() {
         });
       }
       
+      // Try to get lesson completion data from AsyncStorage
+      try {
+        const lessonProgressJson = await AsyncStorage.getItem('lessonProgress');
+        if (lessonProgressJson) {
+          const lessonProgress = JSON.parse(lessonProgressJson);
+          
+          Object.entries(lessonProgress).forEach(([childId, subjectData]) => {
+            if (progress[childId]) {
+              Object.entries(subjectData).forEach(([subject, lessons]) => {
+                if (progress[childId][subject]) {
+                  progress[childId][subject].lessons = {
+                    total: lessons.length || 0,
+                    completed: lessons.filter(lesson => lesson.completed).length || 0
+                  };
+                }
+              });
+            }
+          });
+        }
+      } catch (error) {
+        console.log('Error getting lesson progress from AsyncStorage:', error);
+      }
+      
       // Calculate averages for each subject for each student
       Object.keys(progress).forEach(childId => {
         const childProgress = progress[childId];
@@ -278,9 +408,27 @@ export default function StudentProgress() {
         });
       });
       
+      // Cache the results
+      try {
+        await AsyncStorage.setItem(progressCacheKey, JSON.stringify(progress));
+        await AsyncStorage.setItem(cacheExpiry, Date.now().toString());
+      } catch (cacheError) {
+        console.log('Error caching progress data:', cacheError);
+      }
+      
       setProgressData(progress);
     } catch (error) {
       console.error('Error loading progress data:', error);
+      
+      // Try to load from cache as fallback if online fetch fails
+      try {
+        const cachedProgress = await AsyncStorage.getItem('student_progress_cache');
+        if (cachedProgress) {
+          setProgressData(JSON.parse(cachedProgress));
+        }
+      } catch (cacheError) {
+        console.log('Error reading cache:', cacheError);
+      }
     }
   };
 
@@ -447,9 +595,16 @@ export default function StudentProgress() {
                         ]} 
                       />
                     </View>
-                    <Text style={[styles.quizCount, { color: currentTheme?.textSecondary || '#666' }]}>
-                      {subProgress.count} {subProgress.count === 1 ? 'quiz' : 'quizzes'}
-                    </Text>
+                    <View style={styles.progressFooter}>
+                      <Text style={[styles.quizCount, { color: currentTheme?.textSecondary || '#666' }]}>
+                        {subProgress.count} {subProgress.count === 1 ? 'quiz' : 'quizzes'}
+                      </Text>
+                      {subProgress.lessons && subProgress.lessons.total > 0 && (
+                        <Text style={[styles.lessonProgress, { color: currentTheme?.textSecondary || '#666' }]}>
+                          {subProgress.lessons.completed}/{subProgress.lessons.total} lessons completed
+                        </Text>
+                      )}
+                    </View>
                   </View>
                 );
               })}
@@ -498,11 +653,65 @@ export default function StudentProgress() {
                   ]} 
                 />
               </View>
+              
+              {/* Lesson Progress Section */}
+              {subjectData.lessons && subjectData.lessons.total > 0 && (
+                <View style={styles.lessonProgressContainer}>
+                  <Text style={[styles.lessonProgressTitle, { color: currentTheme?.text || '#333' }]}>
+                    Lesson Progress
+                  </Text>
+                  <View style={styles.lessonProgressStats}>
+                    <Text style={[styles.lessonProgressText, { color: currentTheme?.textSecondary || '#666' }]}>
+                      {subjectData.lessons.completed} of {subjectData.lessons.total} lessons completed
+                    </Text>
+                    <Text style={[styles.lessonProgressPercentage, { color: currentTheme?.primary || '#2196F3' }]}>
+                      {subjectData.lessons.total > 0 
+                        ? Math.round((subjectData.lessons.completed / subjectData.lessons.total) * 100) 
+                        : 0}%
+                    </Text>
+                  </View>
+                  <View style={[styles.progressBarBackground, { 
+                    backgroundColor: currentTheme?.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                  }]}>
+                    <View 
+                      style={[
+                        styles.progressBar, 
+                        { 
+                          width: `${subjectData.lessons.total > 0 
+                            ? Math.round((subjectData.lessons.completed / subjectData.lessons.total) * 100) 
+                            : 0}%`, 
+                          backgroundColor: subjects.find(s => s.id === selectedSubject)?.color || '#2196F3'
+                        }
+                      ]} 
+                    />
+                  </View>
+                </View>
+              )}
             </View>
           )}
         </View>
       </View>
     );
+  };
+
+  // Function to clear cache and force data reload
+  const clearCache = async () => {
+    try {
+      await AsyncStorage.removeItem('student_progress_cache');
+      await AsyncStorage.removeItem('student_progress_cache_timestamp');
+      
+      Alert.alert(
+        "Cache Cleared", 
+        "The cached data has been cleared. Loading fresh data...",
+        [{ text: "OK" }]
+      );
+      
+      // Reload data
+      loadStudentsAndProgress();
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      Alert.alert("Error", "Failed to clear cache");
+    }
   };
 
   return (
@@ -512,9 +721,14 @@ export default function StudentProgress() {
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Student Progress</Text>
-        <TouchableOpacity style={styles.refreshButton} onPress={loadStudentsAndProgress}>
-          <Ionicons name="refresh" size={24} color="#FFF" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.clearButton} onPress={clearCache}>
+            <Ionicons name="trash-outline" size={22} color="#FFF" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.refreshButton} onPress={loadStudentsAndProgress}>
+            <Ionicons name="refresh" size={24} color="#FFF" />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.tabsContainer}>
@@ -738,5 +952,47 @@ const styles = StyleSheet.create({
   progressStatLabel: {
     fontSize: 12,
     marginTop: 4,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  clearButton: {
+    padding: 8,
+    marginRight: 4,
+  },
+  progressFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  lessonProgress: {
+    fontSize: 12,
+    textAlign: 'right',
+  },
+  lessonProgressContainer: {
+    marginTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+    paddingTop: 12,
+  },
+  lessonProgressTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  lessonProgressStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  lessonProgressText: {
+    fontSize: 14,
+  },
+  lessonProgressPercentage: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 }); 

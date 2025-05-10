@@ -15,7 +15,17 @@
     "pin": "ፒን",
     "addChild": "ልጅ ጨምር",
     "children": "ልጆች",
-    "role": "ሚና"
+    "role": "ሚና",
+    "welcome": "እንኳን ደህና መጣቹሁ",
+    "selectRole": "ሚና ምረጥ",
+    "getStarted": "እንጀምር",
+    "progress": "መጠባበቅ",
+    "lessonsCompleted": "ትምህርቶች ተጠናቅቀዋል",
+    "quizzesCompleted": "ጥያቄዎች ተጠናቅቀዋል",
+    "totalLessons": "ጠቅላላ ትምህርቶች",
+    "totalQuizzes": "ጠቅላላ ጥያቄዎች",
+    "ethiokidslearn": "ኢትዮ ልጆች ተማሩ"
+
   },
   "roles": {
     "parent": "ወላጅ",

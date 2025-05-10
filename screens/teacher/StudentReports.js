@@ -17,7 +17,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../../services/firebase';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
 
 export default function StudentReports() {
   const navigation = useNavigation();
@@ -169,12 +169,13 @@ export default function StudentReports() {
     
     setLoadingReports(true);
     try {
-      // Query reports for this student
+      // Query reports for this student with the indexed query
       const reportsQuery = query(
         collection(db, 'reports'),
         where('childId', '==', student.id),
         where('teacherId', '==', user.uid),
-        orderBy('timestamp', 'desc')
+        orderBy('timestamp', 'desc'),
+        limit(20) // Add limit for better performance
       );
       
       const reportsSnapshot = await getDocs(reportsQuery);
@@ -187,12 +188,47 @@ export default function StudentReports() {
         }));
         
         setPreviousReports(reports);
+        
+        // Also cache these reports locally for offline access
+        try {
+          const cachedReportsKey = `reports_${student.id}_${user.uid}`;
+          await AsyncStorage.setItem(cachedReportsKey, JSON.stringify(reports));
+        } catch (cacheError) {
+          console.log('Failed to cache reports locally:', cacheError);
+        }
       } else {
-        setPreviousReports([]);
+        // Try to get cached reports if no online results
+        try {
+          const cachedReportsKey = `reports_${student.id}_${user.uid}`;
+          const cachedReports = await AsyncStorage.getItem(cachedReportsKey);
+          
+          if (cachedReports) {
+            setPreviousReports(JSON.parse(cachedReports));
+          } else {
+            setPreviousReports([]);
+          }
+        } catch (cacheError) {
+          console.log('Failed to get cached reports:', cacheError);
+          setPreviousReports([]);
+        }
       }
     } catch (error) {
       console.error('Error loading previous reports:', error);
-      setPreviousReports([]);
+      
+      // Fallback to cached data if online query fails
+      try {
+        const cachedReportsKey = `reports_${student.id}_${user.uid}`;
+        const cachedReports = await AsyncStorage.getItem(cachedReportsKey);
+        
+        if (cachedReports) {
+          setPreviousReports(JSON.parse(cachedReports));
+        } else {
+          setPreviousReports([]);
+        }
+      } catch (cacheError) {
+        console.log('Failed to get cached reports in error fallback:', cacheError);
+        setPreviousReports([]);
+      }
     } finally {
       setLoadingReports(false);
     }

@@ -92,7 +92,7 @@ export default function LoginScreen({ navigation }) {
       </View>
 
       <View style={styles.container}>
-        <Text style={styles.title}>EthioKids Learn</Text>
+        <Text style={styles.title}>{translate('auth.ethiokidslearn')}</Text>
         
         <View style={styles.inputContainer}>
           <View style={styles.inputIcon}>
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#1E90FF',
     fontWeight: '600',
-  },
+  },  
   container: {
     flex: 1,
     justifyContent: 'center',

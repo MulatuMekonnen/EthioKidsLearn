@@ -18,8 +18,10 @@ import { useTheme } from '../../context/ThemeContext';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import * as ImagePicker from 'expo-image-picker';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '../../services/firebase';
+// Import ProfileImageManager for Cloudinary uploads
+import ProfileImageManager from '../../components/ProfileImageManager';
+import { uploadToCloudinary } from '../../services/cloudinary';
 
 export default function AdminPanel({ navigation }) {
   const { user, logout } = useAuth();
@@ -75,30 +77,33 @@ export default function AdminPanel({ navigation }) {
     }
   };
 
-  // Upload image to Firebase Storage
+  // Upload image to Cloudinary instead of Firebase Storage
   const uploadProfileImage = async (uri) => {
     if (!user?.uid) return;
     
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Show loading indicator
+      Alert.alert('Uploading', 'Uploading profile picture...');
       
-      const storage = getStorage();
-      const storageRef = ref(storage, `profileImages/${user.uid}`);
+      // Upload to Cloudinary
+      const result = await uploadToCloudinary(uri);
       
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      // Update user document with image URL
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        profileImage: downloadURL
-      });
-      
-      setProfileImage(downloadURL);
+      if (result.success) {
+        // Update user document with Cloudinary image URL
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          profileImage: result.url,
+          cloudinaryPublicId: result.publicId // Store public ID for future reference
+        });
+        
+        setProfileImage(result.url);
+        Alert.alert('Success', 'Profile picture updated successfully');
+      } else {
+        throw new Error('Failed to upload image to Cloudinary');
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
+      Alert.alert('Error', 'Failed to upload image. Please try again.');
     }
   };
 
@@ -140,20 +145,14 @@ export default function AdminPanel({ navigation }) {
         style={styles.profilePicContainer} 
         onPress={() => setShowProfileMenu(!showProfileMenu)}
       >
-        {profileImage ? (
-          <Image 
-            source={{ uri: profileImage }} 
-            style={styles.profilePic} 
-          />
-        ) : (
-          <View style={[styles.profilePlaceholder, { 
-            backgroundColor: profileColor,
-          }]}>
-            <View style={styles.profileInnerShadow}>
-              <Text style={styles.profilePlaceholderText}>{getInitials()}</Text>
-            </View>
-          </View>
-        )}
+        <ProfileImageManager 
+          userId={user?.uid}
+          imageUrl={profileImage}
+          size={44}
+          name={userName}
+          editable={false}
+        />
+        
         {showProfileMenu && (
           <Modal
             transparent={true}
@@ -171,28 +170,13 @@ export default function AdminPanel({ navigation }) {
                   }]}>
                     <View style={styles.profileMenuHeader}>
                       <View style={styles.profileImageContainer}>
-                        {profileImage ? (
-                          <Image 
-                            source={{ uri: profileImage }} 
-                            style={styles.profileMenuImage} 
-                          />
-                        ) : (
-                          <View style={[styles.menuProfilePlaceholder, { 
-                            backgroundColor: profileColor
-                          }]}>
-                            <View style={styles.menuProfileInnerShadow}>
-                              <Text style={styles.menuProfilePlaceholderText}>{getInitials()}</Text>
-                            </View>
-                          </View>
-                        )}
-                        <TouchableOpacity 
-                          style={styles.editProfileButton}
-                          onPress={pickImage}
-                        >
-                          <View style={styles.editIconContainer}>
-                            <EditIcon />
-                          </View>
-                        </TouchableOpacity>
+                        <ProfileImageManager 
+                          userId={user?.uid}
+                          imageUrl={profileImage}
+                          size={80}
+                          name={userName}
+                          onImageChange={(url) => setProfileImage(url)}
+                        />
                       </View>
                       <Text style={[styles.profileMenuName, { color: currentTheme.text }]}>{userName}</Text>
                       <Text style={[styles.profileMenuEmail, { color: currentTheme.textSecondary }]}>{userEmail}</Text>
@@ -239,13 +223,13 @@ export default function AdminPanel({ navigation }) {
                       style={styles.profileMenuItem}
                       onPress={logout}
                     >
-                      <View style={[styles.profileMenuItemIcon, { marginLeft: -3 }]}>
+                      <View style={styles.profileMenuItemIcon}>
                         <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-                          <Path d="M16 17L21 12M21 12L16 7M21 12H9" stroke={currentTheme.danger} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke={currentTheme.danger} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M16 17L21 12M21 12L16 7M21 12H9" stroke={currentTheme.danger || "#F44336"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke={currentTheme.danger || "#F44336"} strokeWidth="2" strokeLinecap="round" />
                         </Svg>
                       </View>
-                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger }]}>Logout</Text>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger || "#F44336" }]}>Logout</Text>
                     </TouchableOpacity>
                   </View>
                 </TouchableWithoutFeedback>

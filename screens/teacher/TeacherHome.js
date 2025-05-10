@@ -19,9 +19,11 @@ import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
 import * as ImagePicker from 'expo-image-picker';
 import { doc, getDoc, updateDoc, collection, getDocs, query, where } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db } from '../../services/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Import Cloudinary service and ProfileImageManager
+import Cloudinary, { uploadToCloudinary } from '../../services/cloudinary';
+import ProfileImageManager from '../../components/ProfileImageManager';
 
 export default function TeacherHome({ navigation }) {
   const { user, logout } = useAuth();
@@ -70,52 +72,216 @@ export default function TeacherHome({ navigation }) {
     setDashboardData(prev => ({ ...prev, isLoading: true }));
     
     try {
-      // Fetch students count from Firebase
-      const studentsQuery = query(collection(db, 'users'), where('role', '==', 'child'));
-      const studentsSnapshot = await getDocs(studentsQuery);
-      const studentsCount = studentsSnapshot.size;
-
+      // Fetch students count from Firebase - try multiple approaches to get the most accurate count
+      let studentsCount = 0;
+      
+      // 1. First approach: Check direct children collection
+      try {
+        const childrenCollection = collection(db, 'children');
+        const childrenSnapshot = await getDocs(childrenCollection);
+        studentsCount = childrenSnapshot.size;
+      } catch (error) {
+        console.log('No direct children collection found, trying alternatives');
+      }
+      
+      // 2. Second approach: Check users with role 'child'
+      if (studentsCount === 0) {
+        try {
+          const childrenQuery = query(collection(db, 'users'), where('role', '==', 'child'));
+          const childrenSnapshot = await getDocs(childrenQuery);
+          studentsCount = childrenSnapshot.size;
+        } catch (error) {
+          console.log('Error checking child users, trying next approach');
+        }
+      }
+      
+      // 3. Third approach: Check lesson_progress collection for unique childIds
+      if (studentsCount === 0) {
+        try {
+          const lessonProgressCollection = collection(db, 'lesson_progress');
+          const lessonProgressSnapshot = await getDocs(lessonProgressCollection);
+          
+          // Extract unique childIds
+          const uniqueChildIds = new Set();
+          lessonProgressSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.childId) {
+              uniqueChildIds.add(data.childId);
+            }
+          });
+          
+          studentsCount = uniqueChildIds.size;
+        } catch (error) {
+          console.log('Error checking lesson_progress, trying next approach');
+        }
+      }
+      
+      // 4. Fourth approach: Check quiz_results collection for unique childIds
+      if (studentsCount === 0) {
+        try {
+          const quizResultsCollection = collection(db, 'quiz_results');
+          const quizResultsSnapshot = await getDocs(quizResultsCollection);
+          
+          // Extract unique childIds
+          const uniqueChildIds = new Set();
+          quizResultsSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.childId) {
+              uniqueChildIds.add(data.childId);
+            }
+          });
+          
+          studentsCount = uniqueChildIds.size;
+        } catch (error) {
+          console.log('Error checking quiz_results');
+        }
+      }
+      
+      // Fallback to local storage if no students found yet
+      if (studentsCount === 0) {
+        const childrenJson = await AsyncStorage.getItem('children');
+        if (childrenJson) {
+          const childrenData = JSON.parse(childrenJson);
+          studentsCount = childrenData.filter(child => child && child.name).length;
+        }
+      }
+      
       // Fetch lessons count
       let lessonsCount = 0;
+      let mathLessons = 0;
+      let englishLessons = 0;
+      let amharicLessons = 0;
+      let oromoLessons = 0;
+      
       // Try to get lessons count from various collections if they exist
       try {
-        const lessonsSnapshot = await getDocs(collection(db, 'lessons'));
-        lessonsCount = lessonsSnapshot.size;
+        // Math lessons
+        const mathCollection = collection(db, 'lessons_math');
+        const mathSnapshot = await getDocs(mathCollection);
+        mathLessons = mathSnapshot.size;
+        
+        // English lessons
+        const englishCollection = collection(db, 'lessons_english');
+        const englishSnapshot = await getDocs(englishCollection);
+        englishLessons = englishSnapshot.size;
+        
+        // Amharic lessons
+        const amharicCollection = collection(db, 'lessons_amharic');
+        const amharicSnapshot = await getDocs(amharicCollection);
+        amharicLessons = amharicSnapshot.size;
+        
+        // Oromo lessons
+        const oromoCollection = collection(db, 'lessons_oromo');
+        const oromoSnapshot = await getDocs(oromoCollection);
+        oromoLessons = oromoSnapshot.size;
+        
+        // Sum all lessons
+        lessonsCount = mathLessons + englishLessons + amharicLessons + oromoLessons;
       } catch (e) {
-        console.log('No lessons collection found, using default count');
-        lessonsCount = 14; // Default if no lessons collection
+        console.log('Error fetching subject-specific lesson collections');
       }
-
-      // Get quiz completion data from AsyncStorage
-      let completionRate = 0;
-      try {
-        const quizResultsJson = await AsyncStorage.getItem('quizResults');
-        if (quizResultsJson) {
-          const quizResults = JSON.parse(quizResultsJson);
-          
-          // Calculate completion rate based on unique students who took quizzes
-          if (studentsCount > 0 && quizResults.length > 0) {
-            const uniqueStudents = new Set(quizResults.map(result => result.childId)).size;
-            // Calculate completion as a percentage of students who attempted at least one quiz
-            completionRate = Math.round((uniqueStudents / studentsCount) * 100);
-          } else {
-            // Fallback to sample data if no real data is available
-            completionRate = 92;
-          }
-        } else {
-          // No quiz results found, use sample value
-          completionRate = 92;
+      
+      // If no lessons found, try generic lessons collection
+      if (lessonsCount === 0) {
+        try {
+          const lessonsCollection = collection(db, 'lessons');
+          const lessonsSnapshot = await getDocs(lessonsCollection);
+          lessonsCount = lessonsSnapshot.size;
+        } catch (e) {
+          console.log('No lessons collection found');
         }
-      } catch (e) {
-        console.error('Error fetching quiz results:', e);
-        completionRate = 92; // Default fallback
       }
-
-      // Update dashboard data state
+      
+      // Try lesson_content collection if still no lessons
+      if (lessonsCount === 0) {
+        try {
+          const lessonContentCollection = collection(db, 'lesson_content');
+          const lessonContentSnapshot = await getDocs(lessonContentCollection);
+          lessonsCount = lessonContentSnapshot.size;
+        } catch (e) {
+          console.log('No lesson_content collection found, using default count');
+          lessonsCount = 14; // Default if no lessons collection
+        }
+      }
+      
+      // Calculate completion rate
+      let completionRate = 0;
+      
+      // First try to calculate from lesson_progress collection
+      if (studentsCount > 0) {
+        try {
+          // Get all lesson progress data
+          const lessonProgressCollection = collection(db, 'lesson_progress');
+          const lessonProgressSnapshot = await getDocs(lessonProgressCollection);
+          
+          const studentProgress = {};
+          
+          // Group by student
+          lessonProgressSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.childId && data.isCompleted) {
+              if (!studentProgress[data.childId]) {
+                studentProgress[data.childId] = { completed: 0, total: 0 };
+              }
+              studentProgress[data.childId].total++;
+              if (data.isCompleted) {
+                studentProgress[data.childId].completed++;
+              }
+            }
+          });
+          
+          // Calculate average completion percentage across students
+          if (Object.keys(studentProgress).length > 0) {
+            let totalCompletionPercent = 0;
+            let studentsWithProgress = 0;
+            
+            Object.values(studentProgress).forEach(progress => {
+              if (progress.total > 0) {
+                studentsWithProgress++;
+                totalCompletionPercent += (progress.completed / progress.total) * 100;
+              }
+            });
+            
+            if (studentsWithProgress > 0) {
+              completionRate = Math.round(totalCompletionPercent / studentsWithProgress);
+            }
+          }
+        } catch (e) {
+          console.log('Error calculating completion from lesson_progress');
+        }
+      }
+      
+      // If no completion rate calculated yet, try quiz results
+      if (completionRate === 0) {
+        try {
+          const quizResultsJson = await AsyncStorage.getItem('quizResults');
+          if (quizResultsJson) {
+            const quizResults = JSON.parse(quizResultsJson);
+            
+            // Calculate completion rate based on unique students who took quizzes
+            if (studentsCount > 0 && quizResults.length > 0) {
+              const uniqueStudents = new Set(quizResults.map(result => result.childId)).size;
+              // Calculate completion as a percentage of students who attempted at least one quiz
+              completionRate = Math.round((uniqueStudents / studentsCount) * 100);
+            } else {
+              // Fallback to default value
+              completionRate = 75;
+            }
+          } else {
+            // No quiz results found, use default value
+            completionRate = 75;
+          }
+        } catch (e) {
+          console.error('Error fetching quiz results:', e);
+          completionRate = 75; // Default fallback
+        }
+      }
+      
+      // Update dashboard data state with real or fallback values
       setDashboardData({
         studentsCount: studentsCount || 24, // Fallback to 24 if no data
         lessonsCount: lessonsCount || 14,   // Fallback to 14 if no data
-        completionRate: completionRate,     // Already has fallback
+        completionRate: completionRate || 75, // Fallback to 75% if no data
         isLoading: false
       });
     } catch (error) {
@@ -124,7 +290,7 @@ export default function TeacherHome({ navigation }) {
       setDashboardData({
         studentsCount: 24,
         lessonsCount: 14,
-        completionRate: 92,
+        completionRate: 75,
         isLoading: false
       });
     }
@@ -165,30 +331,33 @@ export default function TeacherHome({ navigation }) {
     }
   };
 
-  // Upload image to Firebase Storage
+  // Upload image to Cloudinary instead of Firebase Storage
   const uploadProfileImage = async (uri) => {
     if (!user?.uid) return;
     
     try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
+      // Show loading indicator
+      Alert.alert('Uploading', 'Uploading profile picture...');
       
-      const storage = getStorage();
-      const storageRef = ref(storage, `profileImages/${user.uid}`);
+      // Upload to Cloudinary
+      const result = await uploadToCloudinary(uri);
       
-      await uploadBytes(storageRef, blob);
-      const downloadURL = await getDownloadURL(storageRef);
-      
-      // Update user document with image URL
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        profileImage: downloadURL
-      });
-      
-      setProfileImage(downloadURL);
+      if (result.success) {
+        // Update user document with Cloudinary image URL
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          profileImage: result.url,
+          cloudinaryPublicId: result.publicId // Store public ID for future reference
+        });
+        
+        setProfileImage(result.url);
+        Alert.alert('Success', 'Profile picture updated successfully');
+      } else {
+        throw new Error('Failed to upload image to Cloudinary');
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image');
+      Alert.alert('Error', 'Failed to upload image. Please try again.');
     }
   };
 
@@ -230,20 +399,14 @@ export default function TeacherHome({ navigation }) {
         style={styles.profilePicContainer} 
         onPress={() => setShowProfileMenu(!showProfileMenu)}
       >
-        {profileImage ? (
-          <Image 
-            source={{ uri: profileImage }} 
-            style={styles.profilePic} 
-          />
-        ) : (
-          <View style={[styles.profilePlaceholder, { 
-            backgroundColor: profileColor,
-          }]}>
-            <View style={styles.profileInnerShadow}>
-              <Text style={styles.profilePlaceholderText}>{getInitials()}</Text>
-            </View>
-          </View>
-        )}
+        <ProfileImageManager 
+          userId={user?.uid}
+          imageUrl={profileImage}
+          size={44}
+          name={userName}
+          editable={false}
+        />
+        
         {showProfileMenu && (
           <Modal
             transparent={true}
@@ -261,28 +424,13 @@ export default function TeacherHome({ navigation }) {
                   }]}>
                     <View style={styles.profileMenuHeader}>
                       <View style={styles.profileImageContainer}>
-                        {profileImage ? (
-                          <Image 
-                            source={{ uri: profileImage }} 
-                            style={styles.profileMenuImage} 
-                          />
-                        ) : (
-                          <View style={[styles.menuProfilePlaceholder, { 
-                            backgroundColor: profileColor
-                          }]}>
-                            <View style={styles.menuProfileInnerShadow}>
-                              <Text style={styles.menuProfilePlaceholderText}>{getInitials()}</Text>
-                            </View>
-                          </View>
-                        )}
-                        <TouchableOpacity 
-                          style={styles.editProfileButton}
-                          onPress={pickImage}
-                        >
-                          <View style={styles.editIconContainer}>
-                            <EditIcon />
-                          </View>
-                        </TouchableOpacity>
+                        <ProfileImageManager 
+                          userId={user?.uid}
+                          imageUrl={profileImage}
+                          size={80}
+                          name={userName}
+                          onImageChange={(url) => setProfileImage(url)}
+                        />
                       </View>
                       <Text style={[styles.profileMenuName, { color: currentTheme.text }]}>{userName}</Text>
                       <Text style={[styles.profileMenuEmail, { color: currentTheme.textSecondary }]}>{userEmail}</Text>
@@ -564,32 +712,6 @@ export default function TeacherHome({ navigation }) {
             </TouchableOpacity>
           ))}
         </View>
-        
-        {/* Recent Activity */}
-        <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Recent Activity</Text>
-        <View style={[styles.activityCard, { backgroundColor: currentTheme.card }]}>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <Text style={[styles.activityText, { color: currentTheme.text }]}>
-              Submitted reports for 8 students
-            </Text>
-            <Text style={[styles.activityTime, { color: currentTheme.textSecondary }]}>2h ago</Text>
-          </View>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <Text style={[styles.activityText, { color: currentTheme.text }]}>
-              Created new math lesson
-            </Text>
-            <Text style={[styles.activityTime, { color: currentTheme.textSecondary }]}>Yesterday</Text>
-          </View>
-          <View style={styles.activityItem}>
-            <View style={styles.activityDot} />
-            <Text style={[styles.activityText, { color: currentTheme.text }]}>
-              Provided feedback on 3 assignments
-            </Text>
-            <Text style={[styles.activityTime, { color: currentTheme.textSecondary }]}>2 days ago</Text>
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -743,42 +865,6 @@ const styles = StyleSheet.create({
   menuDescription: {
     fontSize: 13,
     lineHeight: 18,
-  },
-  activityCard: {
-    margin: 16,
-    marginTop: 8,
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 3,
-  },
-  activityItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
-  },
-  activityDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#4285F4',
-    marginRight: 12,
-  },
-  activityText: {
-    flex: 1,
-    fontSize: 14,
-  },
-  activityTime: {
-    fontSize: 12,
-    marginLeft: 8,
   },
   profilePicContainer: {
     width: 44,

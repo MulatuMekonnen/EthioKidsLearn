@@ -2,6 +2,8 @@
   "auth": {
     "login": "Login",
     "signup": "Sign Up",
+    "childLogin": "Child Login",
+    "parentLogin": "Parent Login",
     "noAccount": "Don't have an account? Sign up",
     "haveAccount": "Already have an account? Login",
     "name": "full name",
@@ -14,7 +16,15 @@
     "addChild": "Add Child",
     "children": "Children",
     "role": "Role",
-    "welcome": "Welcome"
+    "welcome": "Welcome",
+    "selectRole": "Select Role",
+    "getStarted": "Get Started",
+    "progress": "Progress",
+    "lessonsCompleted": "Lessons Completed",
+    "quizzesCompleted": "Quizzes Completed",
+    "totalLessons": "Total Lessons",
+    "totalQuizzes": "Total Quizzes",
+    "ethiokidslearn": "Ethio Kids Learn"
   },
   "roles": {
     "parent": "Parent",
@@ -27,7 +37,7 @@
     "emailRequired": "Email is required",
     "invalidEmail": "Please enter a valid email",
     "passwordRequired": "Password is required",
-    "passwordTooShort": "Password must be at least 6 characters",
+    "passwordTooShort": "Password must be at least 8 characters",
     "roleRequired": "Please select a role",
     "pinRequired": "PIN is required",
     "fillAllFields": "Please fill in all fields",

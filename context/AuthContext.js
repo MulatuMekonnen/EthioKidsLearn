@@ -105,7 +105,7 @@ export function AuthProvider({ children }) {
         // This ensures they at least log in to the app
         setUser(cred.user);
         setUserRole('unknown');
-        return cred.user;
+      return cred.user;
       }
     } catch (authError) {
       console.error('Login authentication error:', authError);

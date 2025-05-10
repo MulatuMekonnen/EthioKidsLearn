@@ -15,10 +15,12 @@ import { useLanguage } from '../context/LanguageContext';
 const { width, height } = Dimensions.get('window');
 
 const WelcomeText = () => {
+  const { translate } = useLanguage();
+  const welcomeText = translate('auth.welcome') || 'WELCOME';
   const colors = ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#4B0082','#8B00FF'];
   return (
     <View style={styles.welcomeContainer}>
-      {'WELCOME'.split('').map((letter, idx) => (
+      {welcomeText.split('').map((letter, idx) => (
         <Animatable.Text
           key={idx}
           animation="bounceIn"
@@ -26,7 +28,7 @@ const WelcomeText = () => {
           style={[
             styles.welcomeLetter,
             {
-              color: colors[idx],
+              color: colors[idx % colors.length],
               // add perspective so rotateY looks 3D
               transform: [
                 { perspective: 1000 },
@@ -64,7 +66,7 @@ const WelcomeScreen = ({ navigation }) => {
         style={styles.loginButton}
         onPress={() => navigation.navigate('Login')}
       >
-          <Text style={styles.buttonText}>{translate('auth.login')}</Text>
+          <Text style={styles.buttonText}>{translate('auth.getStarted')}</Text>
       </TouchableOpacity>
     </Animatable.View>
   </SafeAreaView>
