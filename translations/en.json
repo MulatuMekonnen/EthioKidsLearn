@@ -24,7 +24,8 @@
     "quizzesCompleted": "Quizzes Completed",
     "totalLessons": "Total Lessons",
     "totalQuizzes": "Total Quizzes",
-    "ethiokidslearn": "Ethio Kids Learn"
+    "ethiokidslearn": "Ethio Kids Learn",
+    "logout": "Logout"
   },
   "roles": {
     "parent": "Parent",
@@ -51,10 +52,137 @@
     "delete": "Delete",
     "close": "Close",
     "selectLanguage": "Select Language",
-    "language": "Language"
+    "language": "Language",
+    "save": "Save",
+    "back": "Back"
   },
   "lessons": {
     "greeting": "Hello \"{0}\"!",
-    "chooseSubject": "Choose a subject to learn"
+    "chooseSubject": "Choose a subject to learn",
+    "title": "Lessons",
+    "loading": "Loading lessons...",
+    "progress": "Progress",
+    "lessonsLabel": "lessons",
+    "learningAs": "Learning as"
+  },
+  "parent": {
+    "dashboard": "Parent Dashboard",
+    "dashboardDesc": "Manage child profiles and view quiz results",
+    "progressReport": "Progress Report",
+    "progressReportDesc": "View detailed learning progress",
+    "childLogin": "Child Login",
+    "childLoginDesc": "Switch to child profile login screen",
+    "addChild": "Add Child",
+    "manageChildren": "Manage Children",
+    "viewProgress": "View Progress",
+    "setPin": "Set PIN",
+    "quickAccess": "Quick Access",
+    "noChildrenYet": "No children added yet",
+    "addChildToTrack": "Add a child to start tracking their progress",
+    "createPin": "Create a 4-digit PIN for the child to log in",
+    "confirmPin": "Confirm PIN",
+    "digits": "digits",
+    "createNewPin": "Create a new PIN",
+    "createNewPinFor": "Create a new PIN for",
+    "newPin": "New PIN"
+  },
+  "profile": {
+    "myProfile": "My Profile",
+    "editProfile": "Edit Profile",
+    "profileSettings": "Profile Settings",
+    "accountSettings": "Account Settings",
+    "personalInfo": "Personal Information",
+    "changePassword": "Change Password",
+    "deleteAccount": "Delete Account"
+  },
+  "theme": {
+    "darkTheme": "Dark Theme",
+    "lightTheme": "Light Theme",
+    "systemTheme": "System Theme"
+  },
+  "subjects": {
+    "math": {
+      "title": "Math",
+      "description": "Learn numbers, counting and basic arithmetic"
+    },
+    "english": {
+      "title": "English",
+      "description": "Practice letters, words and basic reading"
+    },
+    "አማርኛ": {
+      "title": "አማርኛ",
+      "description": "Learn Amharic alphabet and words"
+    },
+    "a/oromo": {
+      "title": "A/Oromo",
+      "description": "Learn Oromo language basics"
+    },
+    "animals_and_their_sound": {
+      "title": "Animals and their Sound",
+      "description": "Discover animals and their sounds"
+    },
+    "time_and_calendar": {
+      "title": "Time and Calendar",
+      "description": "Learn about time, days and months"
+    }
+  },
+  "child": {
+    "selectProfile": "Select your profile",
+    "noProfiles": "No profiles found",
+    "askParent": "Ask your parent to create a profile for you",
+    "enterPin": "Enter your PIN to continue",
+    "incorrectPin": "Incorrect PIN",
+    "tryAgain": "Please try again"
+  },
+  "math": {
+    "title": "Mathematics",
+    "learnToCount": "Learn to Count",
+    "learnToCountDesc": "Learn numbers from 1-20 with fun visual aids and interactive exercises.",
+    "addition": "Addition",
+    "additionDesc": "Practice adding numbers with easy-to-understand examples and games.",
+    "subtraction": "Subtraction",
+    "subtractionDesc": "Master the basics of subtraction through step-by-step lessons.",
+    "multiplication": "Multiplication",
+    "multiplicationDesc": "Learn multiplication tables and solve fun multiplication puzzles.",
+    "division": "Division",
+    "divisionDesc": "Understand division concepts with visual aids and simple problems.",
+    "mathQuiz": "Math Quiz",
+    "mathQuizDesc": "Test your math skills with quizzes covering all the topics you've learned.",
+    "mathContent": "Math Content",
+    "mathContentDesc": "View and download approved math content from teachers."
+  },
+  "animals": {
+    "title": "Animal Sounds",
+    "lion": "Lion",
+    "elephant": "Elephant",
+    "giraffe": "Giraffe",
+    "zebra": "Zebra",
+    "monkey": "Monkey"
+  },
+  "alphabet": {
+    "title": "Alphabet Lesson",
+    "dragAndDrop": "Drag and drop activity goes here"
+  },
+  "progressReport": {
+    "title": "Progress Report",
+    "loading": "Loading data...",
+    "teacherReports": "Teacher Reports",
+    "teacherFeedback": "Feedback from teachers for",
+    "noReports": "No teacher reports available for this subject",
+    "overview": "Overview",
+    "minutes": "Minutes",
+    "quizzes": "Quizzes",
+    "average": "Average",
+    "testScores": "Test Scores",
+    "noScores": "No test scores available for",
+    "subjectDistribution": "Subject Distribution",
+    "quizCompletion": "Quiz completion by subject",
+    "weeklyActivity": "Weekly Activity",
+    "minutesLearning": "Minutes spent learning",
+    "childProgress": "Child Progress",
+    "performanceByChild": "Performance by child",
+    "noChildData": "No child data available",
+    "completed": "Completed",
+    "noData": "No quiz data available"
   }
 } 

@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { collection, query, where, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
@@ -24,6 +25,7 @@ export default function LessonsScreen() {
   const route = useRoute();
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const [activeChild, setActiveChild] = useState(null);
   const [progress, setProgress] = useState({});
   const [loading, setLoading] = useState(true);
@@ -254,6 +256,9 @@ export default function LessonsScreen() {
     const subjectProgress = getProgressForSubject(subject);
     const progressPercentage = subjectProgress.percentage || 0;
     
+    // Get translated description if available
+    const translatedDescription = translate(`subjects.${subject.title.toLowerCase().replace(/\s+/g, '_')}.description`, { defaultValue: subject.description });
+    
     return (
       <TouchableOpacity
         key={subject.id}
@@ -275,10 +280,10 @@ export default function LessonsScreen() {
         </View>
         <View style={styles.subjectContent}>
           <Text style={[styles.subjectTitle, { color: currentTheme?.text || '#333' }]}>
-            {subject.title}
+            {translate(`subjects.${subject.title.toLowerCase().replace(/\s+/g, '_')}.title`, { defaultValue: subject.title })}
           </Text>
           <Text style={[styles.subjectDescription, { color: currentTheme?.textSecondary || 'rgba(0,0,0,0.7)' }]}>
-            {subject.description}
+            {translatedDescription}
           </Text>
           
           {/* Progress bar */}
@@ -288,10 +293,10 @@ export default function LessonsScreen() {
           
           <View style={styles.progressStats}>
             <Text style={[styles.progressText, { color: currentTheme?.textSecondary || 'rgba(0,0,0,0.7)' }]}>
-              Progress: {progressPercentage}%
+              {translate('lessons.progress')}: {progressPercentage}%
             </Text>
             <Text style={[styles.lessonCount, { color: currentTheme?.textSecondary || 'rgba(0,0,0,0.7)' }]}>
-              {subjectProgress.completed}/{subjectProgress.total} lessons
+              {subjectProgress.completed}/{subjectProgress.total} {translate('lessons.lessonsLabel')}
             </Text>
           </View>
         </View>
@@ -314,13 +319,13 @@ export default function LessonsScreen() {
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Lessons</Text>
+          <Text style={styles.headerTitle}>{translate('lessons.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={currentTheme?.primary || '#2196F3'} />
           <Text style={[styles.loadingText, { color: currentTheme?.text || '#fff' }]}>
-            Loading lessons...
+            {translate('lessons.loading')}
           </Text>
         </View>
       </SafeAreaView>
@@ -336,16 +341,16 @@ export default function LessonsScreen() {
         >
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Lessons</Text>
+        <Text style={styles.headerTitle}>{translate('lessons.title')}</Text>
         <View style={styles.headerRight} />
       </View>
 
       <View style={styles.welcome}>
         <Text style={[styles.greeting, { color: currentTheme?.text || '#333' }]}>
-          Hello {userName}!
+          {translate('lessons.greeting', { 0: userName })}
         </Text>
         <Text style={[styles.subtitle, { color: currentTheme?.textSecondary || '#666' }]}>
-          Choose a subject to learn
+          {translate('lessons.chooseSubject')}
         </Text>
       </View>
 
@@ -362,7 +367,7 @@ export default function LessonsScreen() {
           </View>
           <View>
             <Text style={[styles.activeChildText, { color: currentTheme?.text || '#fff' }]}>
-              Learning as: {activeChild.name}
+              {translate('lessons.learningAs')}: {activeChild.name}
             </Text>
           </View>
         </View>

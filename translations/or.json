@@ -2,59 +2,187 @@
   "auth": {
     "login": "Seeni",
     "signup": "Galmaa'i",
-    "childLogin": "seensi daa’immanii",
-    "parentLogin": "Seeni maattin",
-    "noAccount": "Akkaawuntii hin qabduu? Galmaa'i",
-    "haveAccount": "Akkaawuntii qabdaa? Seeni",
-    "name": "Maqaa Guutuu",
+    "childLogin": "Seensa Daa'imaa",
+    "parentLogin": "Seensa Maatii",
+    "noAccount": "Herrega hin qabduu? Galmaa'i",
+    "haveAccount": "Herrega qabdaa? Seeni",
+    "name": "maqaa guutuu",
     "email": "Imeelii",
-    "password": "Jecha Iccitii",
-    "childName": "Maqaa Ilmaa",
-    "age": "Umurii",
-    "grade": "Dareesaa",
-    "pin": "Piinii",
-    "addChild": "Ilma Dabali",
-    "children": "Ilmaan",
-    "role": "Gahe",
-    "welcome": "Baga Nagaan Dhuftan",
-    "selectRole": "Gaheen Filadhu",
+    "password": "Jecha iccitii",
+    "childName": "Maqaa Daa'imaa",
+    "age": "Umrii",
+    "grade": "Kutaa",
+    "pin": "PIN",
+    "addChild": "Daa'ima Dabaluu",
+    "children": "Daa'imman",
+    "role": "Gahee",
+    "welcome": "Baga nagaan dhuftan",
+    "selectRole": "Gahee filadhu",
     "getStarted": "Jalqabi",
-    "progress": "Dhufta",
-    "lessonsCompleted": "barnootaXumurame",
-    "quizzesCompleted": "quizzesXumurameera",
-    "totalLessons": "waliigalaBarnoota",
-    "totalQuizzes": "quizzes waliigala",
-    "ethiokidslearn": "Ijoolleen Ethio Baradha"
+    "progress": "Fooyya'iinsa",
+    "lessonsCompleted": "Barnoota Xumuraman",
+    "quizzesCompleted": "Qormaata Xumuraman",
+    "totalLessons": "Barnootaa Waliigala",
+    "totalQuizzes": "Qormaata Waliigala",
+    "ethiokidslearn": "Ethio Kids Learn",
+    "logout": "Ba'i"
   },
   "roles": {
     "parent": "Maatii",
     "teacher": "Barsiisaa",
-    "admin": "Bulchiinsa"
+    "admin": "Bulchaa"
   },
   "errors": {
-    "title": "Dogoggorri",
-    "nameRequired": "Maqaa barbaachisaadha",
-    "emailRequired": "Imeelii barbaachisaadha",
-    "invalidEmail": "Fayyadamtaa imeelii sirrii ta'e",
+    "title": "Dogoggora",
+    "nameRequired": "Maqaan barbaachisaadha",
+    "emailRequired": "Imeeliin barbaachisaadha",
+    "invalidEmail": "Maaloo imeelii sirrii galchi",
     "passwordRequired": "Jecha iccitii barbaachisaadha",
-    "passwordTooShort": "Jecha iccitii yeroo dheeraa 6 qopheessaa ta'uu qaba",
-    "roleRequired": "Fayyadamtaa dhaamsa filadhaa",
-    "pinRequired": "Piinii barbaachisaadha",
-    "fillAllFields": "Fayyadamtaa bakka hunda guutaa",
-    "signupFailed": "Akkaawuntii uumuu hin danda'ne. Irra deebi'aa yaalaa.",
-    "loginFailed": "Seeni hin danda'ne. Jecha iccitii keessan mirkaneessaa.",
-    "invalidCredentials": "Maqaa ykn piinii dogoggoraa. Irra deebi'aa yaalaa."
+    "passwordTooShort": "Jecha iccitii yoo xiqqaate qubeewwan 8 qabaachuu qaba",
+    "roleRequired": "Maaloo gahee filadhu",
+    "pinRequired": "PIN barbaachisaadha",
+    "fillAllFields": "Maaloo bakka duwwaa hunda guuti",
+    "signupFailed": "Herrega uumuun hin milkoofne. Maaloo irra deebi'i yaali.",
+    "loginFailed": "Seenuun hin milkoofne. Maaloo ragaa kee mirkaneessi.",
+    "invalidCredentials": "Maqaa ykn PIN sirrii miti. Maaloo irra deebi'i yaali."
   },
   "common": {
-    "cancel": "Haqaa",
-    "add": "Dabali",
-    "delete": "Balleessi",
-    "close": "Cufaa",
-    "selectLanguage": "Afaan Filadhu",
-    "language": "Afaan"
+    "cancel": "Haqi",
+    "add": "Dabaluu",
+    "delete": "Haqi",
+    "close": "Cufuu",
+    "selectLanguage": "Afaan filadhu",
+    "language": "Afaan",
+    "save": "Olkaa'i",
+    "back": "Duubatti"
   },
   "lessons": {
     "greeting": "Akkam \"{0}\"!",
-    "chooseSubject": "Gosa barnootaa filadhu"
+    "chooseSubject": "Barnoota barattuu filadhu",
+    "title": "Barnootawwan",
+    "loading": "Barnootawwan fe'aa jira...",
+    "progress": "Fooyya'iinsa",
+    "lessonsLabel": "barnootawwan",
+    "learningAs": "Akka"
+  },
+  "parent": {
+    "dashboard": "Daashboordii Maatii",
+    "dashboardDesc": "Profaayila daa'immanii too'achuu fi bu'aa qormaataa ilaaluu",
+    "progressReport": "Gabaasa Fooyya'iinsaa",
+    "progressReportDesc": "Fooyya'iinsa barachuu bal'inaan ilaaluu",
+    "childLogin": "Seensa Daa'imaa",
+    "childLoginDesc": "Gara iskiriinii seensaa profaayila daa'imaa jijjiiri",
+    "addChild": "Daa'ima Dabaluu",
+    "manageChildren": "Daa'imman Bulchuu",
+    "viewProgress": "Fooyya'iinsa Ilaaluu",
+    "setPin": "PIN Qabsiisi",
+    "quickAccess": "Argannaa Saffisaa",
+    "noChildrenYet": "Daa'imman hanga ammaa hin dabalamne",
+    "addChildToTrack": "Fooyya'iinsa isaanii hordofuu jalqabuuf daa'ima dabaluu",
+    "createPin": "Daa'imni seenuuf PIN lakkoofsa 4 uumi",
+    "confirmPin": "PIN mirkaneessi",
+    "digits": "lakkoofsa",
+    "createNewPin": "PIN haaraa uumi",
+    "createNewPinFor": "PIN haaraa kanaaf uumi",
+    "newPin": "PIN Haaraa"
+  },
+  "profile": {
+    "myProfile": "Profaayila Koo",
+    "editProfile": "Profaayila Gulaali",
+    "profileSettings": "Qindaa'ina Profaayilaa",
+    "accountSettings": "Qindaa'ina Herregaa",
+    "personalInfo": "Odeeffannoo Dhuunfaa",
+    "changePassword": "Jecha Iccitii Jijjiiri",
+    "deleteAccount": "Herrega Haqi"
+  },
+  "theme": {
+    "darkTheme": "Bifa Dukkana",
+    "lightTheme": "Bifa Ifaa",
+    "systemTheme": "Bifa Sirna"
+  },
+  "subjects": {
+    "math": {
+      "title": "Herrega",
+      "description": "Lakkoofsa, lakkaa'uu fi herrega bu'uuraa baradhaa"
+    },
+    "english": {
+      "title": "Afaan Ingilizii",
+      "description": "Qubee, jechoota fi dubbisa bu'uuraa shaakalaa"
+    },
+    "አማርኛ": {
+      "title": "አማርኛ",
+      "description": "Qubee fi jechoota Afaan Amaaraa baradhaa"
+    },
+    "a/oromo": {
+      "title": "Afaan Oromoo",
+      "description": "Bu'uura Afaan Oromoo baradhaa"
+    },
+    "animals_and_their_sound": {
+      "title": "Beeyladootaa fi Sagalee Isaanii",
+      "description": "Beeyladootaa fi sagalee isaanii argadhaa"
+    },
+    "time_and_calendar": {
+      "title": "Yeroo fi Kalendaraa",
+      "description": "Waa'ee yeroo, guyyootaa fi ji'oota baradhaa"
+    }
+  },
+  "child": {
+    "selectProfile": "Profaayila kee filadhu",
+    "noProfiles": "Profaayilli hin argamne",
+    "askParent": "Maatii kee akka profaayila siif uumu gaafadhu",
+    "enterPin": "Itti fufuuf PIN kee galchi",
+    "incorrectPin": "PIN sirrii miti",
+    "tryAgain": "Maaloo irra deebi'i yaali"
+  },
+  "math": {
+    "title": "Herrega",
+    "learnToCount": "Lakkaa'uu Baradhaa",
+    "learnToCountDesc": "Lakkoofsa 1-20 gargaarsa mul'ata gammachiisaa fi shaakala hirmaachisaa waliin baradhaa.",
+    "addition": "Ida'ama",
+    "additionDesc": "Lakkoofsa ida'uu fakkeenya salphaatti hubatamuun danda'amu fi taphootaan shaakalaa.",
+    "subtraction": "Hir'isu",
+    "subtractionDesc": "Bu'uura hir'su tartiiba tartiibaan barnoota keessatti baradhaa.",
+    "multiplication": "Baay'isuu",
+    "multiplicationDesc": "Gabatee baay'isuu baradhaa fi hibboo baay'isuu gammachiisaa hiikaa.",
+    "division": "Hiruu",
+    "divisionDesc": "Yaada hiruu gargaarsa mul'ataa fi rakkoolee salphaa fayyadamuun hubadhu.",
+    "mathQuiz": "Qormaata Herregaa",
+    "mathQuizDesc": "Dandeettii herregaa keessan qormaata mata duree barataniin hunda kan haguugu fudhachuun qoradhaa.",
+    "mathContent": "Qabiyyee Herregaa",
+    "mathContentDesc": "Qabiyyee herregaa barsiisotaan mirkana'e ilaalaa fi buufadhaa."
+  },
+  "animals": {
+    "title": "Sagalee Beeyladootaa",
+    "lion": "Leenca",
+    "elephant": "Arba",
+    "giraffe": "Qeeransa",
+    "zebra": "Harree Dirree",
+    "monkey": "Jaldeessa"
+  },
+  "alphabet": {
+    "title": "Barnoota Qubee",
+    "dragAndDrop": "Hojii guuruu fi kaa'uu asitti dhufaa"
+  },
+  "progressReport": {
+    "title": "Gabaasa Ademsota",
+    "loading": "Ragaa fe'aa jira...",
+    "teacherReports": "Gabaasa Barsiisotaa",
+    "teacherFeedback": "Yaada barsiisotaa kan",
+    "noReports": "Gabaasni barsiisaa gosa barnoota kanaaf hin jiru",
+    "overview": "Ilaalcha Waliigalaa",
+    "minutes": "Daqiiqawwan",
+    "quizzes": "Qormaatawwan",
+    "average": "Giddugaleessa",
+    "testScores": "Qabxiiwwan Qormaataa",
+    "noScores": "Qabxiin qormaataa kan hin jiru",
+    "subjectDistribution": "Raabsaa Gosa Barnootaa",
+    "quizCompletion": "Xumuraa qormaataa gosa barnootaan",
+    "weeklyActivity": "Hojii Torbanee",
+    "minutesLearning": "Daqiiqawwan barachuuf fayyadaman",
+    "childProgress": "Fooyya'iinsa Daa'imaa",
+    "performanceByChild": "Raawwii daa'imaan",
+    "noChildData": "Ragaan daa'imaa hin argamne",
+    "completed": "Xumurame",
+    "noData": "Ragaan qormaataa hin argamne"
   }
 } 

@@ -15,6 +15,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db, storage } from '../../services/firebase';
 import { collection, addDoc, getDocs, doc, setDoc, deleteDoc, query, orderBy, getDoc, updateDoc } from 'firebase/firestore';
@@ -26,6 +27,7 @@ import { Svg, Path, Circle, Rect } from 'react-native-svg';
 export default function ParentDashboard() {
   const navigation = useNavigation();
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const { user } = useAuth();
   const [children, setChildren] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
@@ -423,7 +425,7 @@ export default function ParentDashboard() {
             />
           </Svg>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Parent Dashboard</Text>
+        <Text style={styles.headerTitle}>{translate('parent.dashboard')}</Text>
         <View style={{ width: 40 }} />
       </View>
 
@@ -507,7 +509,7 @@ export default function ParentDashboard() {
                 />
               </Svg>
               <Text style={[styles.profileStatText, { color: currentTheme.text }]}>
-                {children.length} {children.length === 1 ? 'Child' : 'Children'}
+                {children.length} {children.length === 1 ? translate('auth.children').slice(0, -1) : translate('auth.children')}
               </Text>
             </View>
             <View style={[styles.editProfileButton, { borderColor: currentTheme.primary }]}>
@@ -520,14 +522,14 @@ export default function ParentDashboard() {
                   strokeLinejoin="round"
                 />
               </Svg>
-              <Text style={[styles.editProfileText, { color: currentTheme.primary }]}>Edit Profile</Text>
+              <Text style={[styles.editProfileText, { color: currentTheme.primary }]}>{translate('profile.editProfile')}</Text>
             </View>
           </View>
         </TouchableOpacity>
 
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Children</Text>
+            <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>{translate('auth.children')}</Text>
             <TouchableOpacity 
               style={[styles.addButton, { backgroundColor: currentTheme.primary }]}
               onPress={() => setModalVisible(true)}
@@ -570,10 +572,10 @@ export default function ParentDashboard() {
                 />
               </Svg>
               <Text style={[styles.emptyStateText, { color: currentTheme.text }]}>
-                No children added yet
+                {translate('parent.noChildrenYet')}
               </Text>
               <Text style={[styles.emptyStateSubText, { color: currentTheme.text }]}>
-                Add a child to start tracking their progress
+                {translate('parent.addChildToTrack')}
               </Text>
             </View>
           ) : (
@@ -590,13 +592,13 @@ export default function ParentDashboard() {
                   <View style={styles.childDetails}>
                     <Text style={[styles.childName, { color: currentTheme.text }]}>{child.name}</Text>
                       <Text style={[styles.childAge, { color: currentTheme.textSecondary }]}>
-                      Age: {child.age} • Level: {child.level}
+                      {translate('auth.age')}: {child.age} • {translate('auth.grade')}: {child.level}
                     </Text>
                       
                       {childProgress[child.id] && (
                         <View style={styles.childProgressIndicator}>
                           <Text style={[styles.childProgressText, { color: currentTheme.textSecondary }]}>
-                            {getQuizzesCompleted(child.id)} quizzes completed
+                            {getQuizzesCompleted(child.id)} {translate('auth.quizzesCompleted')}
                       </Text>
                         </View>
                       )}
@@ -658,7 +660,7 @@ export default function ParentDashboard() {
         </View>
         
         <View style={[styles.section, { backgroundColor: currentTheme.card, borderColor: currentTheme.border }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Quick Access</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>{translate('parent.quickAccess')}</Text>
           <View style={styles.quickAccessRow}>
             <TouchableOpacity 
               style={[styles.quickAccessButton, { backgroundColor: currentTheme.background, borderColor: currentTheme.border }]}
@@ -680,7 +682,7 @@ export default function ParentDashboard() {
                   strokeLinejoin="round"
                 />
               </Svg>
-              <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>My Profile</Text>
+              <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>{translate('profile.myProfile')}</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -710,7 +712,7 @@ export default function ParentDashboard() {
                   strokeLinejoin="round"
                 />
               </Svg>
-              <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>Progress Report</Text>
+              <Text style={[styles.quickAccessText, { color: currentTheme.text }]}>{translate('parent.progressReport')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -725,11 +727,11 @@ export default function ParentDashboard() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: currentTheme.card }]}>
-              <Text style={[styles.modalTitle, { color: currentTheme.text }]}>Add Child</Text>
+              <Text style={[styles.modalTitle, { color: currentTheme.text }]}>{translate('auth.addChild')}</Text>
             
                 <TextInput
                   style={[styles.input, { borderColor: currentTheme.border, color: currentTheme.text }]}
-              placeholder="Child's Name"
+              placeholder={translate('auth.childName')}
               placeholderTextColor={currentTheme.textSecondary}
                   value={childName}
                   onChangeText={setChildName}
@@ -737,7 +739,7 @@ export default function ParentDashboard() {
               
                 <TextInput
                   style={[styles.input, { borderColor: currentTheme.border, color: currentTheme.text }]}
-              placeholder="Age (3-12)"
+              placeholder={`${translate('auth.age')} (3-12)`}
               placeholderTextColor={currentTheme.textSecondary}
                   value={childAge}
                   onChangeText={setChildAge}
@@ -745,7 +747,7 @@ export default function ParentDashboard() {
                 />
               
             <View style={styles.levelSelector}>
-              <Text style={[styles.levelLabel, { color: currentTheme.text }]}>Level:</Text>
+              <Text style={[styles.levelLabel, { color: currentTheme.text }]}>{translate('auth.grade')}:</Text>
               <View style={styles.levelOptions}>
                 {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
                     <TouchableOpacity
@@ -773,12 +775,12 @@ export default function ParentDashboard() {
               </View>
               
             <Text style={[styles.pinInstructions, { color: currentTheme.text }]}>
-              Create a 4-digit PIN for the child to log in
+              {translate('parent.createPin')}
             </Text>
             
                 <TextInput
                   style={[styles.input, { borderColor: currentTheme.border, color: currentTheme.text }]}
-              placeholder="4-digit PIN"
+              placeholder={`${translate('auth.pin')} (4 ${translate('parent.digits')})`}
               placeholderTextColor={currentTheme.textSecondary}
               value={childPin}
               onChangeText={setChildPin}
@@ -789,7 +791,7 @@ export default function ParentDashboard() {
               
                 <TextInput
                   style={[styles.input, { borderColor: currentTheme.border, color: currentTheme.text }]}
-                  placeholder="Confirm PIN"
+                  placeholder={translate('parent.confirmPin')}
               placeholderTextColor={currentTheme.textSecondary}
               value={confirmPin}
               onChangeText={setConfirmPin}
@@ -810,14 +812,14 @@ export default function ParentDashboard() {
                   setConfirmPin('');
                 }}
               >
-                <Text style={[styles.modalButtonText, { color: currentTheme.text }]}>Cancel</Text>
+                <Text style={[styles.modalButtonText, { color: currentTheme.text }]}>{translate('common.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={[styles.modalButton, styles.addButton, { backgroundColor: currentTheme.primary }]} 
               onPress={handleAddChild}
             >
-                <Text style={[styles.modalButtonText, { color: '#FFF' }]}>Add</Text>
+                <Text style={[styles.modalButtonText, { color: '#FFF' }]}>{translate('common.add')}</Text>
             </TouchableOpacity>
             </View>
           </View>
@@ -833,15 +835,15 @@ export default function ParentDashboard() {
       >
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: currentTheme.card }]}>
-            <Text style={[styles.modalTitle, { color: currentTheme.text }]}>Set PIN</Text>
+            <Text style={[styles.modalTitle, { color: currentTheme.text }]}>{translate('parent.setPin')}</Text>
             
             <Text style={[styles.pinInstructions, { color: currentTheme.text }]}>
-              {selectedChildForPin ? `Create a new PIN for ${selectedChildForPin.name}` : 'Create a new PIN'}
+              {selectedChildForPin ? `${translate('parent.createNewPinFor')} ${selectedChildForPin.name}` : translate('parent.createNewPin')}
             </Text>
             
             <TextInput
               style={[styles.input, { borderColor: currentTheme.border, color: currentTheme.text }]}
-              placeholder="New 4-digit PIN"
+              placeholder={`${translate('parent.newPin')} (4 ${translate('parent.digits')})`}
               placeholderTextColor={currentTheme.textSecondary}
               value={pin}
               onChangeText={setPin}
@@ -852,7 +854,7 @@ export default function ParentDashboard() {
             
             <TextInput
               style={[styles.input, { borderColor: currentTheme.border, color: currentTheme.text }]}
-              placeholder="Confirm PIN"
+              placeholder={translate('parent.confirmPin')}
               placeholderTextColor={currentTheme.textSecondary}
               value={confirmPin}
               onChangeText={setConfirmPin}
@@ -871,14 +873,14 @@ export default function ParentDashboard() {
                   setSelectedChildForPin(null);
                 }}
               >
-                <Text style={[styles.modalButtonText, { color: currentTheme.text }]}>Cancel</Text>
+                <Text style={[styles.modalButtonText, { color: currentTheme.text }]}>{translate('common.cancel')}</Text>
               </TouchableOpacity>
               
               <TouchableOpacity 
                 style={[styles.modalButton, styles.addButton, { backgroundColor: currentTheme.primary }]} 
               onPress={savePin}
             >
-                <Text style={[styles.modalButtonText, { color: '#FFF' }]}>Save</Text>
+                <Text style={[styles.modalButtonText, { color: '#FFF' }]}>{translate('common.save')}</Text>
             </TouchableOpacity>
             </View>
           </View>

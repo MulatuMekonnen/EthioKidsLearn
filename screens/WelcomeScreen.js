@@ -17,7 +17,6 @@ const { width, height } = Dimensions.get('window');
 const WelcomeText = () => {
   const { translate } = useLanguage();
   const welcomeText = translate('auth.welcome') || 'WELCOME';
-  const colors = ['#FF0000','#FF7F00','#FFFF00','#00FF00','#0000FF','#4B0082','#8B00FF'];
   return (
     <View style={styles.welcomeContainer}>
       {welcomeText.split('').map((letter, idx) => (
@@ -28,7 +27,7 @@ const WelcomeText = () => {
           style={[
             styles.welcomeLetter,
             {
-              color: colors[idx % colors.length],
+              color: '#2196F3',
               // add perspective so rotateY looks 3D
               transform: [
                 { perspective: 1000 },

@@ -2,17 +2,19 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Image } from 'react-native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
+import { useLanguage } from '../../context/LanguageContext';
 
 const animals = [
-  { name: 'Lion', sound: require('../../assets/sounds/animals/lion.mp3'), image: require('../../assets/images/animals/lion.png') },
-  { name: 'Elephant', sound: require('../../assets/sounds/animals/elephant.mp3'), image: require('../../assets/images/animals/elephant.png') },
-  { name: 'Giraffe', sound: require('../../assets/sounds/animals/giraffe.mp3'), image: require('../../assets/images/animals/giraffe.png') },
-  { name: 'Zebra', sound: require('../../assets/sounds/animals/zebra.mp3'), image: require('../../assets/images/animals/zebra.png') },
-  { name: 'Monkey', sound: require('../../assets/sounds/animals/monkey.mp3'), image: require('../../assets/images/animals/monkey.png') },
+  { name: 'lion', sound: require('../../assets/sounds/animals/lion.mp3'), image: require('../../assets/images/animals/lion.png') },
+  { name: 'elephant', sound: require('../../assets/sounds/animals/elephant.mp3'), image: require('../../assets/images/animals/elephant.png') },
+  { name: 'giraffe', sound: require('../../assets/sounds/animals/giraffe.mp3'), image: require('../../assets/images/animals/giraffe.png') },
+  { name: 'zebra', sound: require('../../assets/sounds/animals/zebra.mp3'), image: require('../../assets/images/animals/zebra.png') },
+  { name: 'monkey', sound: require('../../assets/sounds/animals/monkey.mp3'), image: require('../../assets/images/animals/monkey.png') },
 ];
 
 const AnimalsLessonScreen = ({ navigation }) => {
   const [sound, setSound] = React.useState();
+  const { translate } = useLanguage();
 
   async function playSound(soundFile) {
     try {
@@ -42,9 +44,9 @@ const AnimalsLessonScreen = ({ navigation }) => {
           style={styles.backButton}
           onPress={() => navigation.goBack()}
         >
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Text style={styles.backButtonText}>{`← ${translate('common.back')}`}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText}>Animal Sounds</Text>
+        <Text style={styles.headerText}>{translate('animals.title')}</Text>
       </View>
 
       <ScrollView style={styles.content}>
@@ -65,7 +67,7 @@ const AnimalsLessonScreen = ({ navigation }) => {
                   style={styles.animalImage}
                   resizeMode="contain"
                 />
-                <Text style={styles.animalName}>{animal.name}</Text>
+                <Text style={styles.animalName}>{translate(`animals.${animal.name}`)}</Text>
               </TouchableOpacity>
             </Animatable.View>
           ))}

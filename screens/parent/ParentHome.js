@@ -4,19 +4,23 @@ import { useAuth } from '../../context/AuthContext';
 import { useNavigation } from '@react-navigation/native';
 import { Svg, Path, Circle } from 'react-native-svg';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ProfileImageManager from '../../components/ProfileImageManager';
+import LanguageSelector from '../../components/LanguageSelector';
 
 export default function ParentHome() {
   const { user, logout } = useAuth();
   const navigation = useNavigation();
   const { currentTheme, toggleTheme } = useTheme();
+  const { translate, currentLanguage, languages, changeLanguage } = useLanguage();
   const [profileImage, setProfileImage] = useState(null);
   const [userName, setUserName] = useState('Parent');
   const [userEmail, setUserEmail] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLanguageSelector, setShowLanguageSelector] = useState(false);
 
   useEffect(() => {
     fetchUserProfile();
@@ -64,6 +68,17 @@ export default function ParentHome() {
   const handleToggleTheme = () => {
     toggleTheme();
     setShowProfileMenu(false);
+  };
+
+  // Handle language change
+  const handleLanguageChange = (langCode) => {
+    changeLanguage(langCode);
+    setShowLanguageSelector(false);
+  };
+
+  // Toggle language selector
+  const toggleLanguageSelector = () => {
+    setShowLanguageSelector(!showLanguageSelector);
   };
 
   // Custom profile picture component
@@ -122,7 +137,26 @@ export default function ParentHome() {
                           <Path d="M20 21C20 16.5817 16.4183 13 12 13C7.58172 13 4 16.5817 4 21" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
                         </Svg>
                       </View>
-                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>My Profile</Text>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>{translate('profile.myProfile')}</Text>
+                    </TouchableOpacity>
+                    
+                    <TouchableOpacity 
+                      style={styles.profileMenuItem}
+                      onPress={toggleLanguageSelector}
+                    >
+                      <View style={styles.profileMenuItemIcon}>
+                        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <Circle cx="12" cy="12" r="10" />
+                          <Path d="M2 12h20" />
+                          <Path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                        </Svg>
+                      </View>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>{translate('common.language')}</Text>
+                      <View style={styles.languageIndicator}>
+                        <Text style={[styles.languageCode, { color: currentTheme.primary }]}>
+                          {currentLanguage.toUpperCase()}
+                        </Text>
+                      </View>
                     </TouchableOpacity>
                     
                     <TouchableOpacity 
@@ -143,7 +177,7 @@ export default function ParentHome() {
                         </Svg>
                       </View>
                       <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>
-                        {currentTheme.mode === 'dark' ? 'Light Theme' : 'Dark Theme'}
+                        {currentTheme.mode === 'dark' ? translate('theme.lightTheme') : translate('theme.darkTheme')}
                       </Text>
                     </TouchableOpacity>
                     
@@ -157,8 +191,58 @@ export default function ParentHome() {
                           <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke={currentTheme.danger || "#F44336"} strokeWidth="2" strokeLinecap="round" />
                         </Svg>
                       </View>
-                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger || "#F44336" }]}>Logout</Text>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger || "#F44336" }]}>{translate('auth.logout')}</Text>
                     </TouchableOpacity>
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        )}
+        
+        {/* Language Selector Modal */}
+        {showLanguageSelector && (
+          <Modal
+            transparent={true}
+            visible={showLanguageSelector}
+            animationType="fade"
+            onRequestClose={() => setShowLanguageSelector(false)}
+          >
+            <TouchableWithoutFeedback onPress={() => setShowLanguageSelector(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback>
+                  <View style={[styles.languageMenu, { 
+                    backgroundColor: currentTheme.card,
+                    top: Platform.OS === 'ios' ? 100 : 80,
+                    right: 20
+                  }]}>
+                    <Text style={[styles.languageMenuTitle, { color: currentTheme.text }]}>
+                      {translate('common.selectLanguage')}
+                    </Text>
+                    
+                    {Object.values(languages).map((language) => (
+                      <TouchableOpacity
+                        key={language.code}
+                        style={[
+                          styles.languageMenuItem,
+                          currentLanguage === language.code && styles.selectedLanguageItem
+                        ]}
+                        onPress={() => handleLanguageChange(language.code)}
+                      >
+                        <Text style={[
+                          styles.languageMenuItemText, 
+                          { color: currentTheme.text },
+                          currentLanguage === language.code && { color: currentTheme.primary, fontWeight: 'bold' }
+                        ]}>
+                          {language.name}
+                        </Text>
+                        {currentLanguage === language.code && (
+                          <Svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={currentTheme.primary} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <Path d="M20 6L9 17L4 12" />
+                          </Svg>
+                        )}
+                      </TouchableOpacity>
+                    ))}
                   </View>
                 </TouchableWithoutFeedback>
               </View>
@@ -194,8 +278,8 @@ export default function ParentHome() {
   const menuItems = [
     {
       id: 1,
-      title: 'Parent Dashboard',
-      description: 'Manage child profiles and view quiz results',
+      title: translate('parent.dashboard'),
+      description: translate('parent.dashboardDesc'),
       icon: (color) => (
         <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
           <Circle cx="9" cy="7" r="4" stroke={color} strokeWidth="2" />
@@ -209,8 +293,8 @@ export default function ParentHome() {
     },
     {
       id: 3,
-      title: 'Progress Report',
-      description: 'View detailed learning progress',
+      title: translate('parent.progressReport'),
+      description: translate('parent.progressReportDesc'),
       icon: (color) => (
         <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
           <Path d="M8 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V16" stroke={color} strokeWidth="2" strokeLinecap="round" />
@@ -222,8 +306,8 @@ export default function ParentHome() {
     },
     {
       id: 4,
-      title: 'Child Login',
-      description: 'Switch to child profile login screen',
+      title: translate('parent.childLogin'),
+      description: translate('parent.childLoginDesc'),
       icon: (color) => (
         <Svg width="28" height="28" viewBox="0 0 24 24" fill="none">
           <Circle cx="12" cy="12" r="9" stroke={color} strokeWidth="2" />
@@ -239,9 +323,14 @@ export default function ParentHome() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
+      {/* Language selector in top-left corner */}
+      <View style={styles.languageSelectorContainer}>
+        <LanguageSelector isDark={true} />
+      </View>
+      
       <View style={[styles.header, { backgroundColor: currentTheme.primary }]}>
         <View style={styles.headerContent}>
-          <Text style={styles.welcomeText}>Welcome, <Text style={styles.userName}>{capitalizeWords(userName)}</Text></Text>
+          <Text style={styles.welcomeText}>{translate('auth.welcome')}, <Text style={styles.userName}>{capitalizeWords(userName)}</Text></Text>
         </View>
         <ProfilePicture />
       </View>
@@ -476,5 +565,54 @@ const styles = StyleSheet.create({
   },
   profileMenuItemText: {
     fontSize: 16,
+    flex: 1,
   },
+  languageSelectorContainer: {
+    position: 'absolute',
+    top: 15,
+    left: 15,
+    zIndex: 100,
+  },
+  languageMenu: {
+    position: 'absolute',
+    width: 200,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    overflow: 'hidden',
+    padding: 8,
+  },
+  languageMenuTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  languageMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  selectedLanguageItem: {
+    backgroundColor: 'rgba(33, 150, 243, 0.1)',
+  },
+  languageMenuItemText: {
+    fontSize: 16,
+  },
+  languageIndicator: {
+    marginLeft: 'auto',
+  },
+  languageCode: {
+    fontSize: 12,
+    fontWeight: 'bold',
+  }
 });

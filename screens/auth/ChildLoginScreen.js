@@ -16,6 +16,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Animatable from 'react-native-animatable';
 import { db, auth } from '../../services/firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { useLanguage } from '../../context/LanguageContext';
 
 // PIN Pad Component
 const PinPad = ({ onPinComplete }) => {
@@ -119,6 +120,7 @@ const PinPad = ({ onPinComplete }) => {
 
 export default function ChildLoginScreen() {
   const navigation = useNavigation();
+  const { translate } = useLanguage();
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -228,11 +230,11 @@ export default function ChildLoginScreen() {
           });
         } catch (error) {
           console.error('Error saving active child:', error);
-          Alert.alert('Error', 'Failed to login. Please try again.');
+          Alert.alert(translate('errors.title'), translate('errors.loginFailed'));
         }
       } else {
         // PIN doesn't match
-        Alert.alert('Incorrect PIN', 'The PIN you entered is incorrect. Please try again.');
+        Alert.alert(translate('child.incorrectPin'), translate('child.tryAgain'));
       }
       setVerifying(false);
       setSelectedChild(null);
@@ -259,7 +261,7 @@ export default function ChildLoginScreen() {
         <TouchableOpacity style={styles.backButton} onPress={handleBackToParent}>
           <Ionicons name="arrow-back" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Child Login</Text>
+        <Text style={styles.headerTitle}>{translate('auth.childLogin')}</Text>
         <View style={styles.headerRight} />
       </View>
       
@@ -271,7 +273,7 @@ export default function ChildLoginScreen() {
                 <Text style={styles.avatarTextLarge}>{selectedChild.name.charAt(0)}</Text>
               </View>
               <Text style={styles.selectedChildName}>{selectedChild.name}</Text>
-              <Text style={styles.pinInstructions}>Please enter your 4-digit PIN</Text>
+              <Text style={styles.pinInstructions}>{translate('child.enterPin')}</Text>
             </Animatable.View>
             
             {verifying ? (
@@ -284,18 +286,18 @@ export default function ChildLoginScreen() {
               style={styles.cancelButton} 
               onPress={() => setSelectedChild(null)}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{translate('common.cancel')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.profileSelectionContainer}>
-            <Text style={styles.subtitle}>Select your profile to continue</Text>
+            <Text style={styles.subtitle}>{translate('child.selectProfile')}</Text>
             
             {children.length === 0 ? (
               <View style={styles.emptyState}>
                 <Ionicons name="person-outline" size={64} color="#666" />
-                <Text style={styles.emptyStateText}>No child profiles found</Text>
-                <Text style={styles.emptyStateSubText}>Ask a parent to create a profile for you</Text>
+                <Text style={styles.emptyStateText}>{translate('child.noProfiles')}</Text>
+                <Text style={styles.emptyStateSubText}>{translate('child.askParent')}</Text>
               </View>
             ) : (
               <ScrollView style={styles.childrenList} contentContainerStyle={styles.childrenListContent}>
@@ -310,7 +312,7 @@ export default function ChildLoginScreen() {
                       </View>
                       <View style={styles.childInfo}>
                         <Text style={styles.childName}>{child.name}</Text>
-                        <Text style={styles.childLevel}>Level: {child.level || 1}</Text>
+                        <Text style={styles.childLevel}>{translate('auth.grade')}: {child.level || 1}</Text>
                       </View>
                       <View style={styles.chevron}>
                         <Ionicons name="chevron-forward" size={24} color="#2196F3" />

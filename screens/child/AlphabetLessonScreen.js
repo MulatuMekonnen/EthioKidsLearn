@@ -3,10 +3,12 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Feather } from '@expo/vector-icons';
 import * as Animatable from 'react-native-animatable';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function AlphabetLessonScreen() {
   const navigation = useNavigation();
   const [currentLetter, setCurrentLetter] = useState('A');
+  const { translate } = useLanguage();
 
   const playAudio = () => {
     // Implement audio playback here
@@ -22,11 +24,11 @@ export default function AlphabetLessonScreen() {
       </TouchableOpacity>
       <View style={styles.activityContainer}>
         {/* Implement drag-and-drop activity here */}
-        <Text style={styles.activityText}>Drag and drop activity goes here</Text>
+        <Text style={styles.activityText}>{translate('alphabet.dragAndDrop')}</Text>
       </View>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
         <Feather name="arrow-left" size={24} color="white" />
-        <Text style={styles.backButtonText}>Back</Text>
+        <Text style={styles.backButtonText}>{translate('common.back')}</Text>
       </TouchableOpacity>
     </View>
   );

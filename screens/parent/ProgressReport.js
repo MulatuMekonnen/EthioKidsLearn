@@ -17,6 +17,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../services/firebase';
 import { collection, query, where, getDocs, orderBy, limit } from 'firebase/firestore';
+import { useLanguage } from '../../context/LanguageContext';
 
 // Subject categories with colors
 const subjects = [
@@ -32,6 +33,7 @@ export default function ProgressReport() {
   const navigation = useNavigation();
   const { currentTheme } = useTheme();
   const { user } = useAuth();
+  const { translate } = useLanguage();
   const [selectedSubject, setSelectedSubject] = useState('math');
   const [loading, setLoading] = useState(true);
   const [childData, setChildData] = useState([]);
@@ -523,23 +525,19 @@ export default function ProgressReport() {
   };
 
   const renderSubjectDistribution = () => {
-    // Calculate total quiz count for each subject
-    const subjectCounts = subjects.map(subject => ({
+    const categories = processedData.categories || {};
+    const data = subjects.map(subject => ({
+      id: subject.id,
       name: subject.name,
-      count: (processedData.categories[subject.id] || []).length,
       color: subject.color,
-      legendFontColor: currentTheme?.text || '#333',
+      value: Array.isArray(categories[subject.id]) ? categories[subject.id].length : 0,
     }));
     
-    // Filter out subjects with no quizzes
-    const filteredCounts = subjectCounts.filter(subject => subject.count > 0);
-    
-    // If no data, show a message
-    if (filteredCounts.length === 0) {
+    if (data.every(item => item.value === 0)) {
       return (
         <View style={styles.noDataContainer}>
           <Text style={[styles.noDataText, { color: currentTheme?.textSecondary || '#999' }]}>
-            No quiz data available
+            {translate('progressReport.noData')}
           </Text>
         </View>
       );
@@ -547,10 +545,10 @@ export default function ProgressReport() {
     
     return (
       <View style={styles.subjectDistributionContainer}>
-        {filteredCounts.map((subject, index) => (
+        {data.map((item, index) => (
           <View key={index} style={styles.subjectDistributionItem}>
             <View style={[styles.subjectDistributionBar, { 
-              backgroundColor: subject.color,
+              backgroundColor: item.color,
               minWidth: 80, // Ensure the bar is wide enough to show text
               paddingHorizontal: 8, // Add padding for text
               paddingVertical: 4 // Add padding for text
@@ -561,11 +559,11 @@ export default function ProgressReport() {
                 textShadowOffset: { width: 0, height: 1 },
                 textShadowRadius: 2,
               }]}>
-                {subject.name}
+                {item.name}
               </Text>
             </View>
             <Text style={[styles.subjectDistributionValue, { color: currentTheme?.text || '#333' }]}>
-              {subject.count}
+              {item.value}
             </Text>
           </View>
         ))}
@@ -580,7 +578,7 @@ export default function ProgressReport() {
       return (
         <View style={styles.noDataContainer}>
           <Text style={[styles.noDataText, { color: currentTheme?.textSecondary || '#999' }]}>
-            No child data available
+            {translate('progressReport.noChildData')}
           </Text>
         </View>
       );
@@ -617,7 +615,7 @@ export default function ProgressReport() {
                 <View style={styles.childInfo}>
                   <Text style={[styles.childName, { color: currentTheme?.text || '#333' }]}>{child.name}</Text>
                   <Text style={[styles.childStats, { color: currentTheme?.textSecondary || '#999' }]}>
-                    Completed: {child.completedQuizzes} quizzes
+                    {translate('progressReport.completed')} {child.completedQuizzes} {translate('progressReport.quizzes')}
                   </Text>
                 </View>
                 <View style={[styles.averageScoreBadge, { backgroundColor: getScoreColor(child.averageScore) }]}>
@@ -664,7 +662,7 @@ export default function ProgressReport() {
       return (
         <View style={[styles.emptyReportsContainer, { backgroundColor: currentTheme?.cardAlt || '#f5f5f5' }]}>
           <Text style={[styles.emptyReportsText, { color: currentTheme?.textSecondary || '#666' }]}>
-            No teacher reports available for this subject
+            {translate('progressReport.noReports')}
           </Text>
         </View>
       );
@@ -729,12 +727,12 @@ export default function ProgressReport() {
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Progress Report</Text>
+          <Text style={styles.headerTitle}>{translate('progressReport.title')}</Text>
           <View style={styles.headerRight} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={currentTheme?.primary || '#2196F3'} />
-          <Text style={[styles.loadingText, { color: currentTheme?.text || '#333' }]}>Loading data...</Text>
+          <Text style={[styles.loadingText, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.loading')}</Text>
         </View>
       </SafeAreaView>
     );
@@ -749,7 +747,7 @@ export default function ProgressReport() {
       >
           <Ionicons name="arrow-back" size={24} color="#fff" />
       </TouchableOpacity>
-        <Text style={styles.headerTitle}>Progress Report</Text>
+        <Text style={styles.headerTitle}>{translate('progressReport.title')}</Text>
         <TouchableOpacity
           style={styles.refreshButton}
           onPress={async () => {
@@ -772,43 +770,43 @@ export default function ProgressReport() {
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Teacher Reports</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.teacherReports')}</Text>
           <Text style={[styles.sectionSubtitle, { color: currentTheme?.textSecondary || '#666' }]}>
-            Feedback from teachers for {subjects.find(s => s.id === selectedSubject)?.name}
+            {translate('progressReport.teacherFeedback')} {subjects.find(s => s.id === selectedSubject)?.name}
           </Text>
           {renderTeacherReports()}
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Overview</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.overview')}</Text>
           
           <View style={styles.statsContainer}>
             <View style={[styles.statCard, { backgroundColor: currentTheme?.background || '#f5f5f5', borderColor: currentTheme?.border || '#e0e0e0' }]}>
               <Ionicons name="time-outline" size={24} color={getSubjectColor(selectedSubject)} />
               <Text style={[styles.statValue, { color: currentTheme?.text || '#333' }]}>{getTimeSpent()}</Text>
-              <Text style={[styles.statLabel, { color: currentTheme?.text || '#333' }]}>Minutes</Text>
+              <Text style={[styles.statLabel, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.minutes')}</Text>
             </View>
             
             <View style={[styles.statCard, { backgroundColor: currentTheme?.background || '#f5f5f5', borderColor: currentTheme?.border || '#e0e0e0' }]}>
               <Ionicons name="book-outline" size={24} color={getSubjectColor(selectedSubject)} />
               <Text style={[styles.statValue, { color: currentTheme?.text || '#333' }]}>{getCompletedLessons()}</Text>
-              <Text style={[styles.statLabel, { color: currentTheme?.text || '#333' }]}>Quizzes</Text>
+              <Text style={[styles.statLabel, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.quizzes')}</Text>
             </View>
             
             <View style={[styles.statCard, { backgroundColor: currentTheme?.background || '#f5f5f5', borderColor: currentTheme?.border || '#e0e0e0' }]}>
               <Ionicons name="star-outline" size={24} color={getSubjectColor(selectedSubject)} />
               <Text style={[styles.statValue, { color: currentTheme?.text || '#333' }]}>{averageScore}%</Text>
-              <Text style={[styles.statLabel, { color: currentTheme?.text || '#333' }]}>Average</Text>
+              <Text style={[styles.statLabel, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.average')}</Text>
             </View>
           </View>
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Test Scores</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.testScores')}</Text>
           {scores.length === 0 ? (
             <View style={styles.noDataContainer}>
               <Text style={[styles.noDataText, { color: currentTheme?.textSecondary || '#999' }]}>
-                No test scores available for {subjects.find(s => s.id === selectedSubject)?.name}
+                {translate('progressReport.noScores')} {subjects.find(s => s.id === selectedSubject)?.name}
               </Text>
             </View>
           ) : (
@@ -817,20 +815,20 @@ export default function ProgressReport() {
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Subject Distribution</Text>
-          <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>Quiz completion by subject</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.subjectDistribution')}</Text>
+          <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.quizCompletion')}</Text>
           {renderSubjectDistribution()}
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Weekly Activity</Text>
-          <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>Minutes spent learning</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.weeklyActivity')}</Text>
+          <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.minutesLearning')}</Text>
           {renderWeeklyActivity()}
         </View>
 
         <View style={[styles.section, { backgroundColor: currentTheme?.card || '#fff', borderColor: currentTheme?.border || '#e0e0e0' }]}>
-          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>Child Progress</Text>
-          <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>Performance by child</Text>
+          <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.childProgress')}</Text>
+          <Text style={[styles.sectionSubtitle, { color: currentTheme?.text || '#333' }]}>{translate('progressReport.performanceByChild')}</Text>
           {renderChildProgress()}
         </View>
     </ScrollView>

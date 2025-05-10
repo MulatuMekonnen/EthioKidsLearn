@@ -24,8 +24,8 @@
     "quizzesCompleted": "ጥያቄዎች ተጠናቅቀዋል",
     "totalLessons": "ጠቅላላ ትምህርቶች",
     "totalQuizzes": "ጠቅላላ ጥያቄዎች",
-    "ethiokidslearn": "ኢትዮ ልጆች ተማሩ"
-
+    "ethiokidslearn": "ኢትዮ ልጆች ተማሩ",
+    "logout": "ውጣ"
   },
   "roles": {
     "parent": "ወላጅ",
@@ -52,10 +52,137 @@
     "delete": "ሰርዝ",
     "close": "ዝጋ",
     "selectLanguage": "ቋንቋ ምረጥ",
-    "language": "ቋንቋ"
+    "language": "ቋንቋ",
+    "save": "አስቀምጥ",
+    "back": "ተመለስ"
   },
   "lessons": {
     "greeting": "ሰላም \"{0}\"!",
-    "chooseSubject": "የትምህርት አይነት ይምረጡ"
+    "chooseSubject": "የትምህርት አይነት ይምረጡ",
+    "title": "ትምህርቶች",
+    "loading": "ትምህርቶችን በመጫን ላይ...",
+    "progress": "እድገት",
+    "lessonsLabel": "ትምህርቶች",
+    "learningAs": "እንደ"
+  },
+  "parent": {
+    "dashboard": "የወላጅ ዳሽቦርድ",
+    "dashboardDesc": "የልጆችን መገለጫ ያስተዳድሩ እና የፈተና ውጤቶችን ይመልከቱ",
+    "progressReport": "የመሻሻል ሪፖርት",
+    "progressReportDesc": "ዝርዝር የትምህርት ሂደትን ይመልከቱ",
+    "childLogin": "የልጅ መግቢያ",
+    "childLoginDesc": "ወደ የልጅ መግቢያ ይሂዱ",
+    "addChild": "ልጅ ጨምር",
+    "manageChildren": "ልጆችን ያስተዳድሩ",
+    "viewProgress": "ሂደትን ይመልከቱ",
+    "setPin": "ፒን ያዘጋጁ",
+    "quickAccess": "ፈጣን መግቢያ",
+    "noChildrenYet": "እስካሁን ምንም ልጆች አልተጨመሩም",
+    "addChildToTrack": "ልጅን ለመከታተል ልጅ ይጨምሩ",
+    "createPin": "ለልጁ መግቢያ የ4 አሃዝ ፒን ይፍጠሩ",
+    "confirmPin": "ፒን ያረጋግጡ",
+    "digits": "አሃዞች",
+    "createNewPin": "አዲስ ፒን ይፍጠሩ",
+    "createNewPinFor": "ለ አዲስ ፒን ይፍጠሩ",
+    "newPin": "አዲስ ፒን"
+  },
+  "profile": {
+    "myProfile": "የኔ መገለጫ",
+    "editProfile": "መገለጫ አስተካክል",
+    "profileSettings": "የመገለጫ ማስተካከያዎች",
+    "accountSettings": "የመለያ ማስተካከያዎች",
+    "personalInfo": "የግል መረጃ",
+    "changePassword": "የይለፍ ቃል ቀይር",
+    "deleteAccount": "መለያ አጥፋ"
+  },
+  "theme": {
+    "darkTheme": "ጨለማ ገጽታ",
+    "lightTheme": "ብርሃን ገጽታ",
+    "systemTheme": "የስርዓት ገጽታ"
+  },
+  "subjects": {
+    "math": {
+      "title": "ሒሳብ",
+      "description": "ቁጥሮችን፣ መቁጠርን እና መሰረታዊ የሂሳብ ስሌቶችን ይማሩ"
+    },
+    "english": {
+      "title": "እንግሊዝኛ",
+      "description": "ፊደላትን፣ ቃላትን እና መሰረታዊ ንባብን ይለማመዱ"
+    },
+    "አማርኛ": {
+      "title": "አማርኛ",
+      "description": "የአማርኛ ፊደላትን እና ቃላትን ይማሩ"
+    },
+    "a/oromo": {
+      "title": "አፋን ኦሮሞ",
+      "description": "መሰረታዊ የኦሮምኛ ቋንቋን ይማሩ"
+    },
+    "animals_and_their_sound": {
+      "title": "እንስሳት እና ድምፃቸው",
+      "description": "እንስሳትን እና ድምፃቸውን ይማሩ"
+    },
+    "time_and_calendar": {
+      "title": "ሰዓት እና የቀን መቁጠሪያ",
+      "description": "ስለ ሰዓት፣ ቀናት እና ወራት ይማሩ"
+    }
+  },
+  "child": {
+    "selectProfile": "መገለጫዎን ይምረጡ",
+    "noProfiles": "ምንም መገለጫዎች አልተገኙም",
+    "askParent": "ወላጅዎ ለእርስዎ መገለጫ እንዲፈጥር ይጠይቁ",
+    "enterPin": "ለመቀጠል ፒንዎን ያስገቡ",
+    "incorrectPin": "ትክክል ያልሆነ ፒን",
+    "tryAgain": "እባክዎ እንደገና ይሞክሩ"
+  },
+  "math": {
+    "title": "ሒሳብ",
+    "learnToCount": "መቁጠር ይማሩ",
+    "learnToCountDesc": "ከ1-20 ቁጥሮችን በአስደሳች የእይታ መርጃዎች እና በተግባራዊ ልምምዶች ይማሩ።",
+    "addition": "ድምር",
+    "additionDesc": "ቁጥሮችን መደመር በቀላሉ ሊገባ በሚችሉ ምሳሌዎች እና ጨዋታዎች ይለማመዱ።",
+    "subtraction": "ልዩነት",
+    "subtractionDesc": "በደረጃ በደረጃ ትምህርቶች አማካኝነት የመቀነስ መሰረታዊ ነገሮችን ይማሩ።",
+    "multiplication": "ብዜት",
+    "multiplicationDesc": "የብዜት ሰንጠረዦችን ይማሩ እና አስደሳች የብዜት እንቆቅልሾችን ይፍቱ።",
+    "division": "ክፍፍል",
+    "divisionDesc": "የእይታ መርጃዎችን እና ቀላል ችግሮችን በመጠቀም የክፍፍል ፅንሰ ሀሳቦችን ይረዱ።",
+    "mathQuiz": "የሒሳብ ፈተና",
+    "mathQuizDesc": "ያጠናቀቁትን ርዕሶች በሙሉ የሚሸፍኑ ፈተናዎችን በመውሰድ የሒሳብ ክህሎትዎን ይፈትሹ።",
+    "mathContent": "የሒሳብ ይዘት",
+    "mathContentDesc": "ከመምህራን የተፈቀደ የሒሳብ ይዘትን ይመልከቱ እና ያውርዱ።"
+  },
+  "animals": {
+    "title": "የእንስሳት ድምፆች",
+    "lion": "አንበሳ",
+    "elephant": "ዝሆን",
+    "giraffe": "ቀጭኔ",
+    "zebra": "የሜዳ አህያ",
+    "monkey": "ጦጣ"
+  },
+  "alphabet": {
+    "title": "የፊደል ትምህርት",
+    "dragAndDrop": "ጎትተው የማስቀመጥ እንቅስቃሴ እዚህ ይሄዳል"
+  },
+  "progressReport": {
+    "title": "የሂደት ሪፖርት",
+    "loading": "መረጃን በመጫን ላይ...",
+    "teacherReports": "የመምህራን ሪፖርቶች",
+    "teacherFeedback": "ለ የመምህራን አስተያየት",
+    "noReports": "ለዚህ ትምህርት የመምህር ሪፖርት የለም",
+    "overview": "አጠቃላይ እይታ",
+    "minutes": "ደቂቃዎች",
+    "quizzes": "ፈተናዎች",
+    "average": "አማካይ",
+    "testScores": "የፈተና ውጤቶች",
+    "noScores": "ለ ምንም የፈተና ውጤቶች የሉም",
+    "subjectDistribution": "የትምህርት ዓይነት ስርጭት",
+    "quizCompletion": "በትምህርት ዓይነት የፈተና አጠናቀቅ",
+    "weeklyActivity": "የሳምንታዊ እንቅስቃሴ",
+    "minutesLearning": "በመማር ላይ የተጠቀሙ ደቂቃዎች",
+    "childProgress": "የልጅ እድገት",
+    "performanceByChild": "በልጅ የሚለካ አፈጻጸም",
+    "noChildData": "ምንም የልጅ መረጃ አልተገኘም",
+    "completed": "ተጠናቋል",
+    "noData": "ምንም የፈተና መረጃ አልተገኘም"
   }
 } 

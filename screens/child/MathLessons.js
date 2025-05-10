@@ -3,70 +3,72 @@ import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView } fr
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const MathLessons = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { childId, childName } = route.params || { childId: '1', childName: 'Child' };
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const isDarkMode = currentTheme.mode === 'dark';
 
   const mathTopics = [
     {
       id: 1,
-      title: 'Learn to Count',
+      title: 'learnToCount',
       icon: 'apps-outline',
       screen: 'LearnCount',
       color: '#4CAF50',
-      description: 'Learn numbers from 1-20 with fun visual aids and interactive exercises.'
+      description: 'learnToCountDesc'
     },
     {
       id: 2,
-      title: 'Addition',
+      title: 'addition',
       icon: 'add-circle-outline',
       screen: 'Addition',
       color: '#FF9800',
-      description: 'Practice adding numbers with easy-to-understand examples and games.'
+      description: 'additionDesc'
     },
     {
       id: 3,
-      title: 'Subtraction',
+      title: 'subtraction',
       icon: 'remove-circle-outline',
       screen: 'Subtraction',
       color: '#E91E63',
-      description: 'Master the basics of subtraction through step-by-step lessons.'
+      description: 'subtractionDesc'
     },
     {
       id: 4,
-      title: 'Multiplication',
+      title: 'multiplication',
       icon: 'grid-outline',
       screen: 'Multiplication',
       color: '#9C27B0',
-      description: 'Learn multiplication tables and solve fun multiplication puzzles.'
+      description: 'multiplicationDesc'
     },
     {
       id: 5,
-      title: 'Division',
+      title: 'division',
       icon: 'pie-chart-outline',
       screen: 'Division',
       color: '#3F51B5',
-      description: 'Understand division concepts with visual aids and simple problems.'
+      description: 'divisionDesc'
     },
     {
       id: 6,
-      title: 'Math Quiz',
+      title: 'mathQuiz',
       icon: 'help-circle-outline',
       screen: 'MathQuiz',
       color: '#2196F3',
-      description: 'Test your math skills with quizzes covering all the topics you\'ve learned.'
+      description: 'mathQuizDesc'
     },
     {
       id: 7,
-      title: 'Math Content',
+      title: 'mathContent',
       icon: 'library-outline',
       screen: 'ContentsScreen',
       color: '#9C27B0',
-      description: 'View and download approved math content from teachers.',
+      description: 'mathContentDesc',
       params: { category: 'math' }
     }
   ];
@@ -110,7 +112,7 @@ const MathLessons = () => {
                 textShadowRadius: isDarkMode ? 3 : 1,
               }
             ]}>
-              {topic.title}
+              {translate(`math.${topic.title}`)}
             </Text>
             <Text style={[
               styles.topicDescription, 
@@ -122,7 +124,7 @@ const MathLessons = () => {
                 fontWeight: isDarkMode ? '500' : '400',
               }
             ]}>
-              {topic.description}
+              {translate(`math.${topic.description}`)}
             </Text>
           </View>
           <View style={[
@@ -191,7 +193,7 @@ const MathLessons = () => {
             textShadowOffset: { width: 0, height: 1 },
             textShadowRadius: 3,
           }
-        ]}>Mathematics</Text>
+        ]}>{translate('math.title')}</Text>
         <View style={{ width: 24 }} />
       </View>
 
