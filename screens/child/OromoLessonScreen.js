@@ -525,6 +525,18 @@ const oromoContent = [
   }
 ];
 
+const oromoTopics = [
+  {
+    id: 7,
+    title: 'Qormaata Afaan Oromoo',
+    icon: 'library-outline',
+    screen: 'ContentsScreen',
+    color: '#9C27B0',
+    description: 'Qormaata Afaan Oromoo barsiisota irraa argatan ilaalaa fi galchaa',
+    params: { category: 'oromo' }
+  }
+];
+
 // Quiz questions organized by category
 const quizQuestions = {
   Qubee: [
@@ -722,6 +734,7 @@ const quizQuestions = {
 };
 
 const categories = [...new Set(oromoContent.map(item => item.category))];
+categories.push('Qabiyyee'); // Add content category
 
 export default function OromoLessonScreen() {
   const navigation = useNavigation();
@@ -769,7 +782,16 @@ export default function OromoLessonScreen() {
       : undefined;
   }, [sound]);
 
-  const filteredContent = oromoContent.filter(item => item.category === selectedCategory);
+  const filteredContent = selectedCategory === 'Qabiyyee' 
+    ? [{ 
+        title: 'Qabiyyee Afaan Oromoo',
+        icon: 'library-outline',
+        screen: 'ContentsScreen',
+        color: '#9C27B0',
+        description: 'Qabiyyee Afaan Oromoo barsiisota irraa argatan ilaalaa fi galchaa',
+        params: { category: 'oromo' }
+      }]
+    : oromoContent.filter(item => item.category === selectedCategory);
 
   // Start quiz for the selected category
   const startQuiz = (category) => {
@@ -1006,52 +1028,57 @@ export default function OromoLessonScreen() {
       >
         <View style={styles.grid}>
           {filteredContent.map((item, index) => (
-                <View
-              key={item.letter || item.word}
+            <View
+              key={item.letter || item.word || item.title}
               style={styles.card}
             >
               <TouchableOpacity
-                    style={[
-                      styles.button,
-                      item.category === 'Maatii' && styles.familyButton,
-                      item.category === 'Jecha Bu\'uraa' && styles.basicWordsButton,
-                      item.category === 'Nagaa' && styles.greetingsButton,
-                      item.category === 'Lakkoofsa' && styles.numbersButton
-                    ]}
-                onPress={() => playSound(item.sound)}
+                style={[
+                  styles.button,
+                  item.category === 'Maatii' && styles.familyButton,
+                  item.category === 'Jecha Bu\'uraa' && styles.basicWordsButton,
+                  item.category === 'Nagaa' && styles.greetingsButton,
+                  item.category === 'Lakkoofsa' && styles.numbersButton,
+                  item.category === 'Qabiyyee' && styles.contentButton
+                ]}
+                onPress={() => {
+                  if (item.screen) {
+                    navigation.navigate(item.screen, item.params);
+                  } else {
+                    playSound(item.sound);
+                  }
+                }}
                 activeOpacity={0.7}
               >
-                <Text style={styles.mainText}>
-                  {item.letter || item.word}
-                </Text>
-                <Text style={styles.pronunciationText}>
-                  ({item.pronunciation})
-                </Text>
-                {item.example && (
-                  <Text style={styles.exampleText}>
-                    {item.example}
+                {item.icon ? (
+                  <Ionicons name={item.icon} size={32} color={item.color} />
+                ) : (
+                  <Text style={styles.mainText}>
+                    {item.letter || item.word}
                   </Text>
                 )}
-                    <Text style={[
-                      styles.meaningText,
-                      item.category === 'Maatii' && styles.familyMeaning,
-                      item.category === 'Jecha Bu\'uraa' && styles.basicWordsMeaning,
-                      item.category === 'Nagaa' && styles.greetingsMeaning,
-                      item.category === 'Lakkoofsa' && styles.numbersMeaning
-                    ]}>
-                  {item.meaning}
-                </Text>
-                    <View style={[
-                      styles.soundIcon,
-                      item.category === 'Maatii' && styles.familySoundIcon,
-                      item.category === 'Jecha Bu\'uraa' && styles.basicWordsSoundIcon,
-                      item.category === 'Nagaa' && styles.greetingsSoundIcon,
-                      item.category === 'Lakkoofsa' && styles.numbersSoundIcon
-                    ]}>
-                      <Ionicons name="volume-high" size={16} color="white" />
-                    </View>
-                  </TouchableOpacity>
-                </View>
+                {item.pronunciation && (
+                  <Text style={styles.pronunciationText}>
+                    ({item.pronunciation})
+                  </Text>
+                )}
+                {item.description && (
+                  <Text style={styles.descriptionText}>
+                    {item.description}
+                  </Text>
+                )}
+                {item.meaning && (
+                  <Text style={styles.meaningText}>
+                    {item.meaning}
+                  </Text>
+                )}
+                {!item.icon && (
+                  <View style={styles.soundIcon}>
+                    <Ionicons name="volume-high" size={16} color="white" />
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
           ))}
         </View>
             
@@ -1436,5 +1463,15 @@ const styles = StyleSheet.create({
   },
   wrongAnswer: {
     color: '#F44336',
-  }
+  },
+  contentButton: {
+    borderLeftWidth: 5,
+    borderLeftColor: '#9C27B0',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 5,
+  },
 }); 

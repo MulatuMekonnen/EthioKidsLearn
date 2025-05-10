@@ -4,6 +4,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const amharicContent = [
   // First row of Amharic alphabet
@@ -542,6 +543,20 @@ const quizQuestions = {
 };
 
 const categories = [...new Set(amharicContent.map(item => item.category))];
+categories.push('ይዘቶች'); // Add content category
+
+const amharicTopics = [
+  // ... existing topics ...
+  {
+    id: 7,
+    title: 'የአማርኛ ይዘቶች',
+    icon: 'library-outline',
+    screen: 'ContentsScreen',
+    color: '#9C27B0',
+    description: 'ከመምህራን የተጽፉ የተጽዕኖ ያላቸውን የአማርኛ ይዘቶች ይመልከቱ እና ያውሉ',
+    params: { category: 'amharic' }
+  }
+];
 
 export default function AmharicLessonScreen() {
   const navigation = useNavigation();
@@ -585,7 +600,16 @@ export default function AmharicLessonScreen() {
       : undefined;
   }, [sound]);
 
-  const filteredContent = amharicContent.filter(item => item.category === selectedCategory);
+  const filteredContent = selectedCategory === 'ይዘቶች'
+    ? [{
+        title: 'የአማርኛ ይዘቶች',
+        icon: 'library-outline',
+        screen: 'ContentsScreen',
+        color: '#9C27B0',
+        description: 'ከመምህራን የተጽፉ የተጽዕኖ ያላቸውን የአማርኛ ይዘቶች ይመልከቱ እና ያውሉ',
+        params: { category: 'amharic' }
+      }]
+    : amharicContent.filter(item => item.category === selectedCategory);
 
   // Start quiz for the selected category
   const startQuiz = (category) => {
@@ -810,22 +834,40 @@ export default function AmharicLessonScreen() {
         <View style={styles.grid}>
           {filteredContent.map((item, index) => (
             <Animatable.View
-              key={item.letter || item.word}
+              key={item.letter || item.word || item.title}
               animation="zoomIn"
               delay={index * 100}
               style={styles.card}
             >
               <TouchableOpacity
-                style={styles.button}
-                onPress={() => playSound(item.sound)}
+                style={[
+                  styles.button,
+                  item.category === 'ይዘቶች' && styles.contentButton
+                ]}
+                onPress={() => {
+                  if (item.screen) {
+                    navigation.navigate(item.screen, item.params);
+                  } else {
+                    playSound(item.sound);
+                  }
+                }}
                 activeOpacity={0.7}
               >
-                <Text style={styles.mainText}>
-                  {item.letter || item.word}
-                </Text>
+                {item.icon ? (
+                  <Ionicons name={item.icon} size={32} color={item.color} />
+                ) : (
+                  <Text style={styles.mainText}>
+                    {item.letter || item.word}
+                  </Text>
+                )}
                 {item.pronunciation && (
                   <Text style={styles.pronunciationText}>
                     ({item.pronunciation})
+                  </Text>
+                )}
+                {item.description && (
+                  <Text style={styles.descriptionText}>
+                    {item.description}
                   </Text>
                 )}
                 {item.meaning && (
@@ -833,12 +875,14 @@ export default function AmharicLessonScreen() {
                     {item.meaning}
                   </Text>
                 )}
-                <View style={styles.soundIcon}>
-                  <Image 
-                    source={require('../../assets/images/speaker.png')}
-                    style={styles.speakerImage}
-                  />
-                </View>
+                {!item.icon && (
+                  <View style={styles.soundIcon}>
+                    <Image 
+                      source={require('../../assets/images/speaker.png')}
+                      style={styles.speakerImage}
+                    />
+                  </View>
+                )}
               </TouchableOpacity>
             </Animatable.View>
           ))}
@@ -1203,5 +1247,17 @@ const styles = StyleSheet.create({
   },
   wrongAnswer: {
     color: '#F44336',
-  }
+  },
+  
+  contentButton: {
+    borderLeftWidth: 5,
+    borderLeftColor: '#9C27B0',
+  },
+  
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 5,
+  },
 });
