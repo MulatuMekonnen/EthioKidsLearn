@@ -15,26 +15,26 @@ const safeWords = [
   },
   {
     word: 'Banana',
-    image: require('../../../assets/images/words/apple.png'), // Fallback to apple if banana image is missing
-    sound: require('../../../assets/sounds/words/apple.mp3'), // Fallback to apple if banana sound is missing
+    image: require('../../../assets/images/words/banana.png'), // Fallback to apple if banana image is missing
+    sound: require('../../../assets/sounds/words/banana.mp3'), // Fallback to apple if banana sound is missing
     category: 'Fruits'
   },
   {
     word: 'Orange',
-    image: require('../../../assets/images/words/apple.png'), // Fallback to apple if orange image is missing
-    sound: require('../../../assets/sounds/words/apple.mp3'), // Fallback to apple if orange sound is missing
+    image: require('../../../assets/images/words/orange.png'), // Fallback to apple if orange image is missing
+    sound: require('../../../assets/sounds/words/orange.mp3'), // Fallback to apple if orange sound is missing
     category: 'Fruits'
   },
   {
     word: 'Grapes',
-    image: require('../../../assets/images/words/apple.png'), // Fallback to apple if grapes image is missing
-    sound: require('../../../assets/sounds/words/apple.mp3'), // Fallback to apple if grapes sound is missing
+    image: require('../../../assets/images/words/grapes.png'), // Fallback to apple if grapes image is missing
+    sound: require('../../../assets/sounds/words/grape.mp3'), // Fallback to apple if grapes sound is missing
     category: 'Fruits'
   },
   {
     word: 'Strawberry',
-    image: require('../../../assets/images/words/apple.png'), // Fallback to apple if strawberry image is missing
-    sound: require('../../../assets/sounds/words/apple.mp3'), // Fallback to apple if strawberry sound is missing
+    image: require('../../../assets/images/words/strawberry.png'), // Fallback to apple if strawberry image is missing
+    sound: require('../../../assets/sounds/words/strawberry.mp3'), // Fallback to apple if strawberry sound is missing
     category: 'Fruits'
   },
   
@@ -47,70 +47,70 @@ const safeWords = [
   },
   {
     word: 'Doll',
-    image: require('../../../assets/images/words/ball.png'), // Fallback to ball if doll image is missing
-    sound: require('../../../assets/sounds/words/ball.mp3'), // Fallback to ball if doll sound is missing
+    image: require('../../../assets/images/words/doll.png'), // Fallback to ball if doll image is missing
+    sound: require('../../../assets/sounds/words/doll.mp3'), // Fallback to ball if doll sound is missing
     category: 'Toys'
   },
   {
     word: 'Teddy',
-    image: require('../../../assets/images/words/ball.png'), // Fallback to ball if teddy image is missing
-    sound: require('../../../assets/sounds/words/ball.mp3'), // Fallback to ball if teddy sound is missing
+    image: require('../../../assets/images/words/teddy.png'), // Fallback to ball if teddy image is missing
+    sound: require('../../../assets/sounds/words/teddy.mp3'), // Fallback to ball if teddy sound is missing
     category: 'Toys'
   },
   {
     word: 'Blocks',
-    image: require('../../../assets/images/words/ball.png'), // Fallback to ball if blocks image is missing
-    sound: require('../../../assets/sounds/words/ball.mp3'), // Fallback to ball if blocks sound is missing
+    image: require('../../../assets/images/words/blocks.png'), // Fallback to ball if blocks image is missing
+    sound: require('../../../assets/sounds/words/blocks.mp3'), // Fallback to ball if blocks sound is missing
     category: 'Toys'
   },
   {
     word: 'Car',
-    image: require('../../../assets/images/words/ball.png'), // Fallback to ball if car image is missing
-    sound: require('../../../assets/sounds/words/ball.mp3'), // Fallback to ball if car sound is missing
+    image: require('../../../assets/images/words/car.png'), // Fallback to ball if car image is missing
+    sound: require('../../../assets/sounds/words/car.mp3'), // Fallback to ball if car sound is missing
     category: 'Toys'
   },
   
   // Animals
   {
     word: 'Cat',
-    image: require('../../../assets/images/words/cat.png'),
+    image: require('../../../assets/images/animals/cat.png'),
     sound: require('../../../assets/sounds/words/cat.mp3'),
     category: 'Animals'
   },
   {
     word: 'Dog',
-    image: require('../../../assets/images/words/dog.png'),
+    image: require('../../../assets/images/animals/dog.png'),
     sound: require('../../../assets/sounds/words/dog.mp3'),
     category: 'Animals'
   },
   {
     word: 'Elephant',
-    image: require('../../../assets/images/words/elephant.png'),
+    image: require('../../../assets/images/animals/elephant.png'),
     sound: require('../../../assets/sounds/words/elephant.mp3'),
     category: 'Animals'
   },
   {
     word: 'Fish',
-    image: require('../../../assets/images/words/fish.png'),
+    image: require('../../../assets/images/animals/fish.png'),
     sound: require('../../../assets/sounds/words/fish.mp3'),
     category: 'Animals'
   },
   {
     word: 'Lion',
-    image: require('../../../assets/images/words/cat.png'), // Fallback to cat if lion image is missing
-    sound: require('../../../assets/sounds/words/cat.mp3'), // Fallback to cat if lion sound is missing
+    image: require('../../../assets/images/animals/lion.png'), // Fallback to cat if lion image is missing
+    sound: require('../../../assets/sounds/words/lion.mp3'), // Fallback to cat if lion sound is missing
     category: 'Animals'
   },
   {
     word: 'Monkey',
-    image: require('../../../assets/images/words/cat.png'), // Fallback to cat if monkey image is missing
-    sound: require('../../../assets/sounds/words/cat.mp3'), // Fallback to cat if monkey sound is missing
+    image: require('../../../assets/images/animals/monkey.png'), // Fallback to cat if monkey image is missing
+    sound: require('../../../assets/sounds/words/monkey.mp3'), // Fallback to cat if monkey sound is missing
     category: 'Animals'
   },
   {
     word: 'Bird',
-    image: require('../../../assets/images/words/cat.png'), // Fallback to cat if bird image is missing
-    sound: require('../../../assets/sounds/words/cat.mp3'), // Fallback to cat if bird sound is missing
+    image: require('../../../assets/images/animals/bird.png'), // Fallback to cat if bird image is missing
+    sound: require('../../../assets/sounds/words/bird.mp3'), // Fallback to cat if bird sound is missing
     category: 'Animals'
   },
   
@@ -123,26 +123,26 @@ const safeWords = [
   },
   {
     word: 'School',
-    image: require('../../../assets/images/words/house.png'), // Fallback to house if school image is missing
-    sound: require('../../../assets/sounds/words/house.mp3'), // Fallback to house if school sound is missing
+    image: require('../../../assets/images/words/school.png'), // Fallback to house if school image is missing
+    sound: require('../../../assets/sounds/words/school.mp3'), // Fallback to house if school sound is missing
     category: 'Places'
   },
   {
     word: 'Park',
-    image: require('../../../assets/images/words/house.png'), // Fallback to house if park image is missing
-    sound: require('../../../assets/sounds/words/house.mp3'), // Fallback to house if park sound is missing
+    image: require('../../../assets/images/words/park.png'), // Fallback to house if park image is missing
+    sound: require('../../../assets/sounds/words/park.mp3'), // Fallback to house if park sound is missing
     category: 'Places'
   },
   {
     word: 'Hospital',
-    image: require('../../../assets/images/words/house.png'), // Fallback to house if hospital image is missing
-    sound: require('../../../assets/sounds/words/house.mp3'), // Fallback to house if hospital sound is missing
+    image: require('../../../assets/images/words/hospital.png'), // Fallback to house if hospital image is missing
+    sound: require('../../../assets/sounds/words/hospital.mp3'), // Fallback to house if hospital sound is missing
     category: 'Places'
   },
   {
     word: 'Beach',
-    image: require('../../../assets/images/words/house.png'), // Fallback to house if beach image is missing
-    sound: require('../../../assets/sounds/words/house.mp3'), // Fallback to house if beach sound is missing
+    image: require('../../../assets/images/words/beach.png'), // Fallback to house if beach image is missing
+    sound: require('../../../assets/sounds/words/beach.mp3'), // Fallback to house if beach sound is missing
     category: 'Places'
   },
   
@@ -155,32 +155,32 @@ const safeWords = [
   },
   {
     word: 'Pizza',
-    image: require('../../../assets/images/words/ice-cream.png'), // Fallback to ice cream if pizza image is missing
-    sound: require('../../../assets/sounds/words/ice-cream.mp3'), // Fallback to ice cream if pizza sound is missing
+    image: require('../../../assets/images/words/pizza.png'), // Fallback to ice cream if pizza image is missing
+    sound: require('../../../assets/sounds/words/pizza.mp3'), // Fallback to ice cream if pizza sound is missing
     category: 'Food'
   },
   {
     word: 'Bread',
-    image: require('../../../assets/images/words/ice-cream.png'), // Fallback to ice cream if bread image is missing
-    sound: require('../../../assets/sounds/words/ice-cream.mp3'), // Fallback to ice cream if bread sound is missing
+    image: require('../../../assets/images/words/bread.png'), // Fallback to ice cream if bread image is missing
+    sound: require('../../../assets/sounds/words/bread.mp3'), // Fallback to ice cream if bread sound is missing
     category: 'Food'
   },
   {
     word: 'Cake',
-    image: require('../../../assets/images/words/ice-cream.png'), // Fallback to ice cream if cake image is missing
-    sound: require('../../../assets/sounds/words/ice-cream.mp3'), // Fallback to ice cream if cake sound is missing
+    image: require('../../../assets/images/words/cake.png'), // Fallback to ice cream if cake image is missing
+    sound: require('../../../assets/sounds/words/cake.mp3'), // Fallback to ice cream if cake sound is missing
     category: 'Food'
   },
   {
     word: 'Milk',
-    image: require('../../../assets/images/words/ice-cream.png'), // Fallback to ice cream if milk image is missing
-    sound: require('../../../assets/sounds/words/ice-cream.mp3'), // Fallback to ice cream if milk sound is missing
+    image: require('../../../assets/images/words/milk.png'), // Fallback to ice cream if milk image is missing
+    sound: require('../../../assets/sounds/words/milk.mp3'), // Fallback to ice cream if milk sound is missing
     category: 'Food'
   },
   {
     word: 'Egg',
-    image: require('../../../assets/images/words/ice-cream.png'), // Fallback to ice cream if egg image is missing
-    sound: require('../../../assets/sounds/words/ice-cream.mp3'), // Fallback to ice cream if egg sound is missing
+    image: require('../../../assets/images/words/egg.png'), // Fallback to ice cream if egg image is missing
+    sound: require('../../../assets/sounds/words/egg.mp3'), // Fallback to ice cream if egg sound is missing
     category: 'Food'
   }
 ];
