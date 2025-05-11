@@ -572,6 +572,7 @@ export default function AmharicLessonScreen() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [finalAnswers, setFinalAnswers] = useState([]);
   const [quizComplete, setQuizComplete] = useState(false);
   const [showResults, setShowResults] = useState(false);
   
@@ -617,6 +618,7 @@ export default function AmharicLessonScreen() {
     setCurrentQuestionIndex(0);
     setScore(0);
     setAnswers([]);
+    setFinalAnswers([]);
     setQuizComplete(false);
     setShowResults(false);
     setShowQuiz(true);
@@ -641,12 +643,15 @@ export default function AmharicLessonScreen() {
     }
     
     // Save answer for results
-    setAnswers([...answers, {
+    const newAnswer = {
       question: currentQuestion.question,
       selectedAnswer,
       correctAnswer: currentQuestion.correctAnswer,
       isCorrect
-    }]);
+    };
+    
+    const updatedAnswers = [...answers, newAnswer];
+    setAnswers(updatedAnswers);
     
     // Reset selected answer
     setSelectedAnswer(null);
@@ -655,14 +660,16 @@ export default function AmharicLessonScreen() {
     if (currentQuestionIndex < currentQuizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      finishQuiz();
+      // Pass the updated answers to finishQuiz to ensure all answers are included
+      finishQuiz(updatedAnswers);
     }
   };
   
   // Finish quiz and save results
-  const finishQuiz = async () => {
+  const finishQuiz = async (finalAnswers = answers) => {
     setQuizComplete(true);
     setShowResults(true);
+    setFinalAnswers(finalAnswers);
     
     try {
       // Get child ID from route params or use default
@@ -673,6 +680,9 @@ export default function AmharicLessonScreen() {
       const existingResultsJson = await AsyncStorage.getItem('quizResults');
       const existingResults = existingResultsJson ? JSON.parse(existingResultsJson) : [];
       
+      // Calculate correct score from the final answers array to ensure accuracy
+      const correctScore = finalAnswers.filter(answer => answer.isCorrect).length;
+      
       // Add new result
       const newResult = {
         id: Date.now().toString(),
@@ -681,9 +691,9 @@ export default function AmharicLessonScreen() {
         category: quizCategory,
         subject: 'Amharic', // Add subject to differentiate from Oromo
         date: new Date().toISOString(),
-        score,
+        score: correctScore,
         totalQuestions: currentQuizQuestions.length,
-        answers
+        answers: finalAnswers
       };
       
       // Save updated results
@@ -692,7 +702,7 @@ export default function AmharicLessonScreen() {
       // Alert success
       Alert.alert(
         'Quiz Complete!',
-        `Your score: ${score}/${currentQuizQuestions.length}\n\nResults saved for your parents to view.`,
+        `Your score: ${correctScore}/${currentQuizQuestions.length}\n\nResults saved for your parents to view.`,
         [{ text: 'OK' }]
       );
     } catch (error) {
@@ -712,13 +722,16 @@ export default function AmharicLessonScreen() {
     
     if (showResults) {
       // Show results screen
+      // Calculate correct score from final answers array to ensure accuracy
+      const correctScore = finalAnswers.filter(answer => answer.isCorrect).length;
+      
       return (
         <View style={styles.quizContainer}>
           <Text style={styles.quizTitle}>Quiz Results</Text>
-          <Text style={styles.scoreText}>Your Score: {score}/{currentQuizQuestions.length}</Text>
+          <Text style={styles.scoreText}>Your Score: {correctScore}/{currentQuizQuestions.length}</Text>
           
           <View style={styles.resultsContainer}>
-            {answers.map((answer, index) => (
+            {finalAnswers.map((answer, index) => (
               <View key={index} style={styles.resultItem}>
                 <Text style={styles.resultQuestion}>{index + 1}. {answer.question}</Text>
                 <View style={styles.resultAnswers}>

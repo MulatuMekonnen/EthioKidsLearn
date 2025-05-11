@@ -210,6 +210,8 @@
     "multiplicationDesc": "Gabatee baay'isuu baradhaa fi hibboo baay'isuu gammachiisaa hiikaa.",
     "division": "Hiruu",
     "divisionDesc": "Yaada hiruu gargaarsa mul'ataa fi rakkoolee salphaa fayyadamuun hubadhu.",
+    "countGame": "Taphoota Lakkaa'uu",
+    "countGameDesc": "Beeyladoota lakkaa'aa fi lakkoofsa karaa sagalee fi hirmaachisaa gammachisaan baradhaa.",
     "mathQuiz": "Qormaata Herregaa",
     "mathQuizDesc": "Dandeettii herregaa keessan qormaata mata duree barataniin hunda kan haguugu fudhachuun qoradhaa.",
     "mathContent": "Qabiyyee Herregaa",

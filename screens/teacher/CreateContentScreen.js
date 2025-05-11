@@ -149,6 +149,15 @@ export default function CreateContentScreen({ navigation }) {
             };
             console.log('Setting video file info:', fileInfo);
             setFileInfo(fileInfo);
+          } else if (result.type === 'success') {
+            // Fallback for older DocumentPicker API format
+            console.log('Using legacy format for video result');
+            setFileInfo({
+              uri: result.uri,
+              name: result.name,
+              type: result.mimeType,
+              size: result.size
+            });
           }
         } catch (pickerError) {
           if (pickerError.code === 'E_DOCUMENT_PICKER_CANCELED') {
@@ -169,7 +178,19 @@ export default function CreateContentScreen({ navigation }) {
           });
           console.log('Audio picker result:', result);
 
-          if (result.type === 'success') {
+          if (!result.canceled && result.assets && result.assets[0]) {
+            const asset = result.assets[0];
+            const fileInfo = {
+              uri: asset.uri,
+              name: asset.name,
+              type: asset.mimeType,
+              size: asset.size
+            };
+            console.log('Setting audio file info:', fileInfo);
+            setFileInfo(fileInfo);
+          } else if (result.type === 'success') {
+            // Fallback for older DocumentPicker API format
+            console.log('Using legacy format for audio result');
             setFileInfo({
               uri: result.uri,
               name: result.name,
@@ -196,7 +217,19 @@ export default function CreateContentScreen({ navigation }) {
           });
           console.log('Document picker result:', result);
 
-          if (result.type === 'success') {
+          if (!result.canceled && result.assets && result.assets[0]) {
+            const asset = result.assets[0];
+            const fileInfo = {
+              uri: asset.uri,
+              name: asset.name,
+              type: asset.mimeType,
+              size: asset.size
+            };
+            console.log('Setting document file info:', fileInfo);
+            setFileInfo(fileInfo);
+          } else if (result.type === 'success') {
+            // Fallback for older DocumentPicker API format
+            console.log('Using legacy format for document result');
             setFileInfo({
               uri: result.uri,
               name: result.name,

@@ -56,6 +56,14 @@ const MathLessons = () => {
     },
     {
       id: 6,
+      title: 'countGame',
+      icon: 'paw-outline',
+      screen: 'CountGame',
+      color: '#4CAF50',
+      description: 'countGameDesc'
+    },
+    {
+      id: 7,
       title: 'mathQuiz',
       icon: 'help-circle-outline',
       screen: 'MathQuiz',
@@ -63,7 +71,7 @@ const MathLessons = () => {
       description: 'mathQuizDesc'
     },
     {
-      id: 7,
+      id: 8,
       title: 'mathContent',
       icon: 'library-outline',
       screen: 'ContentsScreen',
