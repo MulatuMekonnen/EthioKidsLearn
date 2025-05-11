@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
+import { Audio } from 'expo-av';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 const GRID_SIZE = 3;
@@ -9,40 +11,40 @@ const TILE_MARGIN = 10;
 const TILE_SIZE = (width - (GRID_SIZE + 1) * TILE_MARGIN * 2) / GRID_SIZE;
 
 const alphabets = [
-  { letter: 'A', color: '#FFFF00' },
-  { letter: 'B', color: '#FFA500' },
-  { letter: 'C', color: '#FF0000' },
-  { letter: 'D', color: '#FF00FF' },
-  { letter: 'E', color: '#0000FF' },
-  { letter: 'F', color: '#00FF00' },
-  { letter: 'G', color: '#FFFFFF' },
-  { letter: 'H', color: '#1A1B41', textColor: '#FFFFFF', borderColor: '#FFFFFF' },
-  { letter: 'I', color: '#8B4513' },
-  { letter: 'J', color: '#FFFF00' },
-  { letter: 'K', color: '#FFA500' },
-  { letter: 'L', color: '#FF0000' },
-  { letter: 'M', color: '#FF00FF' },
-  { letter: 'N', color: '#0000FF' },
-  { letter: 'O', color: '#00FF00' },
-  { letter: 'P', color: '#FFFFFF' },
-  { letter: 'Q', color: '#1A1B41', textColor: '#FFFFFF', borderColor: '#FFFFFF' },
-  { letter: 'R', color: '#8B4513' },
-  { letter: 'S', color: '#FFFF00' },
-  { letter: 'T', color: '#FFA500' },
-  { letter: 'U', color: '#FF0000' },
-  { letter: 'V', color: '#FF00FF' },
-  { letter: 'W', color: '#0000FF' },
-  { letter: 'X', color: '#00FF00' },
-  { letter: 'Y', color: '#FFFFFF' },
-  { letter: 'Z', color: '#1A1B41', textColor: '#FFFFFF', borderColor: '#FFFFFF' },
+  { letter: 'A', color: '#FFFF00', sound: require('../../../assets/sounds/english/a.m4a') },
+  { letter: 'B', color: '#FFA500', sound: require('../../../assets/sounds/english/b.m4a') },
+  { letter: 'C', color: '#FF0000', sound: require('../../../assets/sounds/english/c.m4a') },
+  { letter: 'D', color: '#FF00FF', sound: require('../../../assets/sounds/english/d.m4a') },
+  { letter: 'E', color: '#0000FF', sound: require('../../../assets/sounds/english/e.m4a') },
+  { letter: 'F', color: '#00FF00', sound: require('../../../assets/sounds/english/f.m4a') },
+  { letter: 'G', color: '#FFFFFF', sound: require('../../../assets/sounds/english/g.m4a') },
+  { letter: 'H', color: '#1A1B41', textColor: '#FFFFFF', borderColor: '#FFFFFF', sound: require('../../../assets/sounds/english/h.m4a') },
+  { letter: 'I', color: '#8B4513', sound: require('../../../assets/sounds/english/i.m4a') },
+  { letter: 'J', color: '#FFFF00', sound: require('../../../assets/sounds/english/j.m4a') },
+  { letter: 'K', color: '#FFA500', sound: require('../../../assets/sounds/english/k.m4a') },
+  { letter: 'L', color: '#FF0000', sound: require('../../../assets/sounds/english/l.m4a') },
+  { letter: 'M', color: '#FF00FF', sound: require('../../../assets/sounds/english/m.m4a') },
+  { letter: 'N', color: '#0000FF', sound: require('../../../assets/sounds/english/n.m4a') },
+  { letter: 'O', color: '#00FF00', sound: require('../../../assets/sounds/english/o.m4a') },
+  { letter: 'P', color: '#FFFFFF', sound: require('../../../assets/sounds/english/p.m4a') },
+  { letter: 'Q', color: '#1A1B41', textColor: '#FFFFFF', borderColor: '#FFFFFF', sound: require('../../../assets/sounds/english/q.m4a') },
+  { letter: 'R', color: '#8B4513', sound: require('../../../assets/sounds/english/r.m4a') },
+  { letter: 'S', color: '#FFFF00', sound: require('../../../assets/sounds/english/s.m4a') },
+  { letter: 'T', color: '#FFA500', sound: require('../../../assets/sounds/english/t.m4a') },
+  { letter: 'U', color: '#FF0000', sound: require('../../../assets/sounds/english/u.m4a') },
+  { letter: 'V', color: '#FF00FF', sound: require('../../../assets/sounds/english/v.m4a') },
+  { letter: 'W', color: '#0000FF', sound: require('../../../assets/sounds/english/w.m4a') },
+  { letter: 'X', color: '#00FF00', sound: require('../../../assets/sounds/english/x.m4a') },
+  { letter: 'Y', color: '#FFFFFF', sound: require('../../../assets/sounds/english/y.m4a') },
+  { letter: 'Z', color: '#1A1B41', textColor: '#FFFFFF', borderColor: '#FFFFFF', sound: require('../../../assets/sounds/english/z.m4a') },
 ];
 
-const LetterTile = ({ letter, color, borderColor, textColor, delay }) => {
+const LetterTile = ({ letter, color, borderColor, textColor, delay, sound, onPlaySound }) => {
   const [isPressed, setIsPressed] = useState(false);
   
   const handlePress = () => {
     setIsPressed(true);
-    // Add letter pronunciation logic here
+    onPlaySound(sound);
     setTimeout(() => setIsPressed(false), 300);
   };
 
@@ -70,6 +72,9 @@ const LetterTile = ({ letter, color, borderColor, textColor, delay }) => {
         ]}>
           {letter}
         </Text>
+        <View style={styles.soundIcon}>
+          <Ionicons name="volume-high" size={20} color="#FFF" />
+        </View>
       </TouchableOpacity>
     </Animatable.View>
   );
@@ -77,6 +82,40 @@ const LetterTile = ({ letter, color, borderColor, textColor, delay }) => {
 
 export default function AlphabetsLessonScreen() {
   const navigation = useNavigation();
+  const [sound, setSound] = useState();
+
+  // Clean up sound when component unmounts
+  useEffect(() => {
+    return sound
+      ? () => {
+          sound.unloadAsync();
+        }
+      : undefined;
+  }, [sound]);
+
+  // Function to play sound
+  async function playSound(soundFile) {
+    try {
+      // Unload previous sound if it exists
+      if (sound) {
+        await sound.unloadAsync();
+      }
+      
+      // Load new sound
+      const { sound: newSound } = await Audio.Sound.createAsync(soundFile);
+      setSound(newSound);
+      
+      // Play sound
+      await newSound.playAsync();
+    } catch (error) {
+      console.log('Error playing sound:', error);
+      Alert.alert(
+        'Sound Not Available',
+        'The sound file for this letter is not available yet.',
+        [{ text: 'OK' }]
+      );
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -90,6 +129,8 @@ export default function AlphabetsLessonScreen() {
               borderColor={item.borderColor}
               textColor={item.textColor}
               delay={index * 100}
+              sound={item.sound}
+              onPlaySound={playSound}
             />
           ))}
         </View>
@@ -170,5 +211,13 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  soundIcon: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 12,
+    padding: 2,
   },
 }); 
