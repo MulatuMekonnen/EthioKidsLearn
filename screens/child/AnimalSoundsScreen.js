@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
@@ -35,89 +35,95 @@ const getCloudinaryUrl = (imageName, options = {}) => {
   return `https://res.cloudinary.com/dljxfr5iy/image/upload/animals/${imageName}`;
 };
 
-// Local animal data with Cloudinary URLs
+// Local animal data with local assets
 const localAnimals = [
   {
     name: 'Lion',
-    imageUrl: getCloudinaryUrl('lion.png'),
+    image: require('../../assets/images/animals/lion.png'),
     sound: require('../../assets/sounds/animals/lion.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Tiger',
-    imageUrl: getCloudinaryUrl('tiger.png'),
+    image: require('../../assets/images/animals/tiger.png'),
     sound: require('../../assets/sounds/animals/tiger.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Monkey',
-    imageUrl: getCloudinaryUrl('monkey.png'),
+    image: require('../../assets/images/animals/monkey.png'),
     sound: require('../../assets/sounds/animals/monkey.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'giraffe',
-    imageUrl: getCloudinaryUrl('giraffe.png'),
+    image: require('../../assets/images/animals/giraffe.png'),
     sound: require('../../assets/sounds/animals/giraffe.mp3'),
     category: 'Wild Animals'
   },
   {
+    name: "Elephant",
+    image: require('../../assets/images/animals/elephant.png'),
+    sound: require('../../assets/sounds/animals/elephant.mp3'),
+    category: 'Wild Animals'
+  },
+  {
     name: 'zebra',
-    imageUrl: getCloudinaryUrl('zebra.png'),
+    image: require('../../assets/images/animals/zebra.png'),
     sound: require('../../assets/sounds/animals/zebra.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Hyena',
-    imageUrl: getCloudinaryUrl('hyena.png'),
+    image: require('../../assets/images/animals/hyena.png'),
     sound: require('../../assets/sounds/animals/hyena.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Cow',
-    imageUrl: getCloudinaryUrl('cow.png'),
+    image: require('../../assets/images/animals/cow.png'),
     sound: require('../../assets/sounds/animals/cow.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Sheep',
-    imageUrl: getCloudinaryUrl('sheep.png'),
+    image: require('../../assets/images/animals/sheep.png'),
     sound: require('../../assets/sounds/animals/sheep.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Horse',
-    imageUrl: getCloudinaryUrl('horse.png'),
+    image: require('../../assets/images/animals/horse.png'),
     sound: require('../../assets/sounds/animals/horse.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Donkey',
-    imageUrl: getCloudinaryUrl('donkey.png'),
+    image: require('../../assets/images/animals/donkey.png'),
     sound: require('../../assets/sounds/animals/donkey.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Ox',
-    imageUrl: getCloudinaryUrl('ox.png'),
+    image: require('../../assets/images/animals/ox.png'),
     sound: require('../../assets/sounds/animals/ox.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Cat',
-    imageUrl: getCloudinaryUrl('cat.png'),
+    image: require('../../assets/images/animals/cat.png'),
     sound: require('../../assets/sounds/animals/cat.mp3'),
     category: 'Pets'
   },
   {
     name: 'Dog',
-    imageUrl: getCloudinaryUrl('dog.png'),
+    image: require('../../assets/images/animals/dog.png'),
     sound: require('../../assets/sounds/animals/dog.mp3'),
     category: 'Pets'
   },
   {
     name: 'Chicken',
-    imageUrl: getCloudinaryUrl('chicken.png'),
+    image: require('../../assets/images/animals/chicken.png'),
     sound: require('../../assets/sounds/animals/chicken.mp3'),
     category: 'Farm Animals'
   }
@@ -134,10 +140,7 @@ const uploadAnimalsToFirebase = async () => {
     for (const animal of localAnimals) {
       await addDoc(animalsCollection, {
         name: animal.name,
-        // Use the same Cloudinary URL format for Firebase
-        imageUrl: getCloudinaryUrl(`${animal.name.toLowerCase()}.png`),
         category: animal.category,
-        // Note: Sound files still need to be uploaded separately to a storage service
       });
     }
     console.log('Animals uploaded to Firebase successfully');
@@ -156,14 +159,6 @@ export default function AnimalSoundsScreen() {
   const [categories, setCategories] = useState(localCategories);
   const [isLoadingFirebase, setIsLoadingFirebase] = useState(false);
   const [failedImages, setFailedImages] = useState({});
-  const [showDebug, setShowDebug] = useState(false);
-
-  // Debug function to test Cloudinary URLs
-  const testCloudinaryUrl = () => {
-    const testUrl = getCloudinaryUrl('lion.png');
-    console.log('Testing Cloudinary URL:', testUrl);
-    Alert.alert('Debug Info', `Testing URL: ${testUrl}\n\nFailed Images: ${Object.keys(failedImages).join(', ')}`);
-  };
 
   // Handle image loading errors
   const handleImageError = (animalName) => {
@@ -184,12 +179,41 @@ export default function AnimalSoundsScreen() {
         
         // Only update state if there are animals in Firestore
         if (animalsSnapshot.docs.length > 0) {
-          const animalsData = animalsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-          }));
+          const animalsData = animalsSnapshot.docs.map(doc => {
+            const firebaseData = doc.data();
+            // Find matching local animal to get the assets
+            const localAnimal = localAnimals.find(animal => animal.name === firebaseData.name);
+            return {
+              id: doc.id,
+              ...firebaseData,
+              // Preserve the local assets
+              image: localAnimal?.image,
+              sound: localAnimal?.sound
+            };
+          });
+
+          // Check for any new animals in localAnimals that aren't in Firebase
+          const firebaseAnimalNames = animalsData.map(animal => animal.name);
+          const newAnimals = localAnimals.filter(animal => !firebaseAnimalNames.includes(animal.name));
           
-          setAnimals(animalsData);
+          if (newAnimals.length > 0) {
+            console.log('Found new animals to upload:', newAnimals.map(a => a.name).join(', '));
+            // Upload new animals to Firebase
+            for (const animal of newAnimals) {
+              await addDoc(animalsCollection, {
+                name: animal.name,
+                category: animal.category,
+              });
+            }
+            // Add the new animals to our data
+            const updatedAnimals = [
+              ...animalsData,
+              ...newAnimals
+            ];
+            setAnimals(updatedAnimals);
+          } else {
+            setAnimals(animalsData);
+          }
           
           // Extract unique categories
           const uniqueCategories = [...new Set(animalsData.map(animal => animal.category))];
@@ -204,10 +228,18 @@ export default function AnimalSoundsScreen() {
             console.log('Successfully uploaded animals to Firebase, fetching updated data...');
             // Fetch the newly uploaded data
             const updatedSnapshot = await getDocs(animalsCollection);
-            const updatedData = updatedSnapshot.docs.map(doc => ({
-              id: doc.id,
-              ...doc.data()
-            }));
+            const updatedData = updatedSnapshot.docs.map(doc => {
+              const firebaseData = doc.data();
+              // Find matching local animal to get the assets
+              const localAnimal = localAnimals.find(animal => animal.name === firebaseData.name);
+              return {
+                id: doc.id,
+                ...firebaseData,
+                // Preserve the local assets
+                image: localAnimal?.image,
+                sound: localAnimal?.sound
+              };
+            });
             
             setAnimals(updatedData);
             
@@ -347,7 +379,7 @@ export default function AnimalSoundsScreen() {
                     </View>
                   ) : (
                     <Image 
-                      source={typeof animal.imageUrl === 'string' ? { uri: animal.imageUrl } : animal.imageUrl}
+                      source={animal.image}
                       style={styles.animalImage}
                       resizeMode="contain"
                       onError={() => handleImageError(animal.name)}
@@ -389,17 +421,6 @@ export default function AnimalSoundsScreen() {
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </Animatable.View>
-
-      {/* Debug button - long press to activate */}
-      <TouchableOpacity
-        style={styles.debugButton}
-        onLongPress={() => {
-          setShowDebug(true);
-          testCloudinaryUrl();
-        }}
-      >
-        <Ionicons name="bug-outline" size={20} color="#FFFFFF" />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -560,13 +581,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 5,
     textAlign: 'center',
-  },
-  debugButton: {
-    position: 'absolute',
-    top: 20,
-    right: 20,
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 }); 
