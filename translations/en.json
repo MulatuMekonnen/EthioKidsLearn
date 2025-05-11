@@ -309,6 +309,7 @@
     "quizCompletion": "Quiz completion by subject",
     "weeklyActivity": "Weekly Activity",
     "minutesLearning": "Minutes spent learning",
-    "dataSuccess": "Data loaded successfully"
+    "dataSuccess": "Data loaded successfully",
+    "noData": "No data available"
   }
 } 

@@ -248,7 +248,8 @@
     "quizCompletion": "በትምህርት ዓይነት የፈተና አጠናቀቅ",
     "weeklyActivity": "የሳምንታዊ እንቅስቃሴ",
     "minutesLearning": "በመማር ላይ የተጠቀሙ ደቂቃዎች",
-    "dataSuccess": "ውሂብ በተሳካ ሁኔታ ተጭኗል"
+    "dataSuccess": "ውሂብ በተሳካ ሁኔታ ተጭኗል",
+    "noData": "ምንም ውሂብ የለም"
   },
   "teacher": {
     "dashboard": "የመምህር ዳሽቦርድ",

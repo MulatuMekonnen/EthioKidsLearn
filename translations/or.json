@@ -246,7 +246,8 @@
     "quizCompletion": "Xumuraa qormaataa gosa barnootaan",
     "weeklyActivity": "Hojii Torbanee",
     "minutesLearning": "Daqiiqawwan barachuuf fayyadaman",
-    "dataSuccess": "Ragaan milkaa'inaan fe'ameera"
+    "dataSuccess": "Ragaan milkaa'inaan fe'ameera",
+    "noData": "Ragaan hin jiru"
   },
   "teacher": {
     "dashboard": "Daashboordii Barsiisaa",
