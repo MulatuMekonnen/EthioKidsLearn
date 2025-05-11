@@ -88,7 +88,7 @@ export default function CreateTeacherScreen({ navigation }) {
             setPassword('');
             
             // Navigate back to manage users
-            navigation.navigate('ManageUsers');
+            
           }
         }
       ],

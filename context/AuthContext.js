@@ -172,7 +172,7 @@ export function AuthProvider({ children }) {
       // Remember the current user to switch back later
       const adminUser = auth.currentUser;
       
-      // Step 2: Create the teacher document in Firestore
+      
       try {
         const teacherData = {
         email,
@@ -189,11 +189,11 @@ export function AuthProvider({ children }) {
         await setDoc(doc(db, 'users', createdUserCred.user.uid), teacherData, { merge: true });
         console.log('Teacher document created successfully in Firestore');
         
-        // Step 3: Update Auth profile
+       
         await updateProfile(createdUserCred.user, { displayName: name });
         console.log('Auth profile updated with displayName');
         
-        // Step 4: Handle auth state if needed
+        
         if (auth.currentUser.uid !== adminUser.uid) {
           console.log('Auth state changed, signing out to restore admin session');
           await signOut(auth);
@@ -235,13 +235,13 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Password reset
   const resetPassword = async (email) => {
     try {
       await sendPasswordResetEmail(auth, email);
       return true;
-    } catch (err) {
-      throw new Error(err.message);
+    } catch (error) {
+      console.error('[AuthContext] resetPassword error:', error);
+      throw error;
     }
   };
 

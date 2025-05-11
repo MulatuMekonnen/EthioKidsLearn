@@ -145,6 +145,11 @@ export default function LoginScreen({ navigation }) {
                   {translate('auth.noAccount')}
                 </Text>
               </TouchableOpacity>
+              <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+                <Text style={[styles.linkText, styles.forgotPasswordText]}>
+                  {translate('auth.forgotPassword')}
+                </Text>
+              </TouchableOpacity>
             </View>
           </>
         )}
@@ -217,10 +222,14 @@ const styles = StyleSheet.create({
   linkContainer: {
     marginTop: 25,
     alignItems: 'center',
+    gap: 10,
   },
   linkText: {
     color: '#666666',
     fontSize: 16,
+  },
+  forgotPasswordText: {
+    color: '#1E90FF',
   },
   link: {
     color: '#1E90FF',

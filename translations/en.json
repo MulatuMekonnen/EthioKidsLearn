@@ -25,7 +25,13 @@
     "totalLessons": "Total Lessons",
     "totalQuizzes": "Total Quizzes",
     "ethiokidslearn": "Ethio Kids Learn",
-    "logout": "Logout"
+    "logout": "Logout",
+    "forgotPassword": "Forgot Password",
+    "resetPassword": "Reset Password",
+    "enterEmailForReset": "Enter your email address and we'll send you instructions to reset your password.",
+    "passwordResetSent": "Password Reset Email Sent",
+    "checkEmailForReset": "Please check your email for instructions to reset your password.",
+    "userNotFound": "No account found with this email address."
   },
   "roles": {
     "parent": "Parent",
