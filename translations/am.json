@@ -68,7 +68,7 @@
   "parent": {
     "dashboard": "የወላጅ ዳሽቦርድ",
     "dashboardDesc": "የልጆችን መገለጫ ያስተዳድሩ እና የፈተና ውጤቶችን ይመልከቱ",
-    "progressReport": "የመሻሻል ሪፖርት",
+    "progressReport": "የሂደት ሪፖርት",
     "progressReportDesc": "ዝርዝር የትምህርት ሂደትን ይመልከቱ",
     "childLogin": "የልጅ መግቢያ",
     "childLoginDesc": "ወደ የልጅ መግቢያ ይሂዱ",
@@ -184,5 +184,54 @@
     "noChildData": "ምንም የልጅ መረጃ አልተገኘም",
     "completed": "ተጠናቋል",
     "noData": "ምንም የፈተና መረጃ አልተገኘም"
+  },
+  "teacher": {
+    "dashboard": "የመምህር ዳሽቦርድ",
+    "welcome": "እንኳን ደህና መጡ",
+    "inspire": "ዛሬ አእምሮዎችን ለማነሳሳት ዝግጁ ነዎት?",
+    "students": "ተማሪዎች",
+    "lessons": "ትምህርቶች",
+    "completion": "ማጠናቀቅ",
+    "noData": "ምንም ውሂብ የለም",
+    "teacherTools": "የመምህር መሳሪያዎች",
+    "studentProgress": "የተማሪ ዕድገት",
+    "studentProgressDesc": "የተማሪ አፈጻጸምን ይመልከቱ እና ይከታተሉ",
+    "studentReports": "የተማሪ ሪፖርቶች",
+    "studentReportsDesc": "የትምህርት አይነት ተኮር ሪፖርቶችን ይፍጠሩ እና ያስተዳድሩ",
+    "createContent": "ይዘት ይፍጠሩ",
+    "createContentDesc": "አዲስ የትምህርት ግብዓቶችን ያዘጋጁ",
+    "classSchedule": "የክፍል መርሀግብር",
+    "classScheduleDesc": "የማስተማሪያ ጊዜ ሰሌዳዎን ያስተዳድሩ",
+    "studentprogress": "የተማሪ ዕድገት",
+    "studentprogressDesc": "የተማሪ አፈጻጸምን ይመልከቱ እና ይከታተሉ",
+    "studentreports": "የተማሪ ሪፖርቶች",
+    "studentreportsDesc": "የትምህርት አይነት ተኮር ሪፖርቶችን ይፍጠሩ እና ያስተዳድሩ",
+    "createcontent": "ይዘት ይፍጠሩ",
+    "createcontentDesc": "አዲስ የትምህርት ግብዓቶችን ያዘጋጁ",
+    "classschedule": "የክፍል መርሀግብር",
+    "classscheduleDesc": "የማስተማሪያ ጊዜ ሰሌዳዎን ያስተዳድሩ",
+    "contentType": "የይዘት አይነት",
+    "contentTitle": "ርዕስ",
+    "contentDescription": "መግለጫ (ተማሪዎች ከዚህ ይዘት ምን ይማራሉ?)",
+    "contentTags": "መለያዎች (በኮማ የተለዩ: ለምሳሌ ቁጥሮች፣ መቁጠር፣ መሰረታዊ)",
+    "contentCategory": "ምድብ:",
+    "contentLevel": "ደረጃ:",
+    "selectFile": "ፋይል ይምረጡ",
+    "changeFile": "ፋይል ይቀይሩ",
+    "reviewNotice": "ይዘትዎ ከመታተሙ በፊት በአስተዳዳሪዎች ይገመገማል። ይህ ሁሉም ይዘት የትምህርት ደረጃዎችን እንደሚያሟላ ለማረጋገጥ ይረዳል።",
+    "submitForReview": "ለግምገማ ያስገቡ",
+    "levels": {
+      "beginner": "ጀማሪ",
+      "intermediate": "መካከለኛ",
+      "advanced": "የላቀ"
+    },
+    "contentTypes": {
+      "document": "ሰነድ",
+      "video": "ቪዲዮ",
+      "audio": "ድምጽ", 
+      "image": "ምስል"
+    },
+    "refreshData": "ውሂብ አድስ",
+    "dataNotAvailable": "ምንም ውሂብ አይገኝም። ስታቲስቲክስን ለማየት ተማሪዎችን እና ትምህርቶችን ይጨምሩ።"
   }
 } 

@@ -28,6 +28,7 @@ import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { Video } from 'expo-av';
 import { useContent } from '../../context/ContentContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 const CONTENT_TYPES = {
   DOCUMENT: 'document',
@@ -39,6 +40,7 @@ const CONTENT_TYPES = {
 export default function CreateContentScreen({ navigation }) {
   const { user } = useAuth();
   const { createContent } = useContent();
+  const { translate } = useLanguage();
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -51,7 +53,7 @@ export default function CreateContentScreen({ navigation }) {
   // Loader & progress
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  
+
   // Initialize content type
   useEffect(() => {
     console.log('Component mounted, content type initialized to:', contentType);
@@ -246,9 +248,9 @@ export default function CreateContentScreen({ navigation }) {
       
       // 2. Save metadata to Firebase using ContentContext
       const contentData = {
-        title,
-        description,
-        category,
+          title,
+          description,
+          category,
         level,
         contentType,
         fileUrl: uploadResult.url,
@@ -257,7 +259,7 @@ export default function CreateContentScreen({ navigation }) {
         fileType: fileInfo.mimeType || fileInfo.type,
         fileSize: fileInfo.size,
         tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        createdBy: user.uid,
+          createdBy: user.uid,
         createdByName: user.displayName || user.email,
         status: 'pending', // Set as pending for admin approval
       };
@@ -308,9 +310,9 @@ export default function CreateContentScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.inner}>
-        <Text style={styles.header}>Create Educational Content</Text>
+        <Text style={styles.header}>{translate('teacher.createContent') || 'Create Educational Content'}</Text>
         
-        <Text style={styles.label}>Content Type</Text>
+        <Text style={styles.label}>{translate('teacher.contentType') || 'Content Type'}</Text>
         <View style={styles.contentTypeSelector}>
           {Object.values(CONTENT_TYPES).map((type) => (
             <TouchableOpacity 
@@ -343,7 +345,7 @@ export default function CreateContentScreen({ navigation }) {
                   contentType === type && styles.contentTypeTextActive
                 ]}
               >
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {translate(`teacher.contentTypes.${type}`) || type.charAt(0).toUpperCase() + type.slice(1)}
               </Text>
             </TouchableOpacity>
           ))}
@@ -351,14 +353,14 @@ export default function CreateContentScreen({ navigation }) {
 
         <TextInput
           style={styles.input}
-          placeholder="Title"
+          placeholder={translate('teacher.contentTitle') || "Title"}
           value={title}
           onChangeText={setTitle}
         />
 
         <TextInput
           style={[styles.input, styles.textArea]}
-          placeholder="Description (what will students learn from this content?)"
+          placeholder={translate('teacher.contentDescription') || "Description (what will students learn from this content?)"}
           value={description}
           onChangeText={setDescription}
           multiline
@@ -366,35 +368,35 @@ export default function CreateContentScreen({ navigation }) {
         
         <TextInput
           style={styles.input}
-          placeholder="Tags (comma separated: e.g. numbers, counting, basic)"
+          placeholder={translate('teacher.contentTags') || "Tags (comma separated: e.g. numbers, counting, basic)"}
           value={tags}
           onChangeText={setTags}
         />
 
         <View style={styles.pickerContainer}>
-          <Text style={styles.pickerLabel}>Category:</Text>
+          <Text style={styles.pickerLabel}>{translate('teacher.contentCategory') || "Category:"}</Text>
           <Picker
             selectedValue={category}
             onValueChange={setCategory}
             style={styles.picker}
           >
-            <Picker.Item label="Mathematics" value="math" />
-            <Picker.Item label="English" value="english" />
-            <Picker.Item label="Amharic" value="amharic" />
-            <Picker.Item label="Afaan Oromo" value="oromo" />
+            <Picker.Item label={translate('subjects.math.title') || "Mathematics"} value="math" />
+            <Picker.Item label={translate('subjects.english.title') || "English"} value="english" />
+            <Picker.Item label={translate('subjects.አማርኛ.title') || "Amharic"} value="amharic" />
+            <Picker.Item label={translate('subjects.a/oromo.title') || "Afaan Oromo"} value="oromo" />
           </Picker>
         </View>
 
         <View style={styles.pickerContainer}>
-          <Text style={styles.pickerLabel}>Level:</Text>
+          <Text style={styles.pickerLabel}>{translate('teacher.contentLevel') || "Level:"}</Text>
           <Picker
             selectedValue={level}
             onValueChange={setLevel}
             style={styles.picker}
           >
-            <Picker.Item label="Beginner" value="beginner" />
-            <Picker.Item label="Intermediate" value="intermediate" />
-            <Picker.Item label="Advanced" value="advanced" />
+            <Picker.Item label={translate('teacher.levels.beginner') || "Beginner"} value="beginner" />
+            <Picker.Item label={translate('teacher.levels.intermediate') || "Intermediate"} value="intermediate" />
+            <Picker.Item label={translate('teacher.levels.advanced') || "Advanced"} value="advanced" />
           </Picker>
         </View>
 
@@ -402,7 +404,9 @@ export default function CreateContentScreen({ navigation }) {
           <TouchableOpacity style={styles.filePicker} onPress={pickFile}>
             <Ionicons name="cloud-upload-outline" size={28} color="#4285F4" />
             <Text style={styles.filePickerText}>
-              {fileInfo ? "Change File" : `Select ${contentType} File`}
+              {fileInfo 
+                ? translate('teacher.changeFile') || "Change File"
+                : translate('teacher.selectFile') || `Select ${contentType} File`}
             </Text>
           </TouchableOpacity>
           
@@ -440,8 +444,8 @@ export default function CreateContentScreen({ navigation }) {
         <View style={styles.infoBox}>
           <Ionicons name="information-circle-outline" size={24} color="#4285F4" />
           <Text style={styles.infoText}>
-            Your content will be reviewed by administrators before being published.
-            This helps ensure all content meets our educational standards.
+            {translate('teacher.reviewNotice') || 
+              "Your content will be reviewed by administrators before being published. This helps ensure all content meets our educational standards."}
           </Text>
         </View>
 
@@ -458,7 +462,9 @@ export default function CreateContentScreen({ navigation }) {
           ) : (
             <>
               <Ionicons name="cloud-upload" size={20} color="#FFFFFF" />
-              <Text style={styles.submitButtonText}>Submit for Review</Text>
+              <Text style={styles.submitButtonText}>
+                {translate('teacher.submitForReview') || "Submit for Review"}
+              </Text>
             </>
           )}
         </TouchableOpacity>

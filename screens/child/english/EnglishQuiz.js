@@ -4,46 +4,46 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Age-based questions
+// Age-based questions - Ages 4-6 (Beginner)
 const beginnerQuestions = [
   {
     question: 'What comes after letter E?',
-    options: ['A. G', 'B. F', 'C. R'],
+    options: ['A. G', 'B. F', 'C. D'],
     correctAnswer: 1
   },
   {
     question: 'What comes before M?',
-    options: ['A. L', 'B. N', 'C. H'],
+    options: ['A. L', 'B. N', 'C. K'],
     correctAnswer: 0
   },
   {
-    question: 'What is missing? C_R.',
-    options: ['A. U', 'B. Y', 'C. A'],
+    question: 'What is missing? C_T',
+    options: ['A. A', 'B. E', 'C. O'],
     correctAnswer: 0
   },
   {
-    question: 'What is missing? AP_LE.',
-    options: ['A. P', 'B. P', 'C. N'],
+    question: 'What is missing? AP_LE',
+    options: ['A. B', 'B. P', 'C. T'],
     correctAnswer: 1
   },
   {
     question: 'Find the vowel:',
-    options: ['A. E', 'B. C', 'C. G'],
+    options: ['A. E', 'B. C', 'C. T'],
     correctAnswer: 0
   },
   {
     question: 'Which letter makes the "S" sound?',
-    options: ['A. C', 'B. S', 'C. T'],
+    options: ['A. C', 'B. S', 'C. Z'],
     correctAnswer: 1
   },
   {
     question: 'What letter does "Ball" start with?',
-    options: ['A. A', 'B. B', 'C. C'],
+    options: ['A. P', 'B. B', 'C. D'],
     correctAnswer: 1
   },
   {
     question: 'What letter does "Cat" start with?',
-    options: ['A. D', 'B. C', 'C. K'],
+    options: ['A. K', 'B. C', 'C. S'],
     correctAnswer: 1
   },
   {
@@ -108,6 +108,7 @@ const beginnerQuestions = [
   }
 ];
 
+// Ages 7-9 (Intermediate)
 const intermediateQuestions = [
   {
     question: 'Which of these is a noun?',
@@ -211,6 +212,7 @@ const intermediateQuestions = [
   }
 ];
 
+// Ages 10+ (Advanced)
 const advancedQuestions = [
   {
     question: 'Which is a preposition?',
@@ -323,14 +325,16 @@ export default function EnglishQuizScreen() {
   const [childInfo, setChildInfo] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState([]);
+  const [ageGroup, setAgeGroup] = useState('beginner'); // Default age group
 
   useEffect(() => {
     // Get child info if available in route params
     const childId = route.params?.childId;
     const childName = route.params?.childName;
+    const childAge = route.params?.childAge;
     
     if (childId && childName) {
-      setChildInfo({ id: childId, name: childName });
+      setChildInfo({ id: childId, name: childName, age: childAge });
     } else {
       loadDefaultChild();
     }
@@ -362,17 +366,25 @@ export default function EnglishQuizScreen() {
     if (!childInfo) return;
     
     let questionSet;
+    let ageGroupLabel;
     
     // Select questions based on child's age/level
     if (childInfo.level === 'Advanced' || (childInfo.age && childInfo.age >= 10)) {
       questionSet = advancedQuestions;
+      ageGroupLabel = 'advanced';
     } else if (childInfo.level === 'Intermediate' || (childInfo.age && childInfo.age >= 7)) {
       questionSet = intermediateQuestions;
+      ageGroupLabel = 'intermediate';
     } else {
       questionSet = beginnerQuestions;
+      ageGroupLabel = 'beginner';
     }
     
+    setAgeGroup(ageGroupLabel);
     setQuestions(questionSet);
+    
+    // Initialize empty answers array
+    setAnswers(new Array(questionSet.length).fill(null));
   };
 
   const handleOptionSelect = (questionIndex, optionIndex) => {
@@ -397,6 +409,23 @@ export default function EnglishQuizScreen() {
   };
 
   const handleSubmit = async () => {
+    // Check if all questions are answered
+    const answeredCount = Object.keys(selectedAnswers).length;
+    if (answeredCount < questions.length) {
+      Alert.alert(
+        'Incomplete Quiz',
+        `You've only answered ${answeredCount} out of ${questions.length} questions. Are you sure you want to submit?`,
+        [
+          { text: 'Continue Answering', style: 'cancel' },
+          { text: 'Submit Anyway', onPress: () => submitQuiz() }
+        ]
+      );
+    } else {
+      submitQuiz();
+    }
+  };
+
+  const submitQuiz = async () => {
     setSubmitted(true);
     
     // Calculate score and show results
@@ -426,6 +455,7 @@ export default function EnglishQuizScreen() {
         childName,
         category: 'English Quiz',
         subject: 'English', // Add subject for categorization
+        ageGroup: ageGroup, // Add age group information
         date: new Date().toISOString(),
         score: newScore,
         totalQuestions: questions.length,
@@ -435,10 +465,24 @@ export default function EnglishQuizScreen() {
       // Save updated results
       await AsyncStorage.setItem('quizResults', JSON.stringify([...existingResults, newResult]));
       
-      // Alert success (optional for better UX)
+      // Calculate percentage
+      const percentage = Math.round((newScore / questions.length) * 100);
+      let message = '';
+      
+      if (percentage >= 90) {
+        message = 'Excellent job! You\'re a star!';
+      } else if (percentage >= 70) {
+        message = 'Great work! Keep it up!';
+      } else if (percentage >= 50) {
+        message = 'Good effort! Keep practicing!';
+      } else {
+        message = 'Keep trying! You\'ll do better next time!';
+      }
+      
+      // Alert success with encouraging message
       Alert.alert(
         'Quiz Complete!',
-        `Your score: ${newScore}/${questions.length}\n\nResults saved for your parents to view.`,
+        `Your score: ${newScore}/${questions.length} (${percentage}%)\n\n${message}`,
         [{ text: 'OK' }]
       );
     } catch (error) {
@@ -446,8 +490,21 @@ export default function EnglishQuizScreen() {
     }
   };
 
+  const getQuizLevelLabel = () => {
+    switch(ageGroup) {
+      case 'advanced': return 'Advanced (Ages 10+)';
+      case 'intermediate': return 'Intermediate (Ages 7-9)';
+      default: return 'Beginner (Ages 4-6)';
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <Animatable.View animation="fadeIn" style={styles.header}>
+        <Text style={styles.headerText}>English Quiz</Text>
+        <Text style={styles.subHeaderText}>{getQuizLevelLabel()}</Text>
+      </Animatable.View>
+      
       <ScrollView 
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -460,6 +517,7 @@ export default function EnglishQuizScreen() {
             delay={questionIndex * 200}
             style={styles.questionContainer}
           >
+            <Text style={styles.questionNumber}>Question {questionIndex + 1}</Text>
             <Text style={styles.questionText}>{question.question}</Text>
             {question.options.map((option, optionIndex) => (
               <TouchableOpacity
@@ -474,7 +532,21 @@ export default function EnglishQuizScreen() {
                 onPress={() => handleOptionSelect(questionIndex, optionIndex)}
                 disabled={submitted}
               >
-                <Text style={styles.optionText}>{option}</Text>
+                <Text style={[
+                  styles.optionText,
+                  (submitted && optionIndex === question.correctAnswer) || 
+                  (submitted && selectedAnswers[questionIndex] === optionIndex) ? 
+                  styles.optionTextSelected : null
+                ]}>
+                  {option}
+                </Text>
+                {submitted && optionIndex === question.correctAnswer && (
+                  <Text style={styles.correctText}>✓ Correct</Text>
+                )}
+                {submitted && selectedAnswers[questionIndex] === optionIndex && 
+                 optionIndex !== question.correctAnswer && (
+                  <Text style={styles.wrongText}>✗ Incorrect</Text>
+                )}
               </TouchableOpacity>
             ))}
           </Animatable.View>
@@ -485,8 +557,12 @@ export default function EnglishQuizScreen() {
             animation="bounceIn"
             style={styles.scoreContainer}
           >
+            <Text style={styles.scoreTitle}>Quiz Results</Text>
             <Text style={styles.scoreText}>
               Your Score: {score} / {questions.length}
+            </Text>
+            <Text style={styles.percentageText}>
+              {Math.round((score / questions.length) * 100)}%
             </Text>
           </Animatable.View>
         )}
@@ -496,28 +572,38 @@ export default function EnglishQuizScreen() {
           delay={800}
           style={styles.submitContainer}
         >
-          <TouchableOpacity
-            style={styles.submitButton}
-            onPress={handleSubmit}
-            disabled={submitted}
-          >
-            <Text style={styles.submitText}>Submit</Text>
-          </TouchableOpacity>
+          {!submitted ? (
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit}
+            >
+              <Text style={styles.submitText}>Submit Answers</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.newQuizButton}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.submitText}>Finish Quiz</Text>
+            </TouchableOpacity>
+          )}
         </Animatable.View>
       </ScrollView>
 
-      <Animatable.View 
-        animation="fadeIn"
-        delay={1000}
-        style={styles.backButtonContainer}
-      >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
+      {!submitted && (
+        <Animatable.View 
+          animation="fadeIn"
+          delay={1000}
+          style={styles.backButtonContainer}
         >
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-      </Animatable.View>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}
+          >
+            <Text style={styles.backButtonText}>Back</Text>
+          </TouchableOpacity>
+        </Animatable.View>
+      )}
     </SafeAreaView>
   );
 }
@@ -526,6 +612,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#1A1B41',
+  },
+  header: {
+    backgroundColor: '#2196F3',
+    padding: 15,
+    alignItems: 'center',
+  },
+  headerText: {
+    color: 'white',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  subHeaderText: {
+    color: 'white',
+    fontSize: 16,
+    marginTop: 5,
   },
   scrollView: {
     flex: 1,
@@ -547,6 +648,12 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+  },
+  questionNumber: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#2196F3',
+    marginBottom: 8,
   },
   questionText: {
     fontSize: 20,
@@ -573,12 +680,32 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#1A1B41',
   },
+  optionTextSelected: {
+    color: 'white',
+  },
+  correctText: {
+    color: 'white',
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+  wrongText: {
+    color: 'white',
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
   submitContainer: {
     alignItems: 'center',
     marginTop: 20,
   },
   submitButton: {
     backgroundColor: '#2196F3',
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    elevation: 5,
+  },
+  newQuizButton: {
+    backgroundColor: '#4CAF50',
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 25,
@@ -613,9 +740,21 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     alignItems: 'center',
   },
+  scoreTitle: {
+    color: 'white',
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
   scoreText: {
     color: 'white',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  percentageText: {
+    color: 'white',
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginTop: 10,
   },
 }); 

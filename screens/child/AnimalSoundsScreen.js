@@ -1,82 +1,123 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, SafeAreaView, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
 import { Audio } from 'expo-av';
 import { db } from '../../services/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { Ionicons } from '@expo/vector-icons';
 
-// Local animal data as fallback
+/**
+ * CLOUDINARY SETUP INSTRUCTIONS:
+ * 
+ * 1. Create a Cloudinary account at https://cloudinary.com/
+ * 2. Get your cloud name from the dashboard
+ * 3. Create a new folder named 'animals' in your Cloudinary media library
+ * 4. Upload all animal images to this folder
+ * 5. Replace 'your-cloud-name' below with your actual cloud name
+ * 6. Images should have the same filenames as referenced in the code (lion.png, tiger.png, etc.)
+ */
+
+// Cloudinary configuration
+// Using the provided cloud name: dljxfr5iy
+const CLOUDINARY_URL = 'https://res.cloudinary.com/dljxfr5iy/image/upload';
+
+// No need for a fallback image, we'll use an icon instead
+
+/**
+ * Helper function to create optimized Cloudinary URLs
+ * @param {string} imageName - The name of the image file without path
+ * @param {object} options - Cloudinary transformation options
+ * @returns {string} - Complete Cloudinary URL
+ */
+const getCloudinaryUrl = (imageName, options = {}) => {
+  // Using a simpler direct URL format that's more likely to work
+  return `https://res.cloudinary.com/dljxfr5iy/image/upload/animals/${imageName}`;
+};
+
+// Local animal data with Cloudinary URLs
 const localAnimals = [
   {
     name: 'Lion',
-    image: require('../../assets/images/animals/lion.png'),
+    imageUrl: getCloudinaryUrl('lion.png'),
     sound: require('../../assets/sounds/animals/lion.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Tiger',
-    image: require('../../assets/images/animals/tiger.png'),
+    imageUrl: getCloudinaryUrl('tiger.png'),
     sound: require('../../assets/sounds/animals/tiger.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Monkey',
-    image: require('../../assets/images/animals/monkey.png'),
+    imageUrl: getCloudinaryUrl('monkey.png'),
     sound: require('../../assets/sounds/animals/monkey.mp3'),
     category: 'Wild Animals'
   },
   {
+    name: 'giraffe',
+    imageUrl: getCloudinaryUrl('giraffe.png'),
+    sound: require('../../assets/sounds/animals/giraffe.mp3'),
+    category: 'Wild Animals'
+  },
+  {
+    name: 'zebra',
+    imageUrl: getCloudinaryUrl('zebra.png'),
+    sound: require('../../assets/sounds/animals/zebra.mp3'),
+    category: 'Wild Animals'
+  },
+  {
     name: 'Hyena',
-    image: require('../../assets/images/animals/hyena.png'),
+    imageUrl: getCloudinaryUrl('hyena.png'),
     sound: require('../../assets/sounds/animals/hyena.mp3'),
     category: 'Wild Animals'
   },
   {
     name: 'Cow',
-    image: require('../../assets/images/animals/cow.png'),
+    imageUrl: getCloudinaryUrl('cow.png'),
     sound: require('../../assets/sounds/animals/cow.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Sheep',
-    image: require('../../assets/images/animals/sheep.png'),
+    imageUrl: getCloudinaryUrl('sheep.png'),
     sound: require('../../assets/sounds/animals/sheep.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Horse',
-    image: require('../../assets/images/animals/horse.png'),
+    imageUrl: getCloudinaryUrl('horse.png'),
     sound: require('../../assets/sounds/animals/horse.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Donkey',
-    image: require('../../assets/images/animals/donkey.png'),
+    imageUrl: getCloudinaryUrl('donkey.png'),
     sound: require('../../assets/sounds/animals/donkey.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Ox',
-    image: require('../../assets/images/animals/ox.png'),
+    imageUrl: getCloudinaryUrl('ox.png'),
     sound: require('../../assets/sounds/animals/ox.mp3'),
     category: 'Farm Animals'
   },
   {
     name: 'Cat',
-    image: require('../../assets/images/animals/cat.png'),
+    imageUrl: getCloudinaryUrl('cat.png'),
     sound: require('../../assets/sounds/animals/cat.mp3'),
     category: 'Pets'
   },
   {
     name: 'Dog',
-    image: require('../../assets/images/animals/dog.png'),
+    imageUrl: getCloudinaryUrl('dog.png'),
     sound: require('../../assets/sounds/animals/dog.mp3'),
     category: 'Pets'
   },
   {
     name: 'Chicken',
-    image: require('../../assets/images/animals/chicken.png'),
+    imageUrl: getCloudinaryUrl('chicken.png'),
     sound: require('../../assets/sounds/animals/chicken.mp3'),
     category: 'Farm Animals'
   }
@@ -85,6 +126,28 @@ const localAnimals = [
 // Pre-compute local categories
 const localCategories = [...new Set(localAnimals.map(animal => animal.category))];
 
+// Helper function to upload animals to Firebase
+const uploadAnimalsToFirebase = async () => {
+  try {
+    const animalsCollection = collection(db, 'animals');
+    
+    for (const animal of localAnimals) {
+      await addDoc(animalsCollection, {
+        name: animal.name,
+        // Use the same Cloudinary URL format for Firebase
+        imageUrl: getCloudinaryUrl(`${animal.name.toLowerCase()}.png`),
+        category: animal.category,
+        // Note: Sound files still need to be uploaded separately to a storage service
+      });
+    }
+    console.log('Animals uploaded to Firebase successfully');
+    return true;
+  } catch (error) {
+    console.error('Error uploading animals to Firebase:', error);
+    return false;
+  }
+};
+
 export default function AnimalSoundsScreen() {
   const navigation = useNavigation();
   const [selectedCategory, setSelectedCategory] = useState('Wild Animals');
@@ -92,6 +155,24 @@ export default function AnimalSoundsScreen() {
   const [animals, setAnimals] = useState(localAnimals);
   const [categories, setCategories] = useState(localCategories);
   const [isLoadingFirebase, setIsLoadingFirebase] = useState(false);
+  const [failedImages, setFailedImages] = useState({});
+  const [showDebug, setShowDebug] = useState(false);
+
+  // Debug function to test Cloudinary URLs
+  const testCloudinaryUrl = () => {
+    const testUrl = getCloudinaryUrl('lion.png');
+    console.log('Testing Cloudinary URL:', testUrl);
+    Alert.alert('Debug Info', `Testing URL: ${testUrl}\n\nFailed Images: ${Object.keys(failedImages).join(', ')}`);
+  };
+
+  // Handle image loading errors
+  const handleImageError = (animalName) => {
+    setFailedImages(prev => ({
+      ...prev,
+      [animalName]: true
+    }));
+    console.log(`Failed to load image for ${animalName}`);
+  };
 
   // Try to load data from Firebase in the background
   useEffect(() => {
@@ -113,6 +194,29 @@ export default function AnimalSoundsScreen() {
           // Extract unique categories
           const uniqueCategories = [...new Set(animalsData.map(animal => animal.category))];
           setCategories(uniqueCategories);
+          console.log('Successfully loaded animals from Firebase');
+        } else {
+          // If no animals in Firebase, upload them
+          console.log('No animals found in Firebase, attempting to upload...');
+          const uploadSuccess = await uploadAnimalsToFirebase();
+          
+          if (uploadSuccess) {
+            console.log('Successfully uploaded animals to Firebase, fetching updated data...');
+            // Fetch the newly uploaded data
+            const updatedSnapshot = await getDocs(animalsCollection);
+            const updatedData = updatedSnapshot.docs.map(doc => ({
+              id: doc.id,
+              ...doc.data()
+            }));
+            
+            setAnimals(updatedData);
+            
+            // Extract unique categories
+            const uniqueCategories = [...new Set(updatedData.map(animal => animal.category))];
+            setCategories(uniqueCategories);
+          } else {
+            console.log('Failed to upload animals to Firebase, using local data');
+          }
         }
       } catch (error) {
         console.error('Error fetching animals from Firebase:', error);
@@ -236,17 +340,17 @@ export default function AnimalSoundsScreen() {
                 activeOpacity={0.7}
               >
                 <View style={styles.imageContainer}>
-                  {animal.imageUrl ? (
-                    <Image 
-                      source={{ uri: animal.imageUrl }}
-                      style={styles.animalImage}
-                      resizeMode="contain"
-                    />
+                  {failedImages[animal.name] ? (
+                    <View style={styles.placeholderContainer}>
+                      <Ionicons name="image-outline" size={60} color="#CCCCCC" />
+                      <Text style={styles.placeholderText}>{animal.name}</Text>
+                    </View>
                   ) : (
                     <Image 
-                      source={animal.image}
+                      source={typeof animal.imageUrl === 'string' ? { uri: animal.imageUrl } : animal.imageUrl}
                       style={styles.animalImage}
                       resizeMode="contain"
+                      onError={() => handleImageError(animal.name)}
                     />
                   )}
                 </View>
@@ -285,6 +389,17 @@ export default function AnimalSoundsScreen() {
           <Text style={styles.backButtonText}>Back</Text>
         </TouchableOpacity>
       </Animatable.View>
+
+      {/* Debug button - long press to activate */}
+      <TouchableOpacity
+        style={styles.debugButton}
+        onLongPress={() => {
+          setShowDebug(true);
+          testCloudinaryUrl();
+        }}
+      >
+        <Ionicons name="bug-outline" size={20} color="#FFFFFF" />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -431,5 +546,27 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  placeholderContainer: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderRadius: 10,
+  },
+  placeholderText: {
+    color: '#999999',
+    fontSize: 14,
+    marginTop: 5,
+    textAlign: 'center',
+  },
+  debugButton: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
 }); 

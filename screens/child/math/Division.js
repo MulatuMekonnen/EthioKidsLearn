@@ -9,31 +9,129 @@ import {
   Dimensions,
   ScrollView
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
 import { useTheme } from '../../../context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
+// Define difficulty levels based on age groups
+const DIFFICULTY_LEVELS = {
+  BEGINNER: {
+    // Ages 5-6
+    divisors: [2, 3], // Simple divisors
+    maxResult: 3,     // Small quotients
+    minResult: 1
+  },
+  INTERMEDIATE: {
+    // Ages 7-9
+    divisors: [2, 3, 4, 5], // More divisors
+    maxResult: 5,           // Larger quotients
+    minResult: 2
+  },
+  ADVANCED: {
+    // Ages 10+
+    divisors: [2, 3, 4, 5, 6, 7, 8, 9, 10], // All single-digit divisors
+    maxResult: 10,                          // Larger quotients
+    minResult: 3
+  }
+};
+
 export default function DivisionScreen() {
   const navigation = useNavigation();
+  const route = useRoute();
   const { currentTheme } = useTheme();
-  const [sound, setSound] = useState();
   const [currentProblem, setCurrentProblem] = useState({
     num1: 6,
     num2: 2,
     result: 3
   });
   const [showResult, setShowResult] = useState(false);
+  const [difficultyLevel, setDifficultyLevel] = useState(DIFFICULTY_LEVELS.BEGINNER);
+  const [childInfo, setChildInfo] = useState(null);
+
+  useEffect(() => {
+    // Get child info if available in route params
+    const childId = route.params?.childId;
+    const childName = route.params?.childName;
+    
+    if (childId && childName) {
+      loadChildInfo(childId, childName);
+    } else {
+      loadDefaultChild();
+    }
+  }, [route.params]);
+
+  useEffect(() => {
+    // Set difficulty level based on child's age or level
+    if (childInfo) {
+      setDifficultyBasedOnChild();
+    }
+    
+    // Generate initial problem
+    generateProblem();
+  }, [childInfo, difficultyLevel]);
+
+  const loadChildInfo = async (childId, childName) => {
+    try {
+      const savedChildren = await AsyncStorage.getItem('children');
+      if (savedChildren) {
+        const children = JSON.parse(savedChildren);
+        const child = children.find(c => c.id === childId);
+        if (child) {
+          setChildInfo(child);
+        } else {
+          setChildInfo({ id: childId, name: childName });
+        }
+      } else {
+        setChildInfo({ id: childId, name: childName });
+      }
+    } catch (error) {
+      console.error('Error loading child information:', error);
+      setChildInfo({ id: childId, name: childName });
+    }
+  };
+
+  const loadDefaultChild = async () => {
+    try {
+      const savedChildren = await AsyncStorage.getItem('children');
+      if (savedChildren) {
+        const children = JSON.parse(savedChildren);
+        if (children.length > 0) {
+          setChildInfo(children[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading default child:', error);
+    }
+  };
+
+  const setDifficultyBasedOnChild = () => {
+    if (!childInfo) return;
+
+    // Set difficulty based on child's level or age
+    if (childInfo.level === 'Advanced' || (childInfo.age && childInfo.age >= 10)) {
+      setDifficultyLevel(DIFFICULTY_LEVELS.ADVANCED);
+    } else if (childInfo.level === 'Intermediate' || (childInfo.age && childInfo.age >= 7)) {
+      setDifficultyLevel(DIFFICULTY_LEVELS.INTERMEDIATE);
+    } else {
+      setDifficultyLevel(DIFFICULTY_LEVELS.BEGINNER);
+    }
+  };
 
   // Generate an age-appropriate problem
   const generateProblem = () => {
-    // Keep division simple for young children
-    // Use small numbers with exact division (no remainders)
-    const num2 = Math.floor(Math.random() * 2) + 2; // divisors 2-3
-    const result = Math.floor(Math.random() * 3) + 1; // results 1-3
-    const num1 = num2 * result; // ensure clean division
+    // Get random divisor from the appropriate range
+    const divisorIndex = Math.floor(Math.random() * difficultyLevel.divisors.length);
+    const num2 = difficultyLevel.divisors[divisorIndex];
+    
+    // Get random result from the appropriate range
+    const resultRange = difficultyLevel.maxResult - difficultyLevel.minResult + 1;
+    const result = Math.floor(Math.random() * resultRange) + difficultyLevel.minResult;
+    
+    // Calculate dividend (ensure clean division)
+    const num1 = num2 * result;
     
     setCurrentProblem({
       num1,
@@ -43,29 +141,19 @@ export default function DivisionScreen() {
     setShowResult(false);
   };
 
-  async function playCorrectSound() {
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        require('../../../assets/sounds/correct.mp3')
-      );
-      setSound(sound);
-      await sound.playAsync();
-    } catch (error) {
-      console.error("Error playing sound:", error);
-    }
-  }
-
-  useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
-
   const revealAnswer = () => {
     setShowResult(true);
-    playCorrectSound();
+  };
+
+  // Get difficulty text for display
+  const getDifficultyText = () => {
+    if (difficultyLevel === DIFFICULTY_LEVELS.ADVANCED) {
+      return "Advanced";
+    } else if (difficultyLevel === DIFFICULTY_LEVELS.INTERMEDIATE) {
+      return "Intermediate";
+    } else {
+      return "Beginner";
+    }
   };
 
   return (
@@ -85,6 +173,7 @@ export default function DivisionScreen() {
         <View style={styles.card}>
           <View style={styles.titleBar}>
             <Text style={styles.titleText}>Let's Divide Things!</Text>
+            <Text style={styles.difficultyText}>Level: {getDifficultyText()}</Text>
           </View>
 
           <View style={styles.content}>
@@ -211,6 +300,11 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#FFFFFF',
+  },
+  difficultyText: {
+    fontSize: 14,
+    color: '#FFFFFF',
+    marginTop: 4,
   },
   content: {
     padding: 16,

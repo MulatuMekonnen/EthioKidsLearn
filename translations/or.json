@@ -24,7 +24,7 @@
     "quizzesCompleted": "Qormaata Xumuraman",
     "totalLessons": "Barnootaa Waliigala",
     "totalQuizzes": "Qormaata Waliigala",
-    "ethiokidslearn": "Ethio Kids Learn",
+    "ethiokidslearn": "Ijoolleen Ethio Baradhaa",
     "logout": "Ba'i"
   },
   "roles": {
@@ -184,5 +184,54 @@
     "noChildData": "Ragaan daa'imaa hin argamne",
     "completed": "Xumurame",
     "noData": "Ragaan qormaataa hin argamne"
+  },
+  "teacher": {
+    "dashboard": "Daashboordii Barsiisaa",
+    "welcome": "Baga nagaan dhuftan",
+    "inspire": "Har'a sammuu kakaasuu qophii?",
+    "students": "Barattoota",
+    "lessons": "Barnootawwan",
+    "completion": "Xumuruu",
+    "noData": "Ragaa hin qabu",
+    "teacherTools": "Meeshaalee Barsiisaa",
+    "studentProgress": "Fooyya'iinsa Barataa",
+    "studentProgressDesc": "Raawwii barataa ilaaluu fi hordofuu",
+    "studentReports": "Gabaasa Barataa",
+    "studentReportsDesc": "Gabaasa adda addaa gosa barnootaa irratti hundaa'e uumuu fi bulchuu",
+    "createContent": "Qabiyyee Uumi",
+    "createContentDesc": "Madda barnootaa haaraa qopheessi",
+    "classSchedule": "Tarree Yeroo Kutaa",
+    "classScheduleDesc": "Sagantaa barsiisuu keessan bulchaa",
+    "studentprogress": "Fooyya'iinsa Barataa",
+    "studentprogressDesc": "Raawwii barataa ilaaluu fi hordofuu",
+    "studentreports": "Gabaasa Barataa",
+    "studentreportsDesc": "Gabaasa adda addaa gosa barnootaa irratti hundaa'e uumuu fi bulchuu",
+    "createcontent": "Qabiyyee Uumi",
+    "createcontentDesc": "Madda barnootaa haaraa qopheessi",
+    "classschedule": "Tarree Yeroo Kutaa",
+    "classscheduleDesc": "Sagantaa barsiisuu keessan bulchaa",
+    "contentType": "Gosa Qabiyyee",
+    "contentTitle": "Mata duree",
+    "contentDescription": "Ibsa (Barattoonni qabiyyee kana irraa maal baratu?)",
+    "contentTags": "Tagooshwan (kan virgule'n adda bahaniif: fkn. lakkoofsa, lakkaa'uu, bu'uuraa)",
+    "contentCategory": "Gosa:",
+    "contentLevel": "Sadarkaa:",
+    "selectFile": "Faayilii Filadhu",
+    "changeFile": "Faayilii Jijjiiri",
+    "reviewNotice": "Qabiyyeen keessan otoo hin maxxanfamin bulchitoota biraan madaalamuu qaba. Kunis qabiyyeen hundi sadarkaalee barnootaa akka guutuu taasisuu qabu mirkaneessuuf gargaara.",
+    "submitForReview": "Madaaliif Galchi",
+    "levels": {
+      "beginner": "Jalqabaa",
+      "intermediate": "Giddugaleessa",
+      "advanced": "Guddataa"
+    },
+    "contentTypes": {
+      "document": "Sanadii",
+      "video": "Viidiyoo",
+      "audio": "Sagalee", 
+      "image": "Suuraa"
+    },
+    "refreshData": "Ragaa Haaromsi",
+    "dataNotAvailable": "Ragaan hin argamu. Istaatiksii ilaaluuf barattootaa fi barnootawwan dabalaa."
   }
 } 

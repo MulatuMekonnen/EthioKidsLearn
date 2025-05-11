@@ -10,7 +10,6 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { Audio } from 'expo-av';
 import { useTheme } from '../../../context/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
@@ -18,7 +17,6 @@ const { width, height } = Dimensions.get('window');
 export default function MultiplicationScreen() {
   const navigation = useNavigation();
   const { currentTheme } = useTheme();
-  const [sound, setSound] = useState();
   const [currentProblem, setCurrentProblem] = useState({
     num1: 2,
     num2: 2,
@@ -39,29 +37,8 @@ export default function MultiplicationScreen() {
     setShowResult(false);
   };
 
-  async function playCorrectSound() {
-    try {
-      const { sound } = await Audio.Sound.createAsync(
-        require('../../../assets/sounds/correct.mp3')
-      );
-      setSound(sound);
-      await sound.playAsync();
-    } catch (error) {
-      console.error("Error playing sound:", error);
-    }
-  }
-
-  useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync();
-        }
-      : undefined;
-  }, [sound]);
-
   const revealAnswer = () => {
     setShowResult(true);
-    playCorrectSound();
   };
 
   // Create a visual representation of the multiplication as groups

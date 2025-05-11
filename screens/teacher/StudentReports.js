@@ -18,11 +18,13 @@ import { useAuth } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../../services/firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, orderBy, limit } from 'firebase/firestore';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function StudentReports() {
   const navigation = useNavigation();
   const { currentTheme } = useTheme();
   const { user } = useAuth();
+  const { translate } = useLanguage();
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -346,13 +348,13 @@ export default function StudentReports() {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#FFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Student Reports</Text>
+          <Text style={styles.headerTitle}>{translate('progressReport.teacherReports') || 'Student Reports'}</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={currentTheme?.primary || '#2196F3'} />
           <Text style={[styles.loadingText, { color: currentTheme?.textSecondary || '#666' }]}>
-            Loading students...
+            {translate('progressReport.loadingStudents') || 'Loading students...'}
           </Text>
         </View>
       </SafeAreaView>
@@ -365,7 +367,7 @@ export default function StudentReports() {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Student Reports</Text>
+        <Text style={styles.headerTitle}>{translate('progressReport.teacherReports') || 'Student Reports'}</Text>
         <TouchableOpacity style={styles.refreshButton} onPress={loadStudents}>
           <Ionicons name="refresh" size={24} color="#FFF" />
         </TouchableOpacity>
@@ -373,17 +375,17 @@ export default function StudentReports() {
 
       <View style={styles.contentContainer}>
         <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>
-          Select a Student to Create Report
+          {translate('progressReport.teacherFeedback') || 'Select a Student to Create Report'}
         </Text>
 
         {students.length === 0 ? (
           <View style={styles.emptyState}>
             <Ionicons name="people" size={48} color={currentTheme?.textSecondary || '#666'} />
             <Text style={[styles.emptyText, { color: currentTheme?.text || '#333' }]}>
-              No students found
+              {translate('progressReport.noChildData') || 'No students found'}
             </Text>
             <Text style={[styles.emptySubtext, { color: currentTheme?.textSecondary || '#666' }]}>
-              There are no students available for reporting
+              {translate('parent.noChildrenYet') || 'There are no students available for reporting'}
             </Text>
           </View>
         ) : (
@@ -439,7 +441,7 @@ export default function StudentReports() {
           <View style={[styles.modalContent, { backgroundColor: currentTheme?.card || '#FFF' }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: currentTheme?.text || '#333' }]}>
-                Create Report for {selectedStudent?.name || 'Student'}
+                {translate('progressReport.teacherFeedback')} {selectedStudent?.name || 'Student'}
               </Text>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -505,14 +507,14 @@ export default function StudentReports() {
             {/* Previous Reports Section */}
             <View style={styles.previousReportsContainer}>
               <Text style={[styles.previousReportsTitle, { color: currentTheme?.text || '#333' }]}>
-                Previous Reports
+                {translate('progressReport.teacherReports') || 'Previous Reports'}
               </Text>
               
               {loadingReports ? (
                 <ActivityIndicator size="small" color={currentTheme?.primary || '#2196F3'} />
               ) : previousReports.length === 0 ? (
                 <Text style={[styles.noReportsText, { color: currentTheme?.textSecondary || '#666' }]}>
-                  No previous reports found
+                  {translate('progressReport.noReports') || 'No previous reports found'}
                 </Text>
               ) : (
                 <FlatList

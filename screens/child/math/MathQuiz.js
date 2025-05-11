@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import * as Animatable from 'react-native-animatable';
-import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Age-based questions
@@ -301,23 +300,11 @@ export default function MathQuizScreen() {
     setQuestions(questionSet);
   };
 
-  async function playSound(isCorrect) {
-    const soundFile = isCorrect 
-      ? require('../../../assets/sounds/correct.mp3')
-      : require('../../../assets/sounds/wrong.mp3');
-    
-    const { sound } = await Audio.Sound.createAsync(soundFile);
-    await sound.playAsync();
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    await sound.unloadAsync();
-  }
-
   const handleOptionSelect = async (questionIndex, optionIndex) => {
     if (submitted) return;
 
     const isCorrect = optionIndex === questions[questionIndex].correctAnswer;
-    await playSound(isCorrect);
-
+    
     setSelectedAnswers({
       ...selectedAnswers,
       [questionIndex]: optionIndex
@@ -395,7 +382,7 @@ export default function MathQuizScreen() {
             delay={questionIndex * 200}
             style={styles.questionContainer}
           >
-            <Text style={styles.questionText}>{question.question}</Text>
+            <Text style={styles.questionText}>{questionIndex + 1}. {question.question}</Text>
             {question.options.map((option, optionIndex) => (
               <TouchableOpacity
                 key={optionIndex}

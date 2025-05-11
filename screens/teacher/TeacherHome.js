@@ -24,19 +24,27 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import Cloudinary service and ProfileImageManager
 import Cloudinary, { uploadToCloudinary } from '../../services/cloudinary';
 import ProfileImageManager from '../../components/ProfileImageManager';
+import { useLanguage } from '../../context/LanguageContext';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function TeacherHome({ navigation }) {
   const { user, logout } = useAuth();
   const { currentTheme, toggleTheme } = useTheme();
+  const { translate, currentLanguage, changeLanguage, languages } = useLanguage();
   const [profileImage, setProfileImage] = useState(null);
   const [userName, setUserName] = useState('Teacher');
   const [userEmail, setUserEmail] = useState('');
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [dashboardData, setDashboardData] = useState({
     studentsCount: 0,
     lessonsCount: 0,
     completionRate: 0,
     isLoading: true
+  });
+  const [dataStatus, setDataStatus] = useState({
+    hasData: false,
+    message: ''
   });
 
   // Fetch user profile data including profile image
@@ -70,6 +78,7 @@ export default function TeacherHome({ navigation }) {
   // Fetch dashboard statistics data
   const fetchDashboardData = async () => {
     setDashboardData(prev => ({ ...prev, isLoading: true }));
+    setDataStatus({ hasData: false, message: 'Loading data...' });
     
     try {
       // Fetch students count from Firebase - try multiple approaches to get the most accurate count
@@ -80,6 +89,7 @@ export default function TeacherHome({ navigation }) {
         const childrenCollection = collection(db, 'children');
         const childrenSnapshot = await getDocs(childrenCollection);
         studentsCount = childrenSnapshot.size;
+        console.log('Found students in children collection:', studentsCount);
       } catch (error) {
         console.log('No direct children collection found, trying alternatives');
       }
@@ -90,6 +100,7 @@ export default function TeacherHome({ navigation }) {
           const childrenQuery = query(collection(db, 'users'), where('role', '==', 'child'));
           const childrenSnapshot = await getDocs(childrenQuery);
           studentsCount = childrenSnapshot.size;
+          console.log('Found students in users collection with role=child:', studentsCount);
         } catch (error) {
           console.log('Error checking child users, trying next approach');
         }
@@ -111,6 +122,7 @@ export default function TeacherHome({ navigation }) {
           });
           
           studentsCount = uniqueChildIds.size;
+          console.log('Found unique students in lesson_progress:', studentsCount);
         } catch (error) {
           console.log('Error checking lesson_progress, trying next approach');
         }
@@ -132,17 +144,23 @@ export default function TeacherHome({ navigation }) {
           });
           
           studentsCount = uniqueChildIds.size;
+          console.log('Found unique students in quiz_results:', studentsCount);
         } catch (error) {
           console.log('Error checking quiz_results');
         }
       }
       
-      // Fallback to local storage if no students found yet
+      // 5. Fifth approach: Check AsyncStorage for children data
       if (studentsCount === 0) {
-        const childrenJson = await AsyncStorage.getItem('children');
-        if (childrenJson) {
-          const childrenData = JSON.parse(childrenJson);
-          studentsCount = childrenData.filter(child => child && child.name).length;
+        try {
+          const childrenJson = await AsyncStorage.getItem('children');
+          if (childrenJson) {
+            const childrenData = JSON.parse(childrenJson);
+            studentsCount = childrenData.filter(child => child && child.name).length;
+            console.log('Found students in AsyncStorage:', studentsCount);
+          }
+        } catch (error) {
+          console.log('Error checking AsyncStorage for children');
         }
       }
       
@@ -152,6 +170,7 @@ export default function TeacherHome({ navigation }) {
       let englishLessons = 0;
       let amharicLessons = 0;
       let oromoLessons = 0;
+      let scienceLessons = 0;
       
       // Try to get lessons count from various collections if they exist
       try {
@@ -175,8 +194,14 @@ export default function TeacherHome({ navigation }) {
         const oromoSnapshot = await getDocs(oromoCollection);
         oromoLessons = oromoSnapshot.size;
         
+        // Science lessons
+        const scienceCollection = collection(db, 'lessons_science');
+        const scienceSnapshot = await getDocs(scienceCollection);
+        scienceLessons = scienceSnapshot.size;
+        
         // Sum all lessons
-        lessonsCount = mathLessons + englishLessons + amharicLessons + oromoLessons;
+        lessonsCount = mathLessons + englishLessons + amharicLessons + oromoLessons + scienceLessons;
+        console.log('Found subject-specific lessons:', lessonsCount);
       } catch (e) {
         console.log('Error fetching subject-specific lesson collections');
       }
@@ -187,6 +212,7 @@ export default function TeacherHome({ navigation }) {
           const lessonsCollection = collection(db, 'lessons');
           const lessonsSnapshot = await getDocs(lessonsCollection);
           lessonsCount = lessonsSnapshot.size;
+          console.log('Found lessons in generic collection:', lessonsCount);
         } catch (e) {
           console.log('No lessons collection found');
         }
@@ -198,9 +224,21 @@ export default function TeacherHome({ navigation }) {
           const lessonContentCollection = collection(db, 'lesson_content');
           const lessonContentSnapshot = await getDocs(lessonContentCollection);
           lessonsCount = lessonContentSnapshot.size;
+          console.log('Found lessons in lesson_content collection:', lessonsCount);
         } catch (e) {
-          console.log('No lesson_content collection found, using default count');
-          lessonsCount = 14; // Default if no lessons collection
+          console.log('No lesson_content collection found');
+        }
+      }
+      
+      // Try to count activities as lessons if still no lessons found
+      if (lessonsCount === 0) {
+        try {
+          const activitiesCollection = collection(db, 'activities');
+          const activitiesSnapshot = await getDocs(activitiesCollection);
+          lessonsCount = activitiesSnapshot.size;
+          console.log('Found activities that count as lessons:', lessonsCount);
+        } catch (e) {
+          console.log('No activities collection found');
         }
       }
       
@@ -219,7 +257,7 @@ export default function TeacherHome({ navigation }) {
           // Group by student
           lessonProgressSnapshot.forEach(doc => {
             const data = doc.data();
-            if (data.childId && data.isCompleted) {
+            if (data.childId) {
               if (!studentProgress[data.childId]) {
                 studentProgress[data.childId] = { completed: 0, total: 0 };
               }
@@ -244,6 +282,7 @@ export default function TeacherHome({ navigation }) {
             
             if (studentsWithProgress > 0) {
               completionRate = Math.round(totalCompletionPercent / studentsWithProgress);
+              console.log('Calculated completion rate from lesson_progress:', completionRate);
             }
           }
         } catch (e) {
@@ -252,6 +291,32 @@ export default function TeacherHome({ navigation }) {
       }
       
       // If no completion rate calculated yet, try quiz results
+      if (completionRate === 0) {
+        try {
+          // First try Firebase collection
+          const quizResultsCollection = collection(db, 'quiz_results');
+          const quizResultsSnapshot = await getDocs(quizResultsCollection);
+          
+          if (!quizResultsSnapshot.empty) {
+            const quizResults = [];
+            quizResultsSnapshot.forEach(doc => {
+              quizResults.push(doc.data());
+            });
+            
+            // Calculate completion rate based on unique students who took quizzes
+            if (studentsCount > 0 && quizResults.length > 0) {
+              const uniqueStudents = new Set(quizResults.map(result => result.childId)).size;
+              // Calculate completion as a percentage of students who attempted at least one quiz
+              completionRate = Math.round((uniqueStudents / studentsCount) * 100);
+              console.log('Calculated completion rate from Firebase quiz_results:', completionRate);
+            }
+          }
+        } catch (e) {
+          console.log('Error fetching quiz results from Firebase');
+        }
+      }
+      
+      // If still no completion rate, try AsyncStorage
       if (completionRate === 0) {
         try {
           const quizResultsJson = await AsyncStorage.getItem('quizResults');
@@ -263,6 +328,7 @@ export default function TeacherHome({ navigation }) {
               const uniqueStudents = new Set(quizResults.map(result => result.childId)).size;
               // Calculate completion as a percentage of students who attempted at least one quiz
               completionRate = Math.round((uniqueStudents / studentsCount) * 100);
+              console.log('Calculated completion rate from AsyncStorage quiz results:', completionRate);
             } else {
               // Fallback to default value
               completionRate = 75;
@@ -277,21 +343,40 @@ export default function TeacherHome({ navigation }) {
         }
       }
       
+      // Count total number of screens/activities in the app as a backup for lessons count
+      if (lessonsCount === 0) {
+        // This is a rough estimate based on the app's structure
+        lessonsCount = 14; // Default if no lessons found
+      }
+      
+      // At the end of the function, update data status
+      const hasAnyData = studentsCount > 0 || lessonsCount > 0 || completionRate > 0;
+      
+      setDataStatus({
+        hasData: hasAnyData,
+        message: hasAnyData ? 'Data loaded successfully' : 'No data available. Add students and lessons to see statistics.'
+      });
+      
       // Update dashboard data state with real or fallback values
       setDashboardData({
-        studentsCount: studentsCount || 24, // Fallback to 24 if no data
-        lessonsCount: lessonsCount || 14,   // Fallback to 14 if no data
-        completionRate: completionRate || 75, // Fallback to 75% if no data
+        studentsCount: studentsCount || 0, // Don't use fallback value
+        lessonsCount: lessonsCount || 0,   // Don't use fallback value
+        completionRate: completionRate || 0, // Don't use fallback value
         isLoading: false
       });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Use fallback values if fetch fails
+      // Use empty values if fetch fails completely
       setDashboardData({
-        studentsCount: 24,
-        lessonsCount: 14,
-        completionRate: 75,
+        studentsCount: 0,
+        lessonsCount: 0,
+        completionRate: 0,
         isLoading: false
+      });
+      
+      setDataStatus({
+        hasData: false,
+        message: 'Error loading data. Please try again.'
       });
     }
   };
@@ -371,6 +456,13 @@ export default function TeacherHome({ navigation }) {
   // Toggle theme
   const handleToggleTheme = () => {
     toggleTheme();
+    setShowProfileMenu(false);
+  };
+
+  // Language selection handler
+  const handleLanguageChange = (language) => {
+    changeLanguage(language);
+    setShowLanguageModal(false);
     setShowProfileMenu(false);
   };
 
@@ -470,6 +562,26 @@ export default function TeacherHome({ navigation }) {
                       </View>
                       <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>
                         {currentTheme.mode === 'dark' ? 'Light Theme' : 'Dark Theme'}
+                      </Text>
+                    </TouchableOpacity>
+                    
+                    {/* Language selection */}
+                    <TouchableOpacity 
+                      style={styles.profileMenuItem}
+                      onPress={() => setShowLanguageModal(true)}
+                    >
+                      <View style={styles.profileMenuItemIcon}>
+                        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="12" r="10" stroke={currentTheme.text} strokeWidth="2" />
+                          <Path d="M12 2C14.4 5.4 16 9.6 16 12C16 14.4 14.4 18.6 12 22M12 2C9.6 5.4 8 9.6 8 12C8 14.4 9.6 18.6 12 22" stroke={currentTheme.text} strokeWidth="2" />
+                          <Path d="M2 12H22" stroke={currentTheme.text} strokeWidth="2" />
+                        </Svg>
+                      </View>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text, flex: 1 }]}>
+                        {translate('common.language') || 'Language'}
+                      </Text>
+                      <Text style={[styles.languageCode, { color: currentTheme.primary }]}>
+                        {currentLanguage.toUpperCase()}
                       </Text>
                     </TouchableOpacity>
                     
@@ -580,36 +692,50 @@ export default function TeacherHome({ navigation }) {
     }
   };
   
+  // First, initialize menuItems array with translated strings
   const menuItems = [
     {
-      title: 'Student Progress',
-      description: 'View and track student performance',
+      title: translate('teacher.studentProgress') || 'Student Progress',
+      description: translate('teacher.studentProgressDesc') || 'View and track student performance',
       icon: 'analytics-outline',
       onPress: () => navigation.navigate('StudentProgress'),
-      color: '#4285F4'
+      color: '#4285F4',
+      translationKey: 'studentprogress',
+      translationDescKey: 'studentprogressDesc'
     },
     {
-      title: 'Student Reports',
-      description: 'Create and manage subject-specific reports for students',
+      title: translate('teacher.studentReports') || 'Student Reports',
+      description: translate('teacher.studentReportsDesc') || 'Create and manage subject-specific reports for students',
       icon: 'document-text-outline',
       onPress: () => navigation.navigate('StudentReports'),
-      color: '#DB4437'
+      color: '#DB4437',
+      translationKey: 'studentreports',
+      translationDescKey: 'studentreportsDesc'
     },
     {
-      title: 'Create Content',
-      description: 'Develop new educational resources',
+      title: translate('teacher.createContent') || 'Create Content',
+      description: translate('teacher.createContentDesc') || 'Develop new educational resources',
       icon: 'book-outline',
       onPress: () => navigation.navigate('CreateContent'),
-      color: '#34A853'
+      color: '#34A853',
+      translationKey: 'createcontent',
+      translationDescKey: 'createcontentDesc'
     },
     {
-      title: 'Class Schedule',
-      description: 'Manage your teaching timetable',
+      title: translate('teacher.classSchedule') || 'Class Schedule',
+      description: translate('teacher.classScheduleDesc') || 'Manage your teaching timetable',
       icon: 'calendar-outline',
       onPress: () => {},
-      color: '#FBBC05'
+      color: '#FBBC05',
+      translationKey: 'classschedule',
+      translationDescKey: 'classscheduleDesc'
     }
   ];
+
+  // First, add a refresh function to the component
+  const refreshDashboard = () => {
+    fetchDashboardData();
+  };
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}>
@@ -618,8 +744,20 @@ export default function TeacherHome({ navigation }) {
       {/* Header */}
       <View style={[styles.header, { backgroundColor: currentTheme.primary }]}>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>Teacher Dashboard</Text>
-          <ProfilePicture />
+          <Text style={styles.headerTitle}>{translate('teacher.dashboard') || 'Teacher Dashboard'}</Text>
+          <View style={styles.headerRight}>
+            <TouchableOpacity 
+              style={styles.refreshButton}
+              onPress={refreshDashboard}
+            >
+              <Svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <Path d="M1 4V10H7" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <Path d="M23 20V14H17" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <Path d="M20.49 9C19.9828 7.56678 19.1209 6.2854 17.9845 5.27542C16.8482 4.26543 15.4745 3.55976 13.9917 3.22426C12.5089 2.88875 10.9652 2.93434 9.50481 3.35677C8.04437 3.77921 6.71475 4.56471 5.64 5.64L1 10M23 14L18.36 18.36C17.2853 19.4353 15.9556 20.2208 14.4952 20.6432C13.0348 21.0657 11.4911 21.1112 10.0083 20.7757C8.52547 20.4402 7.1518 19.7346 6.01547 18.7246C4.87913 17.7146 4.01717 16.4332 3.51 15" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </Svg>
+          </TouchableOpacity>
+            <ProfilePicture />
+          </View>
         </View>
       </View>
       
@@ -633,14 +771,14 @@ export default function TeacherHome({ navigation }) {
           <View style={styles.welcomeContent}>
             <View style={styles.welcomeHeader}>
               <Text style={[styles.welcomeTitle, { color: currentTheme.text }]}>
-                Welcome back, 
+                {translate('teacher.welcome')}, 
               </Text>
               <Text style={[styles.teacherName, { color: currentTheme.primary }]}>
                 {userName}
               </Text>
             </View>
             <Text style={[styles.welcomeSubtitle, { color: currentTheme.textSecondary }]}>
-              Ready to inspire minds today?
+              {translate('teacher.inspire')}
             </Text>
           </View>
           <View style={[styles.avatarContainer, { backgroundColor: currentTheme.primary + '20' }]}>
@@ -657,41 +795,75 @@ export default function TeacherHome({ navigation }) {
             <PeopleIcon />
             {dashboardData.isLoading ? (
               <ActivityIndicator color="#4285F4" size="small" style={styles.statLoader} />
-            ) : (
+            ) : dashboardData.studentsCount > 0 ? (
               <Text style={[styles.statValue, { color: currentTheme.text }]}>
                 {dashboardData.studentsCount}
               </Text>
+            ) : (
+              <Text style={[styles.statNoData, { color: currentTheme.textSecondary }]}>
+                {translate('teacher.noData')}
+              </Text>
             )}
-            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Students</Text>
+            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>{translate('teacher.students')}</Text>
           </TouchableOpacity>
           
           <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
             <DocumentIcon />
             {dashboardData.isLoading ? (
               <ActivityIndicator color="#EA4335" size="small" style={styles.statLoader} />
-            ) : (
+            ) : dashboardData.lessonsCount > 0 ? (
               <Text style={[styles.statValue, { color: currentTheme.text }]}>
                 {dashboardData.lessonsCount}
               </Text>
+            ) : (
+              <Text style={[styles.statNoData, { color: currentTheme.textSecondary }]}>
+                {translate('teacher.noData')}
+              </Text>
             )}
-            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Lessons</Text>
+            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>{translate('teacher.lessons')}</Text>
           </View>
           
           <View style={[styles.statCard, { backgroundColor: currentTheme.card }]}>
             <CheckmarkIcon />
             {dashboardData.isLoading ? (
               <ActivityIndicator color="#34A853" size="small" style={styles.statLoader} />
-            ) : (
+            ) : dashboardData.completionRate > 0 ? (
               <Text style={[styles.statValue, { color: currentTheme.text }]}>
                 {dashboardData.completionRate}%
               </Text>
+            ) : (
+              <Text style={[styles.statNoData, { color: currentTheme.textSecondary }]}>
+                {translate('teacher.noData')}
+              </Text>
             )}
-            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>Completion</Text>
+            <Text style={[styles.statLabel, { color: currentTheme.textSecondary }]}>{translate('teacher.completion')}</Text>
           </View>
         </View>
         
+        {/* Data Status Indicator */}
+        {!dashboardData.isLoading && (
+          <View style={styles.dataStatusContainer}>
+            <Text style={[
+              styles.dataStatusText, 
+              { color: dataStatus.hasData ? currentTheme.success : currentTheme.textSecondary }
+            ]}>
+              {dataStatus.hasData 
+                ? translate('progressReport.loading') || 'Data loaded successfully'
+                : translate('teacher.dataNotAvailable')}
+            </Text>
+            {!dataStatus.hasData && (
+              <TouchableOpacity 
+                style={[styles.refreshDataButton, { backgroundColor: currentTheme.primary }]}
+                onPress={refreshDashboard}
+              >
+                <Text style={styles.refreshDataButtonText}>{translate('teacher.refreshData')}</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+        
         {/* Menu Items */}
-        <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Teacher Tools</Text>
+        <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>{translate('teacher.teacherTools')}</Text>
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => (
             <TouchableOpacity
@@ -703,9 +875,11 @@ export default function TeacherHome({ navigation }) {
                 {getMenuIcon(item.icon, item.color)}
               </View>
               <View style={styles.menuTextContainer}>
-                <Text style={[styles.menuTitle, { color: currentTheme.text }]}>{item.title}</Text>
+                <Text style={[styles.menuTitle, { color: currentTheme.text }]}>
+                  {translate(`teacher.${item.translationKey}`) || item.title}
+                </Text>
                 <Text style={[styles.menuDescription, { color: currentTheme.textSecondary }]} numberOfLines={2}>
-                  {item.description}
+                  {translate(`teacher.${item.translationDescKey}`) || item.description}
                 </Text>
               </View>
               <ChevronIcon />
@@ -713,6 +887,48 @@ export default function TeacherHome({ navigation }) {
           ))}
         </View>
       </ScrollView>
+      
+      {/* Language Selection Modal */}
+      <Modal
+        visible={showLanguageModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowLanguageModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowLanguageModal(false)}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={[styles.languageModalContainer, { backgroundColor: currentTheme.card }]}>
+                <Text style={[styles.languageModalTitle, { color: currentTheme.text }]}>
+                  {translate('common.selectLanguage') || 'Select Language'}
+                </Text>
+                
+                {Object.values(languages).map((lang) => (
+                  <TouchableOpacity
+                    key={lang.code}
+                    style={[
+                      styles.languageOption,
+                      currentLanguage === lang.code && styles.selectedLanguageOption
+                    ]}
+                    onPress={() => handleLanguageChange(lang.code)}
+                  >
+                    <Text style={[
+                      styles.languageOptionText,
+                      { color: currentTheme.text }
+                    ]}>
+                      {lang.name}
+                    </Text>
+                    
+                    {currentLanguage === lang.code && (
+                      <Ionicons name="checkmark" size={24} color="#4285F4" />
+                    )}
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -903,7 +1119,9 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   profileMenu: {
     position: 'absolute',
@@ -1007,5 +1225,83 @@ const styles = StyleSheet.create({
   statLoader: {
     marginVertical: 5,
     height: 22, // Match the height of statValue text
+  },
+  statNoData: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontStyle: 'italic',
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  refreshButton: {
+    padding: 4,
+  },
+  dataStatusContainer: {
+    padding: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dataStatusText: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  refreshDataButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    marginTop: 4,
+  },
+  refreshDataButtonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+  languageSelector: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  languageOptions: {
+    paddingHorizontal: 16,
+    paddingBottom: 8,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  languageOption: {
+    marginVertical: 4,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    marginRight: 8,
+  },
+  selectedLanguageOption: {
+    backgroundColor: 'rgba(66, 133, 244, 0.1)',
+  },
+  languageOptionText: {
+    fontSize: 16,
+  },
+  languageCode: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  languageModalContainer: {
+    width: '80%',
+    borderRadius: 12,
+    overflow: 'hidden',
+    padding: 0,
+  },
+  languageModalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.1)',
   },
 });

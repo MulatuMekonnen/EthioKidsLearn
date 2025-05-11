@@ -30,10 +30,55 @@ export default function Colors() {
 
   async function playSound(colorName) {
     try {
-      const soundFile = 
-        colorName === 'celebration' 
-          ? require('../../../assets/sounds/correct.mp3')
-          : require('../../../assets/sounds/words/cat.mp3'); // Fallback to any existing sound
+      let soundFile;
+      
+      // Map each color to its specific sound file, handling inconsistent file names
+      switch(colorName.toLowerCase()) {
+        case 'red':
+          soundFile = require('../../../assets/sounds/colors/red.mp3');
+          break;
+        case 'blue':
+          // Blue sound is missing, use green as a fallback
+          soundFile = require('../../../assets/sounds/colors/green.mp3');
+          break;
+        case 'green':
+          soundFile = require('../../../assets/sounds/colors/green.mp3');
+          break;
+        case 'yellow':
+          // Yellow sound is missing, use red as a fallback
+          soundFile = require('../../../assets/sounds/colors/red.mp3');
+          break;
+        case 'black':
+          soundFile = require('../../../assets/sounds/colors/Black .mp3'); // Note the space
+          break;
+        case 'white':
+          soundFile = require('../../../assets/sounds/colors/white.mp3');
+          break;
+        case 'orange':
+          soundFile = require('../../../assets/sounds/colors/Orange .mp3'); // Note the space
+          break;
+        case 'purple':
+          soundFile = require('../../../assets/sounds/colors/purple .mp3'); // Note the space
+          break;
+        case 'pink':
+          soundFile = require('../../../assets/sounds/colors/pink.mp3');
+          break;
+        case 'brown':
+          soundFile = require('../../../assets/sounds/colors/brown .mp3'); // Note the space
+          break;
+        case 'gray':
+          soundFile = require('../../../assets/sounds/colors/gray .mp3'); // Note the space
+          break;
+        case 'gold':
+          soundFile = require('../../../assets/sounds/colors/gold .mp3'); // Note the space
+          break;
+        case 'celebration':
+          // Use correct.mp3 as the celebration sound
+          soundFile = require('../../../assets/sounds/correct.mp3');
+          break;
+        default:
+          soundFile = require('../../../assets/sounds/colors/red.mp3');
+      }
       
       if (sound) {
         await sound.unloadAsync();
@@ -62,7 +107,14 @@ export default function Colors() {
 
   const handleColorPress = (color) => {
     setSelectedColor(color);
-    playSound('celebration');
+    
+    // Play the color sound first
+    playSound(color.name);
+    
+    // Then show celebration after a delay
+    setTimeout(() => {
+      playSound('celebration');
+    }, 1500); // Longer delay to allow the color sound to finish
   };
 
   return (

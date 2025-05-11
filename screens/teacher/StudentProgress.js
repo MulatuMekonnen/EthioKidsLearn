@@ -17,11 +17,13 @@ import { useAuth } from '../../context/AuthContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { db } from '../../services/firebase';
 import { collection, query, where, getDocs, orderBy, limit, getDoc, doc, collectionGroup } from 'firebase/firestore';
+import { useLanguage } from '../../context/LanguageContext';
 
 export default function StudentProgress() {
   const navigation = useNavigation();
   const { currentTheme } = useTheme();
   const { user } = useAuth();
+  const { translate } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [students, setStudents] = useState([]);
   const [progressData, setProgressData] = useState({});
@@ -62,7 +64,7 @@ export default function StudentProgress() {
     try {
       let childrenData = [];
       
-      // First try to load from Firebase if user is authenticated
+      // Only load from Firebase - no local storage fallback for real data
       if (user) {
         // Try to fetch children directly from the 'children' collection if it exists
         try {
@@ -134,14 +136,6 @@ export default function StudentProgress() {
         }
       }
       
-      // If no children found in Firebase or not authenticated, fallback to AsyncStorage
-      if (childrenData.length === 0) {
-        const childrenJson = await AsyncStorage.getItem('children');
-        if (childrenJson) {
-          childrenData = JSON.parse(childrenJson);
-        }
-      }
-      
       // Filter out any entries that don't have a name or are incomplete
       childrenData = childrenData.filter(child => 
         child && child.name && child.name.trim() !== ''
@@ -154,23 +148,6 @@ export default function StudentProgress() {
       return childrenData;
     } catch (error) {
       console.error('Error loading students:', error);
-      
-      // Final fallback - try AsyncStorage
-      try {
-        const childrenJson = await AsyncStorage.getItem('children');
-        if (childrenJson) {
-          const childrenData = JSON.parse(childrenJson);
-          // Filter out unknown students
-          const filteredChildren = childrenData.filter(child => 
-            child && child.name && child.name.trim() !== ''
-          );
-          setStudents(filteredChildren);
-          return filteredChildren;
-        }
-      } catch (e) {
-        console.error('AsyncStorage fallback failed:', e);
-      }
-      
       return [];
     }
   };
@@ -182,19 +159,24 @@ export default function StudentProgress() {
       const progressCacheKey = 'student_progress_cache';
       const cacheExpiry = 'student_progress_cache_timestamp';
       let shouldRefreshCache = true;
+      let dataSourceStats = {
+        firebase: { reports: 0, quizResults: 0, lessonProgress: 0 },
+        total: 0
+      };
       
-      // Check if we have a recent cache (less than 15 minutes old)
+      // Check if we have a recent cache (less than 5 minutes old)
       try {
         const lastCacheTime = await AsyncStorage.getItem(cacheExpiry);
         if (lastCacheTime) {
           const cacheAge = Date.now() - parseInt(lastCacheTime);
-          // If cache is less than 15 minutes old, use it
-          if (cacheAge < 15 * 60 * 1000) {
+          // If cache is less than 5 minutes old, use it
+          if (cacheAge < 5 * 60 * 1000) {
             shouldRefreshCache = false;
             const cachedProgress = await AsyncStorage.getItem(progressCacheKey);
             if (cachedProgress) {
               const parsedCache = JSON.parse(cachedProgress);
               setProgressData(parsedCache);
+              console.log("Using cached progress data (less than 5 minutes old)");
               return; // Exit early if using cache
             }
           }
@@ -206,7 +188,9 @@ export default function StudentProgress() {
       // Only continue if we need to refresh the data
       if (!shouldRefreshCache) return;
       
-      // First try to get quiz results from Firebase
+      console.log("Fetching fresh progress data for", studentsData.length, "students");
+      
+      // Get data from Firebase only
       if (user) {
         try {
           // Process each student individually for better indexed queries
@@ -236,6 +220,9 @@ export default function StudentProgress() {
                 const reportData = doc.data();
                 const { quizType, score } = reportData;
                 
+                // Skip any demo data
+                if (reportData.isDemo) return;
+                
                 // Add score to the appropriate subject
                 if (score !== null && score !== undefined && quizType) {
                   if (progress[student.id][quizType]) {
@@ -243,13 +230,17 @@ export default function StudentProgress() {
                     progress[student.id][quizType].count++;
                     progress[student.id].all.scores.push(score);
                     progress[student.id].all.count++;
+                    dataSourceStats.firebase.reports++;
+                    dataSourceStats.total++;
                   }
                 }
               });
+              console.log(`Found ${reportsSnapshot.size} reports for student ${student.name}`);
             }
             
             // 2. Try to get individual quiz results from quiz_results collection
             try {
+              // First try the main collection
               const quizResultsQuery = query(
                 collection(db, 'quiz_results'),
                 where('childId', '==', student.id),
@@ -262,19 +253,117 @@ export default function StudentProgress() {
               if (!quizResultsSnapshot.empty) {
                 quizResultsSnapshot.forEach(doc => {
                   const quizData = doc.data();
-                  const { category, score, totalQuestions } = quizData;
+                  const { category, score, totalQuestions, subject } = quizData;
                   
-                  if (category && score !== undefined && totalQuestions !== undefined) {
-                    const percentageScore = Math.round((score / totalQuestions) * 100);
+                  // Skip demo data
+                  if (quizData.isDemo) return;
+                  
+                  // Determine the correct category
+                  let categoryToUse = category;
+                  
+                  // If no category but we have subject, use that
+                  if (!categoryToUse && subject) {
+                    categoryToUse = subject.toLowerCase();
+                  }
+                  
+                  // Map "English Quiz" to "english", etc.
+                  if (categoryToUse === "English Quiz") categoryToUse = "english";
+                  if (categoryToUse === "Math Quiz") categoryToUse = "math";
+                  if (categoryToUse === "Amharic Quiz") categoryToUse = "amharic";
+                  if (categoryToUse === "Oromo Quiz") categoryToUse = "oromo";
+                  
+                  if (categoryToUse && score !== undefined) {
+                    let percentageScore;
                     
-                    if (progress[student.id][category]) {
-                      progress[student.id][category].scores.push(percentageScore);
-                      progress[student.id][category].count++;
+                    // Calculate percentage score based on available data
+                    if (totalQuestions !== undefined && totalQuestions > 0) {
+                      percentageScore = Math.round((score / totalQuestions) * 100);
+                    } else if (quizData.percentage) {
+                      percentageScore = quizData.percentage;
+                    } else {
+                      // Assume score is already a percentage if no totalQuestions
+                      percentageScore = score;
+                    }
+                    
+                    // Ensure percentage is within reasonable bounds
+                    percentageScore = Math.min(100, Math.max(0, percentageScore));
+                    
+                    if (progress[student.id][categoryToUse]) {
+                      progress[student.id][categoryToUse].scores.push(percentageScore);
+                      progress[student.id][categoryToUse].count++;
                       progress[student.id].all.scores.push(percentageScore);
                       progress[student.id].all.count++;
+                      dataSourceStats.firebase.quizResults++;
+                      dataSourceStats.total++;
                     }
                   }
                 });
+                console.log(`Found ${quizResultsSnapshot.size} quiz results for student ${student.name}`);
+              }
+              
+              // Try also checking user-specific subcollections
+              try {
+                const userQuizResultsQuery = query(
+                  collection(db, `users/${student.id}/quiz_results`),
+                  orderBy('timestamp', 'desc'),
+                  limit(50)
+                );
+                
+                const userQuizResultsSnapshot = await getDocs(userQuizResultsQuery);
+                
+                if (!userQuizResultsSnapshot.empty) {
+                  console.log(`Found ${userQuizResultsSnapshot.size} user-specific quiz results for ${student.name}`);
+                  
+                  userQuizResultsSnapshot.forEach(doc => {
+                    const quizData = doc.data();
+                    const { category, score, totalQuestions, subject } = quizData;
+                    
+                    // Skip demo data
+                    if (quizData.isDemo) return;
+                    
+                    // Determine the correct category
+                    let categoryToUse = category;
+                    
+                    // If no category but we have subject, use that
+                    if (!categoryToUse && subject) {
+                      categoryToUse = subject.toLowerCase();
+                    }
+                    
+                    // Map "English Quiz" to "english", etc.
+                    if (categoryToUse === "English Quiz") categoryToUse = "english";
+                    if (categoryToUse === "Math Quiz") categoryToUse = "math";
+                    if (categoryToUse === "Amharic Quiz") categoryToUse = "amharic";
+                    if (categoryToUse === "Oromo Quiz") categoryToUse = "oromo";
+                    
+                    if (categoryToUse && score !== undefined) {
+                      let percentageScore;
+                      
+                      // Calculate percentage score based on available data
+                      if (totalQuestions !== undefined && totalQuestions > 0) {
+                        percentageScore = Math.round((score / totalQuestions) * 100);
+                      } else if (quizData.percentage) {
+                        percentageScore = quizData.percentage;
+                      } else {
+                        // Assume score is already a percentage if no totalQuestions
+                        percentageScore = score;
+                      }
+                      
+                      // Ensure percentage is within reasonable bounds
+                      percentageScore = Math.min(100, Math.max(0, percentageScore));
+                      
+                      if (progress[student.id][categoryToUse]) {
+                        progress[student.id][categoryToUse].scores.push(percentageScore);
+                        progress[student.id][categoryToUse].count++;
+                        progress[student.id].all.scores.push(percentageScore);
+                        progress[student.id].all.count++;
+                        dataSourceStats.firebase.quizResults++;
+                        dataSourceStats.total++;
+                      }
+                    }
+                  });
+                }
+              } catch (subcollectionError) {
+                console.log('Error fetching user quiz subcollection:', subcollectionError);
               }
             } catch (error) {
               console.log('Error fetching quiz_results:', error);
@@ -304,12 +393,23 @@ export default function StudentProgress() {
                   const lessonData = doc.data();
                   const { subject, isCompleted, lessonId } = lessonData;
                   
-                  if (subject && lessonsBySubject[subject]) {
-                    lessonsBySubject[subject].total++;
+                  // Skip demo data
+                  if (lessonData.isDemo) return;
+                  
+                  // Normalize subject name
+                  let subjectToUse = subject ? subject.toLowerCase() : null;
+                  
+                  // Map subject names if needed
+                  if (subjectToUse === "mathematics") subjectToUse = "math";
+                  if (subjectToUse === "english language") subjectToUse = "english";
+                  
+                  if (subjectToUse && lessonsBySubject[subjectToUse]) {
+                    lessonsBySubject[subjectToUse].total++;
                     lessonsBySubject.all.total++;
+                    dataSourceStats.firebase.lessonProgress++;
                     
                     if (isCompleted) {
-                      lessonsBySubject[subject].completed++;
+                      lessonsBySubject[subjectToUse].completed++;
                       lessonsBySubject.all.completed++;
                     }
                   }
@@ -321,78 +421,80 @@ export default function StudentProgress() {
                     progress[student.id][subject].lessons = lessonsBySubject[subject];
                   }
                 });
+                
+                console.log(`Found ${lessonProgressSnapshot.size} lesson progress entries for student ${student.name}`);
               }
             } catch (error) {
               console.log('Error fetching lesson_progress:', error);
+            }
+
+            // 4. Try to get lesson data from 'lessons' collection with childId field
+            try {
+              const lessonsQuery = query(
+                collection(db, 'lessons'),
+                where('childId', '==', student.id),
+                limit(100)
+              );
+              
+              const lessonsSnapshot = await getDocs(lessonsQuery);
+              
+              if (!lessonsSnapshot.empty) {
+                console.log(`Found ${lessonsSnapshot.size} lessons for student ${student.name}`);
+                
+                // Group by subject
+                const lessonsBySubject = {
+                  math: { total: 0, completed: 0 },
+                  english: { total: 0, completed: 0 },
+                  amharic: { total: 0, completed: 0 },
+                  oromo: { total: 0, completed: 0 },
+                  all: { total: 0, completed: 0 }
+                };
+                
+                lessonsSnapshot.forEach(doc => {
+                  const lessonData = doc.data();
+                  const { subject, completed } = lessonData;
+                  
+                  // Skip demo data
+                  if (lessonData.isDemo) return;
+                  
+                  // Normalize subject
+                  let subjectToUse = subject ? subject.toLowerCase() : null;
+                  
+                  // Map subject names if needed
+                  if (subjectToUse === "mathematics") subjectToUse = "math";
+                  if (subjectToUse === "english language") subjectToUse = "english";
+                  
+                  if (subjectToUse && lessonsBySubject[subjectToUse]) {
+                    lessonsBySubject[subjectToUse].total++;
+                    lessonsBySubject.all.total++;
+                    
+                    if (completed) {
+                      lessonsBySubject[subjectToUse].completed++;
+                      lessonsBySubject.all.completed++;
+                    }
+                  }
+                });
+                
+                // Add lesson data to progress object
+                Object.keys(lessonsBySubject).forEach(subject => {
+                  if (progress[student.id][subject]) {
+                    // If we already have lesson data, merge it
+                    if (progress[student.id][subject].lessons.total > 0) {
+                      progress[student.id][subject].lessons.total += lessonsBySubject[subject].total;
+                      progress[student.id][subject].lessons.completed += lessonsBySubject[subject].completed;
+                    } else {
+                      progress[student.id][subject].lessons = lessonsBySubject[subject];
+                    }
+                  }
+                });
+              }
+            } catch (error) {
+              console.log('Error fetching lessons:', error);
             }
           }
         } catch (error) {
           console.error('Error fetching reports from Firebase:', error);
         }
-      }
-      
-      // If no data from Firebase or missing data for some students, try AsyncStorage
-      const quizResultsJson = await AsyncStorage.getItem('quizResults');
-      if (quizResultsJson) {
-        const quizResults = JSON.parse(quizResultsJson);
-        
-        // Filter for real results (not demo data)
-        const realResults = quizResults.filter(result => !result.isDemo);
-        
-        // Process each result
-        realResults.forEach(result => {
-          const { childId, category, score, totalQuestions } = result;
-          
-          // Skip if no childId, category or score
-          if (!childId || !category || score === undefined || totalQuestions === undefined) return;
-          
-          // Check if this is one of our loaded students
-          if (studentsData.some(student => student.id === childId)) {
-            if (!progress[childId]) {
-              progress[childId] = {
-                math: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
-                english: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
-                amharic: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
-                oromo: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } },
-                all: { scores: [], average: 0, count: 0, lessons: { total: 0, completed: 0 } }
-              };
-            }
-            
-            // Calculate percentage score
-            const percentageScore = Math.round((score / totalQuestions) * 100);
-            
-            // Add score to the appropriate subject
-            if (progress[childId][category]) {
-              progress[childId][category].scores.push(percentageScore);
-              progress[childId][category].count++;
-              progress[childId].all.scores.push(percentageScore);
-              progress[childId].all.count++;
-            }
-          }
-        });
-      }
-      
-      // Try to get lesson completion data from AsyncStorage
-      try {
-        const lessonProgressJson = await AsyncStorage.getItem('lessonProgress');
-        if (lessonProgressJson) {
-          const lessonProgress = JSON.parse(lessonProgressJson);
-          
-          Object.entries(lessonProgress).forEach(([childId, subjectData]) => {
-            if (progress[childId]) {
-              Object.entries(subjectData).forEach(([subject, lessons]) => {
-                if (progress[childId][subject]) {
-                  progress[childId][subject].lessons = {
-                    total: lessons.length || 0,
-                    completed: lessons.filter(lesson => lesson.completed).length || 0
-                  };
-                }
-              });
-            }
-          });
-        }
-      } catch (error) {
-        console.log('Error getting lesson progress from AsyncStorage:', error);
       }
       
       // Calculate averages for each subject for each student
@@ -406,6 +508,17 @@ export default function StudentProgress() {
             subjectData.average = Math.round(sum / subjectData.scores.length);
           }
         });
+      });
+      
+      // Log data source statistics
+      console.log("Progress data source statistics:", {
+        firebase: {
+          reports: dataSourceStats.firebase.reports,
+          quizResults: dataSourceStats.firebase.quizResults,
+          lessonProgress: dataSourceStats.firebase.lessonProgress,
+          total: dataSourceStats.firebase.reports + dataSourceStats.firebase.quizResults + dataSourceStats.firebase.lessonProgress
+        },
+        total: dataSourceStats.total
       });
       
       // Cache the results
@@ -459,6 +572,7 @@ export default function StudentProgress() {
     </TouchableOpacity>
   );
 
+  // Update the renderStudentProgress function to remove data generation and demo indicators
   const renderStudentProgress = ({ item }) => {
     const student = item;
     const studentProgress = progressData[student.id];
@@ -492,7 +606,7 @@ export default function StudentProgress() {
           </View>
           <View style={[styles.noProgressContainer, { borderTopColor: currentTheme?.border || '#E0E0E0' }]}>
             <Text style={[styles.noProgressText, { color: currentTheme?.textSecondary || '#666' }]}>
-              No progress data available
+              No progress data available in Firebase
             </Text>
           </View>
         </View>
@@ -531,7 +645,7 @@ export default function StudentProgress() {
           </View>
           <View style={[styles.noProgressContainer, { borderTopColor: currentTheme?.border || '#E0E0E0' }]}>
             <Text style={[styles.noProgressText, { color: currentTheme?.textSecondary || '#666' }]}>
-              No {selectedSubject === 'all' ? '' : selectedSubject} data available
+              No {selectedSubject === 'all' ? '' : selectedSubject} data available in Firebase
             </Text>
           </View>
         </View>
@@ -702,7 +816,7 @@ export default function StudentProgress() {
       
       Alert.alert(
         "Cache Cleared", 
-        "The cached data has been cleared. Loading fresh data...",
+        "The cached data has been cleared. Loading fresh data from Firebase...",
         [{ text: "OK" }]
       );
       
@@ -720,7 +834,7 @@ export default function StudentProgress() {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Student Progress</Text>
+        <Text style={styles.headerTitle}>{translate('progressReport.childProgress') || 'Student Progress'}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.clearButton} onPress={clearCache}>
             <Ionicons name="trash-outline" size={22} color="#FFF" />
@@ -745,17 +859,17 @@ export default function StudentProgress() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={currentTheme?.primary || '#2196F3'} />
           <Text style={[styles.loadingText, { color: currentTheme?.textSecondary || '#666' }]}>
-            Loading student progress...
+            {translate('progressReport.loading') || 'Loading student progress...'}
           </Text>
         </View>
       ) : students.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Ionicons name="people" size={48} color={currentTheme?.textSecondary || '#666'} />
           <Text style={[styles.emptyText, { color: currentTheme?.text || '#333' }]}>
-            No students found
+            {translate('progressReport.noChildData') || 'No students found'}
           </Text>
           <Text style={[styles.emptySubtext, { color: currentTheme?.textSecondary || '#666' }]}>
-            There are no students available to track progress
+            {translate('parent.noChildrenYet') || 'There are no students available to track progress'}
           </Text>
         </View>
       ) : (
