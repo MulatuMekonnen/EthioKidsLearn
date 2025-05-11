@@ -13,11 +13,13 @@ import {
 } from 'react-native';
 import { useUserManagement } from '../../context/UserManagementContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Svg, Path, Circle, G, Rect } from 'react-native-svg';
 
 export default function UserManagementScreen({ navigation }) {
   const { users, loading, fetchUsers, deleteUser } = useUserManagement();
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [refreshing, setRefreshing] = useState(false);
 
@@ -34,19 +36,19 @@ export default function UserManagementScreen({ navigation }) {
 
   const handleDeleteUser = (userId, userEmail) => {
     Alert.alert(
-      "Delete User",
-      `Are you sure you want to delete ${userEmail}?`,
+      translate('admin.deleteUser'),
+      `${translate('admin.deleteUserConfirm')} ${userEmail}?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: translate('common.cancel'), style: "cancel" },
         {
-          text: "Delete",
+          text: translate('common.delete'),
           style: "destructive",
           onPress: async () => {
             try {
               await deleteUser(userId);
-              Alert.alert("Success", "User has been deleted");
+              Alert.alert("Success", translate('admin.userDeleted'));
             } catch (error) {
-              Alert.alert("Error", error.message || "Failed to delete user");
+              Alert.alert(translate('errors.title'), error.message || translate('admin.failedToDelete'));
             }
           }
         }
@@ -135,7 +137,8 @@ export default function UserManagementScreen({ navigation }) {
         >
           <BackIcon />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>User Management</Text>
+        <Text style={styles.headerTitle}>{translate('admin.userManagement')}</Text>
+        <View style={styles.headerSpacer} />
         <TouchableOpacity 
           style={styles.refreshButton}
           onPress={handleRefresh}
@@ -165,7 +168,7 @@ export default function UserManagementScreen({ navigation }) {
                   { color: '#333333' }
               ]}
             >
-              All Users
+              {translate('admin.allUsers')}
             </Text>
           </TouchableOpacity>
           
@@ -187,7 +190,7 @@ export default function UserManagementScreen({ navigation }) {
                   { color: '#333333' }
               ]}
             >
-              Parents
+              {translate('admin.parents')}
             </Text>
           </TouchableOpacity>
           
@@ -209,7 +212,7 @@ export default function UserManagementScreen({ navigation }) {
                   { color: '#333333' }
               ]}
             >
-              Teachers
+              {translate('admin.teachers')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -219,26 +222,26 @@ export default function UserManagementScreen({ navigation }) {
             <Text style={styles.statValue}>
               {users.filter(u => u.role === 'parent').length}
             </Text>
-            <Text style={styles.statLabel}>Parents</Text>
+            <Text style={styles.statLabel}>{translate('admin.parents')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>
               {users.filter(u => u.role === 'teacher').length}
             </Text>
-            <Text style={styles.statLabel}>Teachers</Text>
+            <Text style={styles.statLabel}>{translate('admin.teachers')}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statValue}>
               {users.filter(u => u.role === 'admin').length}
             </Text>
-            <Text style={styles.statLabel}>Admins</Text>
+            <Text style={styles.statLabel}>{translate('admin.admins')}</Text>
           </View>
         </View>
 
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#2196F3" />
-            <Text style={styles.loadingText}>Loading users...</Text>
+            <Text style={styles.loadingText}>{translate('admin.loadingUsers')}</Text>
           </View>
         ) : (
           <FlatList
@@ -251,7 +254,9 @@ export default function UserManagementScreen({ navigation }) {
                 <View style={styles.userInfo}>
                   <Text style={styles.userEmail}>{item.email}</Text>
                   <Text style={[styles.userRole, { color: item.role === 'teacher' ? '#2196F3' : '#4CAF50' }]}>
-                    {item.role.charAt(0).toUpperCase() + item.role.slice(1)}
+                    {item.role === 'teacher' ? translate('roles.teacher') : 
+                     item.role === 'parent' ? translate('roles.parent') : 
+                     item.role === 'admin' ? translate('roles.admin') : item.role}
                   </Text>
                   {item.name && (
                     <Text style={styles.userName}>{item.name}</Text>
@@ -274,7 +279,7 @@ export default function UserManagementScreen({ navigation }) {
               <View style={styles.emptyContainer}>
                 <PeopleIcon />
                 <Text style={styles.emptyText}>
-                  No users found
+                  {translate('admin.noUsersFound')}
                 </Text>
               </View>
             }
@@ -293,17 +298,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     padding: 16,
     backgroundColor: '#2196F3',
   },
   backButton: {
     padding: 8,
+    marginRight: 8,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#FFF',
+    textAlign: 'left',
+  },
+  headerSpacer: {
+    flex: 1,
   },
   refreshButton: {
     padding: 8,

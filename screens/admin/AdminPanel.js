@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import * as ImagePicker from 'expo-image-picker';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
@@ -22,10 +23,12 @@ import { db } from '../../services/firebase';
 // Import ProfileImageManager for Cloudinary uploads
 import ProfileImageManager from '../../components/ProfileImageManager';
 import { uploadToCloudinary } from '../../services/cloudinary';
+import AdminLanguageSelector from '../../components/AdminLanguageSelector';
 
 export default function AdminPanel({ navigation }) {
   const { user, logout } = useAuth();
   const { currentTheme, toggleTheme } = useTheme();
+  const { translate } = useLanguage();
   const [profileImage, setProfileImage] = useState(null);
   const [userName, setUserName] = useState('Admin');
   const [userEmail, setUserEmail] = useState('');
@@ -73,7 +76,7 @@ export default function AdminPanel({ navigation }) {
       }
     } catch (error) {
       console.error('Error picking image:', error);
-      Alert.alert('Error', 'Failed to pick image');
+      Alert.alert(translate('errors.title'), 'Failed to pick image');
     }
   };
 
@@ -103,7 +106,7 @@ export default function AdminPanel({ navigation }) {
       }
     } catch (error) {
       console.error('Error uploading image:', error);
-      Alert.alert('Error', 'Failed to upload image. Please try again.');
+      Alert.alert(translate('errors.title'), 'Failed to upload image. Please try again.');
     }
   };
 
@@ -194,7 +197,9 @@ export default function AdminPanel({ navigation }) {
                           <Path d="M20 21C20 16.5817 16.4183 13 12 13C7.58172 13 4 16.5817 4 21" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
                         </Svg>
                       </View>
-                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>My Profile</Text>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>
+                        {translate('profile.myProfile')}
+                      </Text>
                     </TouchableOpacity>
                     
                     <TouchableOpacity 
@@ -215,9 +220,24 @@ export default function AdminPanel({ navigation }) {
                         </Svg>
                       </View>
                       <Text style={[styles.profileMenuItemText, { color: currentTheme.text }]}>
-                        {currentTheme.mode === 'dark' ? 'Light Theme' : 'Dark Theme'}
+                        {currentTheme.mode === 'dark' ? translate('theme.lightTheme') : translate('theme.darkTheme')}
                       </Text>
                     </TouchableOpacity>
+                    
+                    {/* Language Selector */}
+                    <View style={styles.profileMenuItem}>
+                      <View style={styles.profileMenuItemIcon}>
+                        <Svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                          <Circle cx="12" cy="12" r="10" stroke={currentTheme.text} strokeWidth="2" />
+                          <Path d="M12 2C16.4183 2 20 5.58172 20 10C20 14.4183 16.4183 18 12 18" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M2 10H20" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                          <Path d="M12 2V18" stroke={currentTheme.text} strokeWidth="2" strokeLinecap="round" />
+                        </Svg>
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <AdminLanguageSelector />
+                      </View>
+                    </View>
                     
                     <TouchableOpacity 
                       style={styles.profileMenuItem}
@@ -229,7 +249,9 @@ export default function AdminPanel({ navigation }) {
                           <Path d="M9 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V16.2C3 17.8802 3 18.7202 3.32698 19.362C3.6146 19.9265 4.07354 20.3854 4.63803 20.673C5.27976 21 6.11984 21 7.8 21H9" stroke={currentTheme.danger || "#F44336"} strokeWidth="2" strokeLinecap="round" />
                         </Svg>
                       </View>
-                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger || "#F44336" }]}>Logout</Text>
+                      <Text style={[styles.profileMenuItemText, { color: currentTheme.danger || "#F44336" }]}>
+                        {translate('auth.logout')}
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 </TouchableWithoutFeedback>
@@ -251,7 +273,7 @@ export default function AdminPanel({ navigation }) {
 
   const menuItems = [
     {
-      title: 'Create Teacher',
+      title: translate('admin.createTeacher'),
       icon: (color) => (
         <Svg width="32" height="32" viewBox="0 0 24 24" fill="none">
           <Circle cx="12" cy="10" r="4" stroke={color} strokeWidth="2" />
@@ -263,7 +285,7 @@ export default function AdminPanel({ navigation }) {
       color: '#4CAF50',
     },
     {
-      title: 'Manage Users',
+      title: translate('admin.manageUsers'),
       icon: (color) => (
         <Svg width="32" height="32" viewBox="0 0 24 24" fill="none">
           <Circle cx="9" cy="7" r="4" stroke={color} strokeWidth="2" />
@@ -275,7 +297,7 @@ export default function AdminPanel({ navigation }) {
       color: '#2196F3',
     },
     {
-      title: 'Manage Content',
+      title: translate('admin.manageContent'),
       icon: (color) => (
         <Svg width="32" height="32" viewBox="0 0 24 24" fill="none">
           <Path d="M5 7.8C5 6.11984 5 5.27976 5.32698 4.63803C5.6146 4.07354 6.07354 3.6146 6.63803 3.32698C7.27976 3 8.11984 3 9.8 3H14.2C15.8802 3 16.7202 3 17.362 3.32698C17.9265 3.6146 18.3854 4.07354 18.673 4.63803C19 5.27976 19 6.11984 19 7.8V16.2C19 17.8802 19 18.7202 18.673 19.362C18.3854 19.9265 17.9265 20.3854 17.362 20.673C16.7202 21 15.8802 21 14.2 21H9.8C8.11984 21 7.27976 21 6.63803 20.673C6.07354 20.3854 5.6146 19.9265 5.32698 19.362C5 18.7202 5 17.8802 5 16.2V7.8Z" stroke={color} strokeWidth="2" />
@@ -303,8 +325,8 @@ export default function AdminPanel({ navigation }) {
       
       {/* Header */}
       <View style={[styles.header, { backgroundColor: currentTheme.primary }]}>
-        <View style={styles.headerLeft} />
-        <Text style={styles.headerTitle}>Admin Dashboard</Text>
+        <Text style={styles.headerTitle}>{translate('admin.dashboard')}</Text>
+        <View style={styles.headerRight} />
         <ProfilePicture />
       </View>
       
@@ -314,9 +336,9 @@ export default function AdminPanel({ navigation }) {
           <ShieldIcon />
         </View>
         <View style={styles.adminInfo}>
-          <Text style={[styles.adminTitle, { color: currentTheme.text }]}>Administrator</Text>
+          <Text style={[styles.adminTitle, { color: currentTheme.text }]}>{translate('admin.adminTitle')}</Text>
           <Text style={[styles.adminSubtitle, { color: currentTheme.textSecondary }]}>
-            Manage your educational platform
+            {translate('admin.adminSubtitle')}
           </Text>
         </View>
       </View>
@@ -352,15 +374,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  headerLeft: {
-    width: 40,
-  },
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
     color: '#FFF',
+    textAlign: 'left',
+  },
+  headerRight: {
     flex: 1,
-    textAlign: 'center',
   },
   profilePicContainer: {
     width: 44,

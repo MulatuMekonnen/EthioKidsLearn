@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Svg, Path, Circle } from 'react-native-svg';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
@@ -24,6 +25,7 @@ import ProfileImageManager from '../../components/ProfileImageManager';
 export default function ProfileScreen({ navigation }) {
   const { user } = useAuth();
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
@@ -57,7 +59,7 @@ export default function ProfileScreen({ navigation }) {
       }
     } catch (error) {
       console.error('Error fetching profile data:', error);
-      Alert.alert('Error', 'Failed to load profile data');
+      Alert.alert(translate('errors.title'), translate('admin.failedToUpdate'));
     } finally {
       setLoading(false);
     }
@@ -76,10 +78,10 @@ export default function ProfileScreen({ navigation }) {
         updatedAt: new Date().toISOString()
       });
       
-      Alert.alert('Success', 'Profile updated successfully');
+      Alert.alert('Success', translate('admin.profileUpdated'));
     } catch (error) {
       console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile');
+      Alert.alert(translate('errors.title'), translate('admin.failedToUpdate'));
     } finally {
       setSaving(false);
     }
@@ -116,7 +118,7 @@ export default function ProfileScreen({ navigation }) {
         >
           <BackIcon />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>My Profile</Text>
+        <Text style={styles.headerTitle}>{translate('profile.myProfile')}</Text>
         <View style={styles.headerRight} />
       </View>
       
@@ -144,16 +146,16 @@ export default function ProfileScreen({ navigation }) {
                   onImageChange={handleProfileImageChange}
                 />
                 <Text style={[styles.profileRole, { color: currentTheme.textSecondary }]}>
-                  Administrator
+                  {translate('roles.admin')}
                 </Text>
               </View>
               
               {/* Form */}
               <View style={[styles.formCard, { backgroundColor: currentTheme.card }]}>
-                <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>Profile Information</Text>
+                <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>{translate('profile.personalInfo')}</Text>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Full Name</Text>
+                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>{translate('admin.fullName')}</Text>
                   <TextInput
                     style={[styles.input, { 
                       color: currentTheme.text,
@@ -162,13 +164,13 @@ export default function ProfileScreen({ navigation }) {
                     }]}
                     value={name}
                     onChangeText={setName}
-                    placeholder="Enter your full name"
+                    placeholder={translate('admin.enterFullName')}
                     placeholderTextColor={currentTheme.textSecondary}
                   />
                 </View>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Email</Text>
+                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>{translate('auth.email')}</Text>
                   <TextInput
                     style={[styles.input, { 
                       color: currentTheme.textSecondary,
@@ -180,12 +182,12 @@ export default function ProfileScreen({ navigation }) {
                     placeholderTextColor={currentTheme.textSecondary}
                   />
                   <Text style={[styles.helperText, { color: currentTheme.textSecondary }]}>
-                    Email cannot be changed
+                    {translate('admin.emailCannotBeChanged')}
                   </Text>
                 </View>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Phone Number</Text>
+                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>{translate('admin.phoneNumber')}</Text>
                   <TextInput
                     style={[styles.input, { 
                       color: currentTheme.text,
@@ -194,14 +196,14 @@ export default function ProfileScreen({ navigation }) {
                     }]}
                     value={phone}
                     onChangeText={setPhone}
-                    placeholder="Enter your phone number"
+                    placeholder={translate('admin.enterPhoneNumber')}
                     placeholderTextColor={currentTheme.textSecondary}
                     keyboardType="phone-pad"
                   />
                 </View>
                 
                 <View style={styles.inputGroup}>
-                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>Bio</Text>
+                  <Text style={[styles.inputLabel, { color: currentTheme.textSecondary }]}>{translate('admin.bio')}</Text>
                   <TextInput
                     style={[styles.textArea, { 
                       color: currentTheme.text,
@@ -210,7 +212,7 @@ export default function ProfileScreen({ navigation }) {
                     }]}
                     value={bio}
                     onChangeText={setBio}
-                    placeholder="Tell us about yourself"
+                    placeholder={translate('admin.aboutYourself')}
                     placeholderTextColor={currentTheme.textSecondary}
                     multiline
                     numberOfLines={4}
@@ -229,7 +231,7 @@ export default function ProfileScreen({ navigation }) {
                   {saving ? (
                     <ActivityIndicator color="#FFFFFF" size="small" />
                   ) : (
-                    <Text style={styles.saveButtonText}>Save Changes</Text>
+                    <Text style={styles.saveButtonText}>{translate('admin.saveChanges')}</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -248,20 +250,21 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
   backButton: {
     padding: 8,
+    marginRight: 8,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFF',
+    textAlign: 'left',
   },
   headerRight: {
-    width: 40,
+    flex: 1,
   },
   keyboardAvoidView: {
     flex: 1,

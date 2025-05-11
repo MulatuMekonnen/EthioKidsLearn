@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { getDoc, doc } from 'firebase/firestore';
 import { db, auth } from '../../services/firebase';
@@ -25,6 +26,7 @@ import { signOut } from 'firebase/auth';
 export default function CreateTeacherScreen({ navigation }) {
   const { createTeacherAccount, userRole, user } = useAuth();
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,8 +58,8 @@ export default function CreateTeacherScreen({ navigation }) {
           // If we're on this screen but not an admin, show alert and go back
           if (!userDoc.exists() || userDoc.data().role !== 'admin') {
             Alert.alert(
-              'Permission Denied',
-              'You do not have administrator privileges to create teacher accounts.',
+              translate('admin.permissionDenied'),
+              translate('admin.noAdminPrivileges'),
               [{ text: 'OK', onPress: () => navigation.goBack() }]
             );
           }
@@ -65,17 +67,17 @@ export default function CreateTeacherScreen({ navigation }) {
       } catch (error) {
         console.error('Error verifying admin status:', error);
         setAdminVerified(false);
-        Alert.alert('Error', 'Failed to verify admin permissions: ' + error.message);
+        Alert.alert(translate('errors.title'), 'Failed to verify admin permissions: ' + error.message);
       }
     };
     
     verifyAdmin();
-  }, [user, navigation]);
+  }, [user, navigation, translate]);
 
   const showSuccessWithCredentials = (teacherEmail, teacherPassword) => {
     Alert.alert(
-      'Teacher Account Created',
-      `The account has been created successfully.\n\nTeacher Email: ${teacherEmail}\nPassword: ${teacherPassword}\n\nPlease share these credentials with the teacher.`,
+      translate('admin.teacherAccountCreated'),
+      `${translate('admin.accountCreatedSuccessfully')}\n\n${translate('admin.teacherEmail')}: ${teacherEmail}\n${translate('auth.password')}: ${teacherPassword}\n\n${translate('admin.shareCredentials')}`,
       [
         {
           text: 'OK',
@@ -96,15 +98,15 @@ export default function CreateTeacherScreen({ navigation }) {
 
   const handleCreate = async () => {
     if (!name || !email || !password) {
-      return Alert.alert('Error', 'All fields are required');
+      return Alert.alert(translate('errors.title'), translate('errors.fillAllFields'));
     }
     
     if (password.length < 6) {
-      return Alert.alert('Error', 'Password must be at least 6 characters');
+      return Alert.alert(translate('errors.title'), translate('errors.passwordTooShort'));
     }
     
     if (!email.includes('@')) {
-      return Alert.alert('Error', 'Please enter a valid email address');
+      return Alert.alert(translate('errors.title'), translate('errors.invalidEmail'));
     }
     
     setLoading(true);
@@ -140,7 +142,7 @@ export default function CreateTeacherScreen({ navigation }) {
         }
       }
       
-      Alert.alert('Failed', errorMessage);
+      Alert.alert(translate('errors.title'), errorMessage);
     } finally {
       setLoading(false);
     }
@@ -239,7 +241,8 @@ export default function CreateTeacherScreen({ navigation }) {
         >
           <BackIcon />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Teacher Account</Text>
+        <Text style={styles.headerTitle}>{translate('admin.createTeacherAccount')}</Text>
+        <View style={styles.headerSpacer} />
       </View>
       
       <KeyboardAvoidingView
@@ -258,10 +261,10 @@ export default function CreateTeacherScreen({ navigation }) {
             </View>
             
             <Text style={[styles.title, { color: currentTheme.text }]}>
-              Create Teacher Account
+              {translate('admin.createTeacherAccount')}
             </Text>
             <Text style={[styles.subtitle, { color: currentTheme.textSecondary }]}>
-              Add a new teacher to your educational platform
+              {translate('admin.addTeacher')}
             </Text>
             
             <View style={[styles.formCard, { backgroundColor: currentTheme.card }]}>
@@ -270,7 +273,7 @@ export default function CreateTeacherScreen({ navigation }) {
                   <PersonIcon />
                 </View>
                 <TextInput
-                  placeholder="Full Name"
+                  placeholder={translate('admin.fullName')}
                   value={name}
                   onChangeText={setName}
                   style={[styles.input, { 
@@ -286,7 +289,7 @@ export default function CreateTeacherScreen({ navigation }) {
                   <MailIcon />
                 </View>
                 <TextInput
-                  placeholder="Email"
+                  placeholder={translate('auth.email')}
                   value={email}
                   onChangeText={setEmail}
                   keyboardType="email-address"
@@ -304,7 +307,7 @@ export default function CreateTeacherScreen({ navigation }) {
                   <LockIcon />
                 </View>
                 <TextInput
-                  placeholder="Password"
+                  placeholder={translate('auth.password')}
                   value={password}
                   onChangeText={setPassword}
                   secureTextEntry={!passwordVisible}
@@ -334,7 +337,7 @@ export default function CreateTeacherScreen({ navigation }) {
                     <View style={styles.buttonIcon}>
                       <AddIcon />
                     </View>
-                    <Text style={styles.buttonText}>Create Teacher</Text>
+                    <Text style={styles.buttonText}>{translate('admin.createTeacher')}</Text>
                   </>
                 )}
               </TouchableOpacity>
@@ -343,7 +346,7 @@ export default function CreateTeacherScreen({ navigation }) {
             <View style={styles.infoCard}>
               <InfoIcon />
               <Text style={[styles.infoText, { color: currentTheme.textSecondary }]}>
-                New teachers will be able to login immediately with these credentials
+                {translate('admin.shareCredentials')}
               </Text>
             </View>
 
@@ -400,6 +403,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: '#FFF',
+    textAlign: 'left',
+  },
+  headerSpacer: {
+    flex: 1,
   },
   keyboardAvoidingView: {
     flex: 1,

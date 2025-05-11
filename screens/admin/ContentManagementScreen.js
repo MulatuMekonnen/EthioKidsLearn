@@ -14,6 +14,7 @@ import {
 import { Svg, Path, Circle, Rect } from 'react-native-svg';
 import { useContent } from '../../context/ContentContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { Video } from 'expo-av';
 import { WebView } from 'react-native-webview';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,6 +28,7 @@ export default function ContentManagementScreen({ navigation }) {
   } = useContent();
   
   const { currentTheme } = useTheme();
+  const { translate } = useLanguage();
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [previewContent, setPreviewContent] = useState(null);
@@ -38,7 +40,7 @@ export default function ContentManagementScreen({ navigation }) {
         setLoading(true);
         await fetchPending();
       } catch (error) {
-        Alert.alert('Error', 'Failed to load content');
+        Alert.alert(translate('errors.title'), 'Failed to load content');
       } finally {
         setLoading(false);
       }
@@ -170,7 +172,7 @@ export default function ContentManagementScreen({ navigation }) {
     try {
       await fetchPending();
     } catch (error) {
-      Alert.alert('Error', 'Failed to refresh content');
+      Alert.alert(translate('errors.title'), 'Failed to refresh content');
     } finally {
       setRefreshing(false);
     }
@@ -179,27 +181,27 @@ export default function ContentManagementScreen({ navigation }) {
   const handleApprove = async (id) => {
     try {
       await approveContent(id);
-      Alert.alert('Success', 'Content has been published.');
+      Alert.alert('Success', translate('admin.content.contentPublished'));
     } catch (err) {
-      Alert.alert('Error', err.message);
+      Alert.alert(translate('errors.title'), err.message);
     }
   };
 
   const handleReject = (id) => {
     Alert.alert(
-      'Reject Content?',
-      'This will mark it as rejected.',
+      translate('admin.content.rejectConfirm'),
+      translate('admin.content.rejectConfirmDesc'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: translate('common.cancel'), style: 'cancel' },
         { 
-          text: 'Reject', 
+          text: translate('admin.content.reject'), 
           style: 'destructive', 
           onPress: async () => {
             try {
               await rejectContent(id);
-              Alert.alert('Success', 'Content has been rejected.');
+              Alert.alert('Success', translate('admin.content.contentRejected'));
             } catch (err) {
-              Alert.alert('Error', err.message);
+              Alert.alert(translate('errors.title'), err.message);
             }
           } 
         },
@@ -218,7 +220,7 @@ export default function ContentManagementScreen({ navigation }) {
     return (
       <View style={styles.previewWrapper}>
         <View style={styles.previewHeader}>
-          <Text style={styles.previewTitle}>Content Preview</Text>
+          <Text style={styles.previewTitle}>{translate('admin.previewContent')}</Text>
           <TouchableOpacity 
             style={styles.closeButton}
             onPress={() => {
@@ -290,10 +292,10 @@ export default function ContentManagementScreen({ navigation }) {
             <Text style={[styles.title, { color: currentTheme.text }]}>{item.title}</Text>
             <View style={styles.metaContainer}>
               <Text style={[styles.meta, { color: currentTheme.textSecondary }]}>
-                Category: <Text style={{color: categoryInfo.color, fontWeight: '600'}}>{item.category}</Text>
+                {translate('admin.content.category')}: <Text style={{color: categoryInfo.color, fontWeight: '600'}}>{item.category}</Text>
               </Text>
               <Text style={[styles.meta, { color: currentTheme.textSecondary }]}>
-                By: {item.createdByName || 'Unknown Teacher'}
+                {translate('admin.content.by')}: {item.createdByName || 'Unknown Teacher'}
               </Text>
             </View>
           </View>
@@ -305,10 +307,16 @@ export default function ContentManagementScreen({ navigation }) {
 
         <View style={styles.fileInfoContainer}>
           <Text style={[styles.fileInfo, { color: currentTheme.textSecondary }]}>
-            Type: {item.contentType}
+            {translate('admin.content.type')}: {
+              item.contentType === 'document' ? translate('admin.contentTypes.document') :
+              item.contentType === 'video' ? translate('admin.contentTypes.video') :
+              item.contentType === 'audio' ? translate('admin.contentTypes.audio') :
+              item.contentType === 'image' ? translate('admin.contentTypes.image') :
+              item.contentType
+            }
           </Text>
           <Text style={[styles.fileInfo, { color: currentTheme.textSecondary }]}>
-            Level: {item.level}
+            {translate('admin.content.level')}: {item.level}
           </Text>
           {item.tags && item.tags.length > 0 && (
             <View style={styles.tagsContainer}>
@@ -328,7 +336,7 @@ export default function ContentManagementScreen({ navigation }) {
           >
             <Ionicons name="eye-outline" size={20} color={currentTheme.primary} />
             <Text style={[styles.previewButtonText, { color: currentTheme.primary }]}>
-              Preview Content
+              {translate('admin.previewContent')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -339,14 +347,14 @@ export default function ContentManagementScreen({ navigation }) {
             onPress={() => handleApprove(item.id)}
           >
             <CheckmarkIcon />
-            <Text style={styles.buttonText}>Approve</Text>
+            <Text style={styles.buttonText}>{translate('admin.content.approve')}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.button, { backgroundColor: '#F5F5F5' }]}
             onPress={() => handleReject(item.id)}
           >
             <CloseIcon />
-            <Text style={[styles.buttonText, {color: '#D32F2F'}]}>Reject</Text>
+            <Text style={[styles.buttonText, {color: '#D32F2F'}]}>{translate('admin.content.reject')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -363,7 +371,7 @@ export default function ContentManagementScreen({ navigation }) {
         >
           <BackArrowIcon />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Content Management</Text>
+        <Text style={styles.headerTitle}>{translate('admin.contentManagement')}</Text>
         <TouchableOpacity 
           style={styles.refreshButton}
           onPress={handleRefresh}
@@ -377,11 +385,11 @@ export default function ContentManagementScreen({ navigation }) {
         <View style={[styles.statusBadge, { backgroundColor: currentTheme.primary + '15' }]}>
           <HourglassIcon color={currentTheme.primary} />
           <Text style={[styles.statusText, { color: currentTheme.primary }]}>
-            Pending Review
+            {translate('admin.pendingReview')}
           </Text>
         </View>
         <Text style={[styles.statusCount, { color: currentTheme.text }]}>
-          {pending.length} {pending.length === 1 ? 'item' : 'items'}
+          {pending.length} {pending.length === 1 ? translate('admin.item') : translate('admin.items')}
         </Text>
       </View>
       
@@ -389,14 +397,14 @@ export default function ContentManagementScreen({ navigation }) {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={currentTheme.primary} />
           <Text style={[styles.loadingText, { color: currentTheme.text }]}>
-            Loading content...
+            {translate('admin.loadingContent')}
           </Text>
         </View>
       ) : pending.length === 0 ? (
         <View style={styles.emptyContainer}>
           <DocumentIcon color={currentTheme.textSecondary} />
           <Text style={[styles.empty, { color: currentTheme.textSecondary }]}>
-            No pending content to review
+            {translate('admin.noPendingContent')}
           </Text>
           <TouchableOpacity 
             style={[styles.refreshEmptyButton, { backgroundColor: currentTheme.primary }]}
@@ -405,7 +413,7 @@ export default function ContentManagementScreen({ navigation }) {
             <View style={{marginRight: 8}}>
               <RefreshIcon />
             </View>
-            <Text style={styles.refreshEmptyText}>Refresh</Text>
+            <Text style={styles.refreshEmptyText}>{translate('teacher.refreshData')}</Text>
           </TouchableOpacity>
         </View>
       ) : (
