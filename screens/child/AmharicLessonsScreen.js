@@ -213,63 +213,63 @@ const amharicContent = [
     word: 'እናት',
     pronunciation: 'Inat',
     meaning: 'Mother',
-    sound: require('../../assets/sounds/amharic/mother.mp3'),
+    sound: require('../../assets/sounds/amharic/words/Mother.m4a'),
     category: 'ቤተሰብ'  // 'Family' in Amharic
   },
   {
     word: 'አባት',
     pronunciation: 'Abat',
     meaning: 'Father',
-    sound: require('../../assets/sounds/amharic/father.mp3'),
+    sound: require('../../assets/sounds/amharic/words/Abat.m4a'),
     category: 'ቤተሰብ'
   },
   {
     word: 'ወንድም',
     pronunciation: 'Wendim',
     meaning: 'Brother',
-    sound: require('../../assets/sounds/amharic/father.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Wendim.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   {
     word: 'እህት',
     pronunciation: 'Ihit',
     meaning: 'Sister',
-    sound: require('../../assets/sounds/amharic/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Sister.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   {
-    word: 'አያት ወንድ',
+    word: 'ወንድ አያት',
     pronunciation: 'Ayat Wend',
     meaning: 'Grandfather',
-    sound: require('../../assets/sounds/amharic/father.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Ayat_wend.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   {
-    word: 'አያት ሴት',
+    word: 'ሴት አያት',
     pronunciation: 'Ayat Set',
     meaning: 'Grandmother',
-    sound: require('../../assets/sounds/amharic/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Ayat_set.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   {
     word: 'ልጅ',
     pronunciation: 'Lij',
     meaning: 'Child',
-    sound: require('../../assets/sounds/amharic/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/lej.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   {
     word: 'ባል',
     pronunciation: 'Bal',
     meaning: 'Husband',
-    sound: require('../../assets/sounds/amharic/father.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Bal.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   {
     word: 'ሚስት',
     pronunciation: 'Mist',
     meaning: 'Wife',
-    sound: require('../../assets/sounds/amharic/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Wife.m4a'), // Placeholder
     category: 'ቤተሰብ'
   },
   
@@ -278,56 +278,56 @@ const amharicContent = [
     word: 'ውሃ',
     pronunciation: 'Wuha',
     meaning: 'Water',
-    sound: require('../../assets/sounds/amharic/water.mp3'),
+    sound: require('../../assets/sounds/amharic/words/Water.m4a'),
     category: 'መሰረታዊ ቃላት'  // 'Basic Words' in Amharic
   },
   {
     word: 'ቀን',
     pronunciation: 'Ken',
     meaning: 'Day',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Ken.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   {
     word: 'ሰላም',
     pronunciation: 'Selam',
     meaning: 'Peace/Hello',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Selam.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   {
     word: 'ደህና',
     pronunciation: 'Dehna',
     meaning: 'Good/Fine',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Dehna.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   {
     word: 'አመሰግናለሁ',
     pronunciation: 'Ameseginalehu',
     meaning: 'Thank you',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Thank you.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   {
     word: 'ሰማይ',
     pronunciation: 'Semay',
     meaning: 'Sky',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Sky.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   {
     word: 'ምድር',
     pronunciation: 'Midir',
     meaning: 'Earth/Ground',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Midr.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   {
     word: 'እሳት',
     pronunciation: 'Isat',
     meaning: 'Fire',
-    sound: require('../../assets/sounds/amharic/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Esat.m4a'), // Placeholder
     category: 'መሰረታዊ ቃላት'
   },
   
@@ -336,56 +336,56 @@ const amharicContent = [
     word: 'ዳቦ',
     pronunciation: 'Dabo',
     meaning: 'Bread',
-    sound: require('../../assets/sounds/amharic/bread.mp3'),
+    sound: require('../../assets/sounds/amharic/words/Dabo.m4a'),
     category: 'ምግብ'  // 'Food' in Amharic
   },
   {
     word: 'ወጥ',
     pronunciation: 'Wet',
     meaning: 'Stew',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Wet.m4a'), // Placeholder
     category: 'ምግብ'
   },
   {
     word: 'ሥጋ',
     pronunciation: 'Siga',
     meaning: 'Meat',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Meat.m4a'), // Placeholder
     category: 'ምግብ'
   },
   {
     word: 'ፍራፍሬ',
     pronunciation: 'Frafire',
     meaning: 'Fruit',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Frafre.m4a'), // Placeholder
     category: 'ምግብ'
   },
   {
     word: 'አትክልት',
     pronunciation: 'Atkilt',
     meaning: 'Vegetable',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Vegetables.m4a'), // Placeholder
     category: 'ምግብ'
   },
   {
     word: 'ቡና',
     pronunciation: 'Buna',
     meaning: 'Coffee',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Buna.m4a'), // Placeholder
     category: 'ምግብ'
   },
   {
     word: 'ወተት',
     pronunciation: 'Wetet',
     meaning: 'Milk',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Milk.m4a'), // Placeholder
     category: 'ምግብ'
   },
   {
     word: 'እንጀራ',
     pronunciation: 'Injera',
     meaning: 'Injera',
-    sound: require('../../assets/sounds/amharic/bread.mp3'), // Placeholder
+    sound: require('../../assets/sounds/amharic/words/Enjera.m4a'), // Placeholder
     category: 'ምግብ'
   },
 ];
