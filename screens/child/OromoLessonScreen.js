@@ -397,56 +397,56 @@ const oromoContent = [
     word: 'Abbaa',
     pronunciation: 'Ab-baa',
     meaning: 'Father',
-    sound: require('../../assets/sounds/oromo/father.mp3'),
+    sound: require('../../assets/sounds/oromo/words/Abbaa.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Haadha',
     pronunciation: 'Haa-dha',
     meaning: 'Mother',
-    sound: require('../../assets/sounds/oromo/mother.mp3'),
+    sound: require('../../assets/sounds/oromo/words/Haadha.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Obboleessa',
     pronunciation: 'Ob-bo-lees-sa',
     meaning: 'Brother',
-    sound: require('../../assets/sounds/oromo/father.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Obboleessa.m4a'), // Placeholder
     category: 'Maatii'
   },
   {
     word: 'Obboleettii',
     pronunciation: 'Ob-bo-leet-tii',
     meaning: 'Sister',
-    sound: require('../../assets/sounds/oromo/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Obboleetti.m4a'), // Placeholder
     category: 'Maatii'
   },
   {
     word: 'Akkaakayuu',
     pronunciation: 'Ak-kaa-ka-yuu',
     meaning: 'Grandfather',
-    sound: require('../../assets/sounds/oromo/father.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Akkaakayuu.m4a'), // Placeholder
     category: 'Maatii'
   },
   {
     word: 'Akkaakoo',
     pronunciation: 'Ak-kaa-koo',
     meaning: 'Grandmother',
-    sound: require('../../assets/sounds/oromo/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Akkaako.m4a'), // Placeholder
     category: 'Maatii'
   },
   {
     word: 'Ilma',
     pronunciation: 'Il-ma',
     meaning: 'Son',
-    sound: require('../../assets/sounds/oromo/father.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Ilma.m4a'), // Placeholder
     category: 'Maatii'
   },
   {
     word: 'Intala',
     pronunciation: 'In-ta-la',
     meaning: 'Daughter',
-    sound: require('../../assets/sounds/oromo/mother.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Intala.m4a'), // Placeholder
     category: 'Maatii'
   },
 
@@ -455,42 +455,42 @@ const oromoContent = [
     word: 'Bishaan',
     pronunciation: 'Bi-shaan',
     meaning: 'Water',
-    sound: require('../../assets/sounds/oromo/water.mp3'),
+    sound: require('../../assets/sounds/oromo/words/Bishasn.m4a'),
     category: 'Jecha Bu\'uraa'
   },
   {
     word: 'Nyaata',
     pronunciation: 'Nya-ata',
     meaning: 'Food',
-    sound: require('../../assets/sounds/oromo/food.mp3'),
+    sound: require('../../assets/sounds/oromo/words/Nyaata.m4a'),
     category: 'Jecha Bu\'uraa'
   },
   {
     word: 'Aduu',
     pronunciation: 'A-duu',
     meaning: 'Sun',
-    sound: require('../../assets/sounds/oromo/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Aduu.m4a'), // Placeholder
     category: 'Jecha Bu\'uraa'
   },
   {
     word: "Ji'a",
     pronunciation: 'Ji-a',
     meaning: 'Moon',
-    sound: require('../../assets/sounds/oromo/food.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Ji\'a.m4a'), // Placeholder
     category: 'Jecha Bu\'uraa'
   },
   {
     word: 'Qilleensa',
     pronunciation: 'Qi-lleen-sa',
     meaning: 'Air',
-    sound: require('../../assets/sounds/oromo/water.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Qilleensa.m4a'), // Placeholder
     category: 'Jecha Bu\'uraa'
   },
   {
     word: 'Lafa',
     pronunciation: 'La-fa',
     meaning: 'Earth',
-    sound: require('../../assets/sounds/oromo/food.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Lafa.m4a'), // Placeholder
     category: 'Jecha Bu\'uraa'
   },
 
@@ -499,28 +499,28 @@ const oromoContent = [
     word: 'Nagaa',
     pronunciation: 'Na-gaa',
     meaning: 'Peace',
-    sound: require('../../assets/sounds/oromo/peace.mp3'),
+    sound: require('../../assets/sounds/oromo/words/Nagaa.m4a'),
     category: 'Nagaa'
   },
   {
     word: 'Akkam',
     pronunciation: 'Ak-kam',
     meaning: 'How are you',
-    sound: require('../../assets/sounds/oromo/peace.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Akkam.m4a'), // Placeholder
     category: 'Nagaa'
   },
   {
     word: 'Nagaatti',
     pronunciation: 'Na-gaa-tti',
     meaning: 'Goodbye',
-    sound: require('../../assets/sounds/oromo/peace.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Nagaatti.m4a'), // Placeholder
     category: 'Nagaa'
   },
   {
     word: 'Galatoomaa',
     pronunciation: 'Ga-la-too-maa',
     meaning: 'Thank you',
-    sound: require('../../assets/sounds/oromo/peace.mp3'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Galatoomaa.m4a'), // Placeholder
     category: 'Nagaa'
   }
 ];
