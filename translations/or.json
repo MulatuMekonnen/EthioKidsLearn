@@ -30,7 +30,7 @@
   "roles": {
     "parent": "Maatii",
     "teacher": "Barsiisaa",
-    "admin": "Bulchaa"
+    "admin": "Bulchinsa"
   },
   "errors": {
     "title": "Dogoggora",
@@ -44,7 +44,9 @@
     "fillAllFields": "Maaloo bakka duwwaa hunda guuti",
     "signupFailed": "Herrega uumuun hin milkoofne. Maaloo irra deebi'i yaali.",
     "loginFailed": "Seenuun hin milkoofne. Maaloo ragaa kee mirkaneessi.",
-    "invalidCredentials": "Maqaa ykn PIN sirrii miti. Maaloo irra deebi'i yaali."
+    "invalidCredentials": "Maqaa ykn PIN sirrii miti. Maaloo irra deebi'i yaali.",
+    "invalidScore": "Qabxiin lakkoofsa 0 hanga 100 ta'uu qaba",
+    "reportFailed": "Gabaasa galchuun hin milkoofne. Maaloo irra deebi'i yaali."
   },
   "common": {
     "cancel": "Haqi",
@@ -166,6 +168,7 @@
   "progressReport": {
     "title": "Gabaasa Ademsota",
     "loading": "Ragaa fe'aa jira...",
+    "loadingStudents": "Barattoota fe'aa jira...",
     "teacherReports": "Gabaasa Barsiisotaa",
     "teacherFeedback": "Yaada barsiisotaa kan",
     "noReports": "Gabaasni barsiisaa gosa barnoota kanaaf hin jiru",
@@ -188,7 +191,7 @@
   "teacher": {
     "dashboard": "Daashboordii Barsiisaa",
     "welcome": "Baga nagaan dhuftan",
-    "inspire": "Har'a sammuu kakaasuu qophii?",
+    "inspire": "Har'a sammuu kakaasuu qophofte?",
     "students": "Barattoota",
     "lessons": "Barnootawwan",
     "completion": "Xumuruu",
@@ -198,6 +201,15 @@
     "studentProgressDesc": "Raawwii barataa ilaaluu fi hordofuu",
     "studentReports": "Gabaasa Barataa",
     "studentReportsDesc": "Gabaasa adda addaa gosa barnootaa irratti hundaa'e uumuu fi bulchuu",
+    "studentSelect": "Gabaasa uumuuf barataa filadhu",
+    "scoreOptional": "Qabxii (Filannoo)",
+    "progressReport": "Gabaasa Ademsota",
+    "submitReport": "Gabaasa Galchi",
+    "previousReports": "Gabaasota Darban",
+    "reportPlaceholder": "Barataan kuni haala gosa barnootaa kana keessatti fooyya'aa jiru irratti yaada bal'aa kenni...",
+    "studentAge": "Umrii",
+    "studentLevel": "Sadarkaa",
+    "parent": "Maatii",
     "createContent": "Qabiyyee Uumi",
     "createContentDesc": "Madda barnootaa haaraa qopheessi",
     "classSchedule": "Tarree Yeroo Kutaa",

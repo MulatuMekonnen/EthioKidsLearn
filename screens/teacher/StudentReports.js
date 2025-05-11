@@ -36,10 +36,10 @@ export default function StudentReports() {
   const [loadingReports, setLoadingReports] = useState(false);
 
   const subjects = [
-    { id: 'math', name: 'Math', color: '#2196F3' },
-    { id: 'english', name: 'English', color: '#4CAF50' },
-    { id: 'amharic', name: 'Amharic', color: '#FF9800' },
-    { id: 'oromo', name: 'Oromo', color: '#9C27B0' }
+    { id: 'math', name: translate('subjects.math.title') || 'Math', color: '#2196F3' },
+    { id: 'english', name: translate('subjects.english.title') || 'English', color: '#4CAF50' },
+    { id: 'amharic', name: translate('subjects.አማርኛ.title') || 'Amharic', color: '#FF9800' },
+    { id: 'oromo', name: translate('subjects.a/oromo.title') || 'Oromo', color: '#9C27B0' }
   ];
 
   useEffect(() => {
@@ -246,12 +246,12 @@ export default function StudentReports() {
 
   const handleSubmitReport = async () => {
     if (!selectedStudent || !selectedSubject) {
-      Alert.alert('Error', 'Please select a student and subject');
+      Alert.alert(translate('errors.title'), translate('teacher.studentSelect'));
       return;
     }
 
     if (!reportText.trim()) {
-      Alert.alert('Error', 'Please enter a report');
+      Alert.alert(translate('errors.title'), translate('errors.fillAllFields'));
       return;
     }
 
@@ -260,7 +260,7 @@ export default function StudentReports() {
     if (scoreValue.trim()) {
       scoreNumber = parseInt(scoreValue.trim(), 10);
       if (isNaN(scoreNumber) || scoreNumber < 0 || scoreNumber > 100) {
-        Alert.alert('Error', 'Score must be a number between 0 and 100');
+        Alert.alert(translate('errors.title'), translate('errors.invalidScore'));
         return;
       }
     }
@@ -306,7 +306,7 @@ export default function StudentReports() {
 
       await AsyncStorage.setItem('teacherReports', JSON.stringify(reports));
 
-      Alert.alert('Success', 'Report submitted successfully');
+      Alert.alert(translate('errors.title') || 'Success', translate('teacher.submitForReview') || 'Report submitted successfully');
       setModalVisible(false);
       setReportText('');
       setScoreValue('');
@@ -315,7 +315,7 @@ export default function StudentReports() {
       await loadPreviousReports(selectedStudent);
     } catch (error) {
       console.error('Error submitting report:', error);
-      Alert.alert('Error', 'Failed to submit report');
+      Alert.alert(translate('errors.title'), translate('errors.reportFailed'));
     } finally {
       setLoading(false);
     }
@@ -348,7 +348,7 @@ export default function StudentReports() {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#FFF" />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{translate('progressReport.teacherReports') || 'Student Reports'}</Text>
+          <Text style={styles.headerTitle}>{translate('teacher.studentreports') || 'Student Reports'}</Text>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.loadingContainer}>
@@ -367,7 +367,7 @@ export default function StudentReports() {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{translate('progressReport.teacherReports') || 'Student Reports'}</Text>
+        <Text style={styles.headerTitle}>{translate('teacher.studentreports') || 'Student Reports'}</Text>
         <TouchableOpacity style={styles.refreshButton} onPress={loadStudents}>
           <Ionicons name="refresh" size={24} color="#FFF" />
         </TouchableOpacity>
@@ -375,7 +375,7 @@ export default function StudentReports() {
 
       <View style={styles.contentContainer}>
         <Text style={[styles.sectionTitle, { color: currentTheme?.text || '#333' }]}>
-          {translate('progressReport.teacherFeedback') || 'Select a Student to Create Report'}
+          {translate('teacher.studentSelect') || 'Select a Student to Create Report'}
         </Text>
 
         {students.length === 0 ? (
@@ -410,11 +410,11 @@ export default function StudentReports() {
                     {item.name}
                   </Text>
                   <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                    Age: {item.age || 'N/A'} • Level: {item.level || 'N/A'}
+                    {translate('teacher.studentAge')}: {item.age || 'N/A'} • {translate('teacher.studentLevel')}: {item.level ? translate(`teacher.levels.${item.level.toLowerCase()}`) || item.level : 'N/A'}
                   </Text>
                   {item.parentName && (
                     <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                      Parent: {item.parentName}
+                      {translate('teacher.parent')}: {item.parentName}
                     </Text>
                   )}
                 </View>
@@ -441,7 +441,7 @@ export default function StudentReports() {
           <View style={[styles.modalContent, { backgroundColor: currentTheme?.card || '#FFF' }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: currentTheme?.text || '#333' }]}>
-                {translate('progressReport.teacherFeedback')} {selectedStudent?.name || 'Student'}
+                {translate('teacher.studentreports')} {selectedStudent?.name || ''}
               </Text>
               <TouchableOpacity
                 style={styles.closeButton}
@@ -458,7 +458,7 @@ export default function StudentReports() {
             <View style={styles.formContainer}>
               <View style={styles.scoreContainer}>
                 <Text style={[styles.scoreLabel, { color: currentTheme?.text || '#333' }]}>
-                  Score (Optional):
+                  {translate('teacher.scoreOptional')}:
                 </Text>
                 <TextInput
                   style={[styles.scoreInput, { 
@@ -475,7 +475,7 @@ export default function StudentReports() {
               </View>
 
               <Text style={[styles.inputLabel, { color: currentTheme?.text || '#333' }]}>
-                Progress Report:
+                {translate('teacher.progressReport')}:
               </Text>
               <TextInput
                 style={[styles.reportInput, { 
@@ -485,7 +485,7 @@ export default function StudentReports() {
                 }]}
                 value={reportText}
                 onChangeText={setReportText}
-                placeholder="Provide detailed feedback about the student's progress in this subject..."
+                placeholder={translate('teacher.reportPlaceholder') || "Provide detailed feedback about the student's progress in this subject..."}
                 placeholderTextColor={currentTheme?.textSecondary || '#666'}
                 multiline
                 textAlignVertical="top"
@@ -499,7 +499,7 @@ export default function StudentReports() {
                 {loading ? (
                   <ActivityIndicator size="small" color="#FFF" />
                 ) : (
-                  <Text style={styles.submitButtonText}>Submit Report</Text>
+                  <Text style={styles.submitButtonText}>{translate('teacher.submitReport')}</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -507,7 +507,7 @@ export default function StudentReports() {
             {/* Previous Reports Section */}
             <View style={styles.previousReportsContainer}>
               <Text style={[styles.previousReportsTitle, { color: currentTheme?.text || '#333' }]}>
-                {translate('progressReport.teacherReports') || 'Previous Reports'}
+                {translate('teacher.previousReports')}
               </Text>
               
               {loadingReports ? (

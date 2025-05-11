@@ -30,10 +30,10 @@ export default function StudentProgress() {
   const [selectedSubject, setSelectedSubject] = useState('all');
 
   const subjects = [
-    { id: 'math', name: 'Math', color: '#2196F3' },
-    { id: 'english', name: 'English', color: '#4CAF50' },
-    { id: 'amharic', name: 'Amharic', color: '#FF9800' },
-    { id: 'oromo', name: 'Oromo', color: '#9C27B0' }
+    { id: 'math', name: translate('subjects.math.title') || 'Math', color: '#2196F3' },
+    { id: 'english', name: translate('subjects.english.title') || 'English', color: '#4CAF50' },
+    { id: 'amharic', name: translate('subjects.አማርኛ.title') || 'Amharic', color: '#FF9800' },
+    { id: 'oromo', name: translate('subjects.a/oromo.title') || 'Oromo', color: '#9C27B0' }
   ];
 
   useEffect(() => {
@@ -595,11 +595,11 @@ export default function StudentProgress() {
                 {student.name}
               </Text>
               <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                Age: {student.age || 'N/A'} • Level: {student.level || 'N/A'}
+                {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level ? translate(`teacher.levels.${student.level.toLowerCase()}`) || student.level : 'N/A'}
               </Text>
               {student.parentName && (
                 <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                  Parent: {student.parentName}
+                  {translate('teacher.parent')}: {student.parentName}
                 </Text>
               )}
             </View>
@@ -634,11 +634,11 @@ export default function StudentProgress() {
                 {student.name}
               </Text>
               <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                Age: {student.age || 'N/A'} • Level: {student.level || 'N/A'}
+                {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level ? translate(`teacher.levels.${student.level.toLowerCase()}`) || student.level : 'N/A'}
               </Text>
               {student.parentName && (
                 <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                  Parent: {student.parentName}
+                  {translate('teacher.parent')}: {student.parentName}
                 </Text>
               )}
             </View>
@@ -669,7 +669,7 @@ export default function StudentProgress() {
               {student.name}
             </Text>
             <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-              Age: {student.age || 'N/A'} • Level: {student.level || 'N/A'}
+              {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level ? translate(`teacher.levels.${student.level.toLowerCase()}`) || student.level : 'N/A'}
             </Text>
           </View>
           <View style={[styles.scoreChip, { backgroundColor: getScoreColor(subjectData.average) }]}>
@@ -834,7 +834,7 @@ export default function StudentProgress() {
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{translate('progressReport.childProgress') || 'Student Progress'}</Text>
+        <Text style={styles.headerTitle}>{translate('teacher.studentprogress') || 'Student Progress'}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.clearButton} onPress={clearCache}>
             <Ionicons name="trash-outline" size={22} color="#FFF" />
