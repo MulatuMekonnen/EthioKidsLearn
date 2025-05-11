@@ -39,14 +39,14 @@ export default function Colors() {
           break;
         case 'blue':
           // Blue sound is missing, use green as a fallback
-          soundFile = require('../../../assets/sounds/colors/green.mp3');
+          soundFile = require('../../../assets/sounds/colors/blue.mp3');
           break;
         case 'green':
           soundFile = require('../../../assets/sounds/colors/green.mp3');
           break;
         case 'yellow':
           // Yellow sound is missing, use red as a fallback
-          soundFile = require('../../../assets/sounds/colors/red.mp3');
+          soundFile = require('../../../assets/sounds/colors/yellow.mp3');
           break;
         case 'black':
           soundFile = require('../../../assets/sounds/colors/Black .mp3'); // Note the space
@@ -72,12 +72,7 @@ export default function Colors() {
         case 'gold':
           soundFile = require('../../../assets/sounds/colors/gold .mp3'); // Note the space
           break;
-        case 'celebration':
-          // Use correct.mp3 as the celebration sound
-          soundFile = require('../../../assets/sounds/correct.mp3');
-          break;
-        default:
-          soundFile = require('../../../assets/sounds/colors/red.mp3');
+        
       }
       
       if (sound) {
