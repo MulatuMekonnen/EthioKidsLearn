@@ -595,7 +595,7 @@ export default function StudentProgress() {
                 {student.name}
               </Text>
               <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level || 'N/A'}
+                {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level ? translate(`teacher.levels.${student.level.toLowerCase()}`) || student.level : 'N/A'}
               </Text>
               {student.parentName && (
                 <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
@@ -634,7 +634,7 @@ export default function StudentProgress() {
                 {student.name}
               </Text>
               <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level || 'N/A'}
+                {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level ? translate(`teacher.levels.${student.level.toLowerCase()}`) || student.level : 'N/A'}
               </Text>
               {student.parentName && (
                 <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
@@ -669,7 +669,7 @@ export default function StudentProgress() {
               {student.name}
             </Text>
             <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-              {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level || 'N/A'}
+              {translate('teacher.studentAge')}: {student.age || 'N/A'} • {translate('teacher.studentLevel')}: {student.level ? translate(`teacher.levels.${student.level.toLowerCase()}`) || student.level : 'N/A'}
             </Text>
           </View>
           <View style={[styles.scoreChip, { backgroundColor: getScoreColor(subjectData.average) }]}>

@@ -410,7 +410,7 @@ export default function StudentReports() {
                     {item.name}
                   </Text>
                   <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
-                    {translate('teacher.studentAge')}: {item.age || 'N/A'} • {translate('teacher.studentLevel')}: {item.level || 'N/A'}
+                    {translate('teacher.studentAge')}: {item.age || 'N/A'} • {translate('teacher.studentLevel')}: {item.level ? translate(`teacher.levels.${item.level.toLowerCase()}`) || item.level : 'N/A'}
                   </Text>
                   {item.parentName && (
                     <Text style={[styles.studentDetail, { color: currentTheme?.textSecondary || '#666' }]}>
