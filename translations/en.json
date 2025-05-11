@@ -226,7 +226,12 @@
       "image": "Image"
     },
     "refreshData": "Refresh Data",
-    "dataNotAvailable": "No data available. Add students and lessons to see statistics."
+    "dataNotAvailable": "No data available. Add students and lessons to see statistics.",
+    "summary": "Dashboard Summary",
+    "activeStudents": "Active Students",
+    "totalLessons": "Total Lessons",
+    "completionRate": "Completion Rate",
+    "overallProgress": "Overall Progress"
   },
   "subjects": {
     "math": {
@@ -274,6 +279,8 @@
     "multiplicationDesc": "Learn multiplication tables and solve fun multiplication puzzles.",
     "division": "Division",
     "divisionDesc": "Understand division concepts with visual aids and simple problems.",
+    "countGame": "Counting Game",
+    "countGameDesc": "Count animals and learn numbers in a fun interactive way with sounds.",
     "mathQuiz": "Math Quiz",
     "mathQuizDesc": "Test your math skills with quizzes covering all the topics you've learned.",
     "mathContent": "Math Content",
@@ -296,22 +303,19 @@
     "loading": "Loading data...",
     "loadingStudents": "Loading students...",
     "teacherReports": "Teacher Reports",
-    "teacherFeedback": "Feedback from teachers for",
-    "noReports": "No teacher reports available for this subject",
+    "teacherFeedback": "Teacher feedback for",
+    "noReports": "No teacher reports for this subject",
     "overview": "Overview",
     "minutes": "Minutes",
     "quizzes": "Quizzes",
     "average": "Average",
     "testScores": "Test Scores",
-    "noScores": "No test scores available for",
+    "noScores": "No test scores for",
     "subjectDistribution": "Subject Distribution",
     "quizCompletion": "Quiz completion by subject",
     "weeklyActivity": "Weekly Activity",
     "minutesLearning": "Minutes spent learning",
-    "childProgress": "Child Progress",
-    "performanceByChild": "Performance by child",
-    "noChildData": "No child data available",
-    "completed": "Completed",
-    "noData": "No quiz data available"
+    "dataSuccess": "Data loaded successfully",
+    "noData": "No data available"
   }
 } 

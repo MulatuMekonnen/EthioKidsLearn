@@ -46,6 +46,7 @@ import Addition from '../screens/child/math/Addition';
 import Subtraction from '../screens/child/math/Subtraction';
 import Multiplication from '../screens/child/math/Multiplication';
 import Division from '../screens/child/math/Division';
+import CountGame from '../screens/child/math/CountGame';
 import MathQuiz from '../screens/child/math/MathQuiz';
 import EnglishLessons from '../screens/child/EnglishLessons';
 import Alphabets from '../screens/child/english/Alphabets';
@@ -136,6 +137,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Subtraction" component={Subtraction} />
                 <Stack.Screen name="Multiplication" component={Multiplication} />
                 <Stack.Screen name="Division" component={Division} />
+                <Stack.Screen name="CountGame" component={CountGame} />
                 <Stack.Screen name="MathQuiz" component={MathQuiz} />
                 <Stack.Screen name="EnglishLessons" component={EnglishLessons} />
                 <Stack.Screen name="Alphabets" component={Alphabets} />
@@ -171,6 +173,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Subtraction" component={Subtraction} />
                 <Stack.Screen name="Multiplication" component={Multiplication} />
                 <Stack.Screen name="Division" component={Division} />
+                <Stack.Screen name="CountGame" component={CountGame} />
                 <Stack.Screen name="MathQuiz" component={MathQuiz} />
                 <Stack.Screen name="EnglishLessons" component={EnglishLessons} />
                 <Stack.Screen name="Alphabets" component={Alphabets} />
@@ -199,6 +202,7 @@ export default function AppNavigator() {
                 <Stack.Screen name="Subtraction" component={Subtraction} />
                 <Stack.Screen name="Multiplication" component={Multiplication} />
                 <Stack.Screen name="Division" component={Division} />
+                <Stack.Screen name="CountGame" component={CountGame} />
                 <Stack.Screen name="MathQuiz" component={MathQuiz} />
                 <Stack.Screen name="EnglishLessons" component={EnglishLessons} />
                 <Stack.Screen name="Alphabets" component={Alphabets} />

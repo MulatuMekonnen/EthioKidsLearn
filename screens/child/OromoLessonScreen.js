@@ -411,42 +411,42 @@ const oromoContent = [
     word: 'Obboleessa',
     pronunciation: 'Ob-bo-lees-sa',
     meaning: 'Brother',
-    sound: require('../../assets/sounds/oromo/words/Obboleessa.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Obboleessa.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Obboleettii',
     pronunciation: 'Ob-bo-leet-tii',
     meaning: 'Sister',
-    sound: require('../../assets/sounds/oromo/words/Obboleetti.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Obboleetti.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Akkaakayuu',
     pronunciation: 'Ak-kaa-ka-yuu',
     meaning: 'Grandfather',
-    sound: require('../../assets/sounds/oromo/words/Akkaakayuu.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Akkaakayuu.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Akkaakoo',
     pronunciation: 'Ak-kaa-koo',
     meaning: 'Grandmother',
-    sound: require('../../assets/sounds/oromo/words/Akkaako.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Akkaako.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Ilma',
     pronunciation: 'Il-ma',
     meaning: 'Son',
-    sound: require('../../assets/sounds/oromo/words/Ilma.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Ilma.m4a'),
     category: 'Maatii'
   },
   {
     word: 'Intala',
     pronunciation: 'In-ta-la',
     meaning: 'Daughter',
-    sound: require('../../assets/sounds/oromo/words/Intala.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Intala.m4a'),
     category: 'Maatii'
   },
 
@@ -469,28 +469,28 @@ const oromoContent = [
     word: 'Aduu',
     pronunciation: 'A-duu',
     meaning: 'Sun',
-    sound: require('../../assets/sounds/oromo/words/Aduu.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Aduu.m4a'),
     category: 'Jecha Bu\'uraa'
   },
   {
     word: "Ji'a",
     pronunciation: 'Ji-a',
     meaning: 'Moon',
-    sound: require('../../assets/sounds/oromo/words/Ji\'a.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Ji\'a.m4a'),
     category: 'Jecha Bu\'uraa'
   },
   {
     word: 'Qilleensa',
     pronunciation: 'Qi-lleen-sa',
     meaning: 'Air',
-    sound: require('../../assets/sounds/oromo/words/Qilleensa.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Qilleensa.m4a'),
     category: 'Jecha Bu\'uraa'
   },
   {
     word: 'Lafa',
     pronunciation: 'La-fa',
     meaning: 'Earth',
-    sound: require('../../assets/sounds/oromo/words/Lafa.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Lafa.m4a'),
     category: 'Jecha Bu\'uraa'
   },
 
@@ -506,21 +506,21 @@ const oromoContent = [
     word: 'Akkam',
     pronunciation: 'Ak-kam',
     meaning: 'How are you',
-    sound: require('../../assets/sounds/oromo/words/Akkam.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Akkam.m4a'),
     category: 'Nagaa'
   },
   {
     word: 'Nagaatti',
     pronunciation: 'Na-gaa-tti',
     meaning: 'Goodbye',
-    sound: require('../../assets/sounds/oromo/words/Nagaatti.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Nagaatti.m4a'),
     category: 'Nagaa'
   },
   {
     word: 'Galatoomaa',
     pronunciation: 'Ga-la-too-maa',
     meaning: 'Thank you',
-    sound: require('../../assets/sounds/oromo/words/Galatoomaa.m4a'), // Placeholder
+    sound: require('../../assets/sounds/oromo/words/Galatoomaa.m4a'),
     category: 'Nagaa'
   }
 ];
@@ -545,13 +545,15 @@ const quizQuestions = {
       question: "Which letter makes the 'ba' sound?",
       options: ["A", "B", "C", "D"],
       correctAnswer: "B",
-      image: require('../../assets/images/ball.png') // Reusing existing image
+      soundHint: require('../../assets/sounds/oromo/qube/B.m4a'),
+      image: require('../../assets/images/ball.png')
     },
     {
       id: 2,
       question: "Match the letter with its example: 'Buna'",
       options: ["A", "B", "C", "D"],
       correctAnswer: "B",
+      soundHint: require('../../assets/sounds/oromo/qube/B.m4a'),
       image: require('../../assets/images/ball.png')
     },
     {
@@ -559,6 +561,7 @@ const quizQuestions = {
       question: "Which letter makes the 'aa' sound?",
       options: ["C", "B", "A", "D"],
       correctAnswer: "A",
+      soundHint: require('../../assets/sounds/oromo/qube/A.m4a'),
       image: require('../../assets/images/ball.png')
     },
     {
@@ -566,12 +569,13 @@ const quizQuestions = {
       question: "Which letter means 'Culture' in its example?",
       options: ["A", "B", "C", "D"],
       correctAnswer: "A",
+      soundHint: require('../../assets/sounds/oromo/qube/A.m4a'),
       image: require('../../assets/images/ball.png')
     },
     {
       id: 5,
       question: "What letter is this?",
-      soundHint: require('../../assets/sounds/oromo/c.mp3'),
+      soundHint: require('../../assets/sounds/oromo/qube/C.m4a'),
       options: ["A", "B", "C", "D"],
       correctAnswer: "C",
       image: require('../../assets/images/ball.png')
@@ -651,7 +655,7 @@ const quizQuestions = {
     {
       id: 5,
       question: "Who is this family member?",
-      soundHint: require('../../assets/sounds/oromo/father.mp3'),
+      soundHint: require('../../assets/sounds/oromo/words/Abbaa.m4a'),
       options: ["Sister", "Father", "Brother", "Mother"],
       correctAnswer: "Father",
       image: require('../../assets/images/teacher.png')
@@ -749,6 +753,7 @@ export default function OromoLessonScreen() {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [score, setScore] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [finalAnswers, setFinalAnswers] = useState([]);
   const [quizComplete, setQuizComplete] = useState(false);
   const [showResults, setShowResults] = useState(false);
   
@@ -799,6 +804,7 @@ export default function OromoLessonScreen() {
     setCurrentQuestionIndex(0);
     setScore(0);
     setAnswers([]);
+    setFinalAnswers([]);
     setQuizComplete(false);
     setShowResults(false);
     setShowQuiz(true);
@@ -823,12 +829,15 @@ export default function OromoLessonScreen() {
     }
     
     // Save answer for results
-    setAnswers([...answers, {
+    const newAnswer = {
       question: currentQuestion.question,
       selectedAnswer,
       correctAnswer: currentQuestion.correctAnswer,
       isCorrect
-    }]);
+    };
+    
+    const updatedAnswers = [...answers, newAnswer];
+    setAnswers(updatedAnswers);
     
     // Reset selected answer
     setSelectedAnswer(null);
@@ -837,14 +846,16 @@ export default function OromoLessonScreen() {
     if (currentQuestionIndex < currentQuizQuestions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      finishQuiz();
+      // Pass the updated answers to finishQuiz to ensure all answers are included
+      finishQuiz(updatedAnswers);
     }
   };
   
   // Finish quiz and save results
-  const finishQuiz = async () => {
+  const finishQuiz = async (finalAnswers = answers) => {
     setQuizComplete(true);
     setShowResults(true);
+    setFinalAnswers(finalAnswers);
     
     try {
       // Get child ID from navigation params or use default
@@ -855,6 +866,9 @@ export default function OromoLessonScreen() {
       const existingResultsJson = await AsyncStorage.getItem('quizResults');
       const existingResults = existingResultsJson ? JSON.parse(existingResultsJson) : [];
       
+      // Calculate correct score from the final answers array to ensure accuracy
+      const correctScore = finalAnswers.filter(answer => answer.isCorrect).length;
+      
       // Add new result
       const newResult = {
         id: Date.now().toString(),
@@ -862,9 +876,9 @@ export default function OromoLessonScreen() {
         childName, // Also save the child's name
         category: quizCategory,
         date: new Date().toISOString(),
-        score,
+        score: correctScore,
         totalQuestions: currentQuizQuestions.length,
-        answers
+        answers: finalAnswers
       };
       
       // Save updated results
@@ -873,7 +887,7 @@ export default function OromoLessonScreen() {
       // Alert success
       Alert.alert(
         'Quiz Complete!',
-        `Your score: ${score}/${currentQuizQuestions.length}\n\nResults saved for your parents to view.`,
+        `Your score: ${correctScore}/${currentQuizQuestions.length}\n\nResults saved for your parents to view.`,
         [{ text: 'OK' }]
       );
     } catch (error) {
@@ -893,13 +907,16 @@ export default function OromoLessonScreen() {
     
     if (showResults) {
       // Show results screen
+      // Calculate correct score from answers array to ensure accuracy
+      const correctScore = finalAnswers.filter(answer => answer.isCorrect).length;
+      
       return (
         <View style={styles.quizContainer}>
           <Text style={styles.quizTitle}>Quiz Results</Text>
-          <Text style={styles.scoreText}>Your Score: {score}/{currentQuizQuestions.length}</Text>
+          <Text style={styles.scoreText}>Your Score: {correctScore}/{currentQuizQuestions.length}</Text>
           
           <View style={styles.resultsContainer}>
-            {answers.map((answer, index) => (
+            {finalAnswers.map((answer, index) => (
               <View key={index} style={styles.resultItem}>
                 <Text style={styles.resultQuestion}>{index + 1}. {answer.question}</Text>
                 <View style={styles.resultAnswers}>

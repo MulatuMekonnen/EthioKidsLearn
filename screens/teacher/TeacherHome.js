@@ -83,300 +83,287 @@ export default function TeacherHome({ navigation }) {
     try {
       // Fetch students count from Firebase - try multiple approaches to get the most accurate count
       let studentsCount = 0;
-      
-      // 1. First approach: Check direct children collection
-      try {
-        const childrenCollection = collection(db, 'children');
-        const childrenSnapshot = await getDocs(childrenCollection);
-        studentsCount = childrenSnapshot.size;
-        console.log('Found students in children collection:', studentsCount);
-      } catch (error) {
-        console.log('No direct children collection found, trying alternatives');
-      }
-      
-      // 2. Second approach: Check users with role 'child'
-      if (studentsCount === 0) {
-        try {
-          const childrenQuery = query(collection(db, 'users'), where('role', '==', 'child'));
-          const childrenSnapshot = await getDocs(childrenQuery);
-          studentsCount = childrenSnapshot.size;
-          console.log('Found students in users collection with role=child:', studentsCount);
-        } catch (error) {
-          console.log('Error checking child users, trying next approach');
-        }
-      }
-      
-      // 3. Third approach: Check lesson_progress collection for unique childIds
-      if (studentsCount === 0) {
-        try {
-          const lessonProgressCollection = collection(db, 'lesson_progress');
-          const lessonProgressSnapshot = await getDocs(lessonProgressCollection);
-          
-          // Extract unique childIds
-          const uniqueChildIds = new Set();
-          lessonProgressSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.childId) {
-              uniqueChildIds.add(data.childId);
-            }
-          });
-          
-          studentsCount = uniqueChildIds.size;
-          console.log('Found unique students in lesson_progress:', studentsCount);
-        } catch (error) {
-          console.log('Error checking lesson_progress, trying next approach');
-        }
-      }
-      
-      // 4. Fourth approach: Check quiz_results collection for unique childIds
-      if (studentsCount === 0) {
-        try {
-          const quizResultsCollection = collection(db, 'quiz_results');
-          const quizResultsSnapshot = await getDocs(quizResultsCollection);
-          
-          // Extract unique childIds
-          const uniqueChildIds = new Set();
-          quizResultsSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.childId) {
-              uniqueChildIds.add(data.childId);
-            }
-          });
-          
-          studentsCount = uniqueChildIds.size;
-          console.log('Found unique students in quiz_results:', studentsCount);
-        } catch (error) {
-          console.log('Error checking quiz_results');
-        }
-      }
-      
-      // 5. Fifth approach: Check AsyncStorage for children data
-      if (studentsCount === 0) {
-        try {
-          const childrenJson = await AsyncStorage.getItem('children');
-          if (childrenJson) {
-            const childrenData = JSON.parse(childrenJson);
-            studentsCount = childrenData.filter(child => child && child.name).length;
-            console.log('Found students in AsyncStorage:', studentsCount);
-          }
-        } catch (error) {
-          console.log('Error checking AsyncStorage for children');
-        }
-      }
-      
-      // Fetch lessons count
       let lessonsCount = 0;
-      let mathLessons = 0;
-      let englishLessons = 0;
-      let amharicLessons = 0;
-      let oromoLessons = 0;
-      let scienceLessons = 0;
-      
-      // Try to get lessons count from various collections if they exist
-      try {
-        // Math lessons
-        const mathCollection = collection(db, 'lessons_math');
-        const mathSnapshot = await getDocs(mathCollection);
-        mathLessons = mathSnapshot.size;
-        
-        // English lessons
-        const englishCollection = collection(db, 'lessons_english');
-        const englishSnapshot = await getDocs(englishCollection);
-        englishLessons = englishSnapshot.size;
-        
-        // Amharic lessons
-        const amharicCollection = collection(db, 'lessons_amharic');
-        const amharicSnapshot = await getDocs(amharicCollection);
-        amharicLessons = amharicSnapshot.size;
-        
-        // Oromo lessons
-        const oromoCollection = collection(db, 'lessons_oromo');
-        const oromoSnapshot = await getDocs(oromoCollection);
-        oromoLessons = oromoSnapshot.size;
-        
-        // Science lessons
-        const scienceCollection = collection(db, 'lessons_science');
-        const scienceSnapshot = await getDocs(scienceCollection);
-        scienceLessons = scienceSnapshot.size;
-        
-        // Sum all lessons
-        lessonsCount = mathLessons + englishLessons + amharicLessons + oromoLessons + scienceLessons;
-        console.log('Found subject-specific lessons:', lessonsCount);
-      } catch (e) {
-        console.log('Error fetching subject-specific lesson collections');
-      }
-      
-      // If no lessons found, try generic lessons collection
-      if (lessonsCount === 0) {
-        try {
-          const lessonsCollection = collection(db, 'lessons');
-          const lessonsSnapshot = await getDocs(lessonsCollection);
-          lessonsCount = lessonsSnapshot.size;
-          console.log('Found lessons in generic collection:', lessonsCount);
-        } catch (e) {
-          console.log('No lessons collection found');
-        }
-      }
-      
-      // Try lesson_content collection if still no lessons
-      if (lessonsCount === 0) {
-        try {
-          const lessonContentCollection = collection(db, 'lesson_content');
-          const lessonContentSnapshot = await getDocs(lessonContentCollection);
-          lessonsCount = lessonContentSnapshot.size;
-          console.log('Found lessons in lesson_content collection:', lessonsCount);
-        } catch (e) {
-          console.log('No lesson_content collection found');
-        }
-      }
-      
-      // Try to count activities as lessons if still no lessons found
-      if (lessonsCount === 0) {
-        try {
-          const activitiesCollection = collection(db, 'activities');
-          const activitiesSnapshot = await getDocs(activitiesCollection);
-          lessonsCount = activitiesSnapshot.size;
-          console.log('Found activities that count as lessons:', lessonsCount);
-        } catch (e) {
-          console.log('No activities collection found');
-        }
-      }
-      
-      // Calculate completion rate
       let completionRate = 0;
+      let totalLessonsCompleted = 0;
+      let totalLessonsAvailable = 0;
+      let dataSource = "Unknown";
       
-      // First try to calculate from lesson_progress collection
-      if (studentsCount > 0) {
-        try {
-          // Get all lesson progress data
-          const lessonProgressCollection = collection(db, 'lesson_progress');
-          const lessonProgressSnapshot = await getDocs(lessonProgressCollection);
+      // First check if we have cached progress data from StudentProgress screen
+      try {
+        const cachedProgress = await AsyncStorage.getItem('student_progress_cache');
+        const cachedStudents = await AsyncStorage.getItem('student_list_cache');
+        
+        if (cachedProgress && cachedStudents) {
+          const progressData = JSON.parse(cachedProgress);
+          const studentsList = JSON.parse(cachedStudents);
+          dataSource = "Cache";
           
-          const studentProgress = {};
+          // Count students with actual progress data
+          studentsCount = studentsList.length;
           
-          // Group by student
-          lessonProgressSnapshot.forEach(doc => {
-            const data = doc.data();
-            if (data.childId) {
-              if (!studentProgress[data.childId]) {
-                studentProgress[data.childId] = { completed: 0, total: 0 };
+          // Count lessons and completion data
+          Object.values(progressData).forEach(student => {
+            // Check each subject for lesson data
+            ['math', 'english', 'amharic', 'oromo'].forEach(subject => {
+              if (student[subject] && student[subject].lessons) {
+                const lessonData = student[subject].lessons;
+                totalLessonsAvailable += lessonData.total;
+                totalLessonsCompleted += lessonData.completed;
               }
-              studentProgress[data.childId].total++;
-              if (data.isCompleted) {
-                studentProgress[data.childId].completed++;
-              }
-            }
+            });
           });
           
-          // Calculate average completion percentage across students
-          if (Object.keys(studentProgress).length > 0) {
-            let totalCompletionPercent = 0;
-            let studentsWithProgress = 0;
+          lessonsCount = Math.max(
+            ...Object.values(progressData).map(student => 
+              student.all.lessons ? student.all.lessons.total : 0
+            )
+          );
+          
+          if (totalLessonsAvailable > 0) {
+            completionRate = Math.round((totalLessonsCompleted / totalLessonsAvailable) * 100);
+          }
+        }
+      } catch (cacheError) {
+        console.log('Error reading from cache, falling back to Firebase:', cacheError);
+      }
+      
+      // If no cached data, try Firebase directly
+      if (studentsCount === 0) {
+        dataSource = "Firebase";
+        
+        // 1. First approach: Check direct children collection
+        try {
+          const childrenCollection = collection(db, 'children');
+          const childrenSnapshot = await getDocs(childrenCollection);
+          studentsCount = childrenSnapshot.size;
+          console.log('Found students in children collection:', studentsCount);
+        } catch (error) {
+          console.log('No direct children collection found, trying alternatives');
+        }
+        
+        // 2. Second approach: Check users with role 'child'
+        if (studentsCount === 0) {
+          try {
+            const childrenQuery = query(collection(db, 'users'), where('role', '==', 'child'));
+            const childrenSnapshot = await getDocs(childrenQuery);
+            studentsCount = childrenSnapshot.size;
+            console.log('Found students in users collection with role=child:', studentsCount);
+          } catch (error) {
+            console.log('Error checking child users, trying next approach');
+          }
+        }
+        
+        // 3. Third approach: Check lesson_progress collection for unique childIds
+        if (studentsCount === 0) {
+          try {
+            const lessonProgressCollection = collection(db, 'lesson_progress');
+            const lessonProgressSnapshot = await getDocs(lessonProgressCollection);
             
-            Object.values(studentProgress).forEach(progress => {
-              if (progress.total > 0) {
-                studentsWithProgress++;
-                totalCompletionPercent += (progress.completed / progress.total) * 100;
+            // Extract unique childIds
+            const uniqueChildIds = new Set();
+            lessonProgressSnapshot.forEach(doc => {
+              const data = doc.data();
+              if (data.childId) {
+                uniqueChildIds.add(data.childId);
               }
             });
             
-            if (studentsWithProgress > 0) {
-              completionRate = Math.round(totalCompletionPercent / studentsWithProgress);
-              console.log('Calculated completion rate from lesson_progress:', completionRate);
-            }
+            studentsCount = uniqueChildIds.size;
+            console.log('Found unique students in lesson_progress:', studentsCount);
+          } catch (error) {
+            console.log('Error checking lesson_progress, trying next approach');
           }
-        } catch (e) {
-          console.log('Error calculating completion from lesson_progress');
         }
-      }
-      
-      // If no completion rate calculated yet, try quiz results
-      if (completionRate === 0) {
-        try {
-          // First try Firebase collection
-          const quizResultsCollection = collection(db, 'quiz_results');
-          const quizResultsSnapshot = await getDocs(quizResultsCollection);
-          
-          if (!quizResultsSnapshot.empty) {
-            const quizResults = [];
+        
+        // 4. Fourth approach: Check quiz_results collection for unique childIds
+        if (studentsCount === 0) {
+          try {
+            const quizResultsCollection = collection(db, 'quiz_results');
+            const quizResultsSnapshot = await getDocs(quizResultsCollection);
+            
+            // Extract unique childIds
+            const uniqueChildIds = new Set();
             quizResultsSnapshot.forEach(doc => {
-              quizResults.push(doc.data());
+              const data = doc.data();
+              if (data.childId) {
+                uniqueChildIds.add(data.childId);
+              }
             });
             
-            // Calculate completion rate based on unique students who took quizzes
-            if (studentsCount > 0 && quizResults.length > 0) {
-              const uniqueStudents = new Set(quizResults.map(result => result.childId)).size;
-              // Calculate completion as a percentage of students who attempted at least one quiz
-              completionRate = Math.round((uniqueStudents / studentsCount) * 100);
-              console.log('Calculated completion rate from Firebase quiz_results:', completionRate);
-            }
+            studentsCount = uniqueChildIds.size;
+            console.log('Found unique students in quiz_results:', studentsCount);
+          } catch (error) {
+            console.log('Error checking quiz_results');
           }
-        } catch (e) {
-          console.log('Error fetching quiz results from Firebase');
         }
-      }
-      
-      // If still no completion rate, try AsyncStorage
-      if (completionRate === 0) {
+        
+        // 5. Fifth approach: Check AsyncStorage for children data
+        if (studentsCount === 0) {
+          try {
+            const childrenJson = await AsyncStorage.getItem('children');
+            if (childrenJson) {
+              const childrenData = JSON.parse(childrenJson);
+              studentsCount = childrenData.filter(child => child && child.name).length;
+              console.log('Found students in AsyncStorage:', studentsCount);
+            }
+          } catch (error) {
+            console.log('Error checking AsyncStorage for children');
+          }
+        }
+        
+        // 6. Check AsyncStorage for quiz results
         try {
           const quizResultsJson = await AsyncStorage.getItem('quizResults');
           if (quizResultsJson) {
             const quizResults = JSON.parse(quizResultsJson);
             
-            // Calculate completion rate based on unique students who took quizzes
-            if (studentsCount > 0 && quizResults.length > 0) {
-              const uniqueStudents = new Set(quizResults.map(result => result.childId)).size;
-              // Calculate completion as a percentage of students who attempted at least one quiz
-              completionRate = Math.round((uniqueStudents / studentsCount) * 100);
-              console.log('Calculated completion rate from AsyncStorage quiz results:', completionRate);
-            } else {
-              // Fallback to default value
-              completionRate = 75;
+            // Count unique childIds
+            const uniqueChildIds = new Set();
+            quizResults.forEach(result => {
+              if (result.childId) {
+                uniqueChildIds.add(result.childId);
+              }
+            });
+            
+            if (uniqueChildIds.size > studentsCount) {
+              studentsCount = uniqueChildIds.size;
+              console.log('Found more students in quiz results:', studentsCount);
             }
-          } else {
-            // No quiz results found, use default value
-            completionRate = 75;
           }
-        } catch (e) {
-          console.error('Error fetching quiz results:', e);
-          completionRate = 75; // Default fallback
+        } catch (error) {
+          console.log('Error checking AsyncStorage for quiz results');
+        }
+        
+        // Fetch lessons count
+        try {
+          // Try to get lesson count from lesson_progress collection
+          const lessonProgressCollection = collection(db, 'lesson_progress');
+          const lessonProgressSnapshot = await getDocs(lessonProgressCollection);
+          
+          // Get total lessons and completed lessons
+          const lessonData = {
+            unique: new Set(),
+            completed: 0,
+            total: 0
+          };
+          
+          lessonProgressSnapshot.forEach(doc => {
+            const data = doc.data();
+            if (data.lessonId) {
+              lessonData.unique.add(data.lessonId);
+              lessonData.total++;
+              if (data.isCompleted) {
+                lessonData.completed++;
+              }
+            }
+          });
+          
+          lessonsCount = lessonData.unique.size || lessonProgressSnapshot.size;
+          totalLessonsAvailable = lessonData.total;
+          totalLessonsCompleted = lessonData.completed;
+          console.log('Found lessons in lesson_progress:', lessonsCount);
+        } catch (error) {
+          console.log('Error checking lesson_progress for lesson count');
+        }
+        
+        // If no lessons found, try generic lessons collection
+        if (lessonsCount === 0) {
+          try {
+            const lessonsCollection = collection(db, 'lessons');
+            const lessonsSnapshot = await getDocs(lessonsCollection);
+            lessonsCount = lessonsSnapshot.size;
+            
+            // Count completed lessons
+            let completed = 0;
+            lessonsSnapshot.forEach(doc => {
+              const data = doc.data();
+              if (data.completed) {
+                completed++;
+              }
+            });
+            
+            totalLessonsAvailable = lessonsCount;
+            totalLessonsCompleted = completed;
+            console.log('Found lessons in generic collection:', lessonsCount);
+          } catch (error) {
+            console.log('No lessons collection found');
+          }
+        }
+        
+        // Try lesson_content collection if still no lessons
+        if (lessonsCount === 0) {
+          try {
+            const lessonContentCollection = collection(db, 'lesson_content');
+            const lessonContentSnapshot = await getDocs(lessonContentCollection);
+            lessonsCount = lessonContentSnapshot.size;
+            console.log('Found lessons in lesson_content collection:', lessonsCount);
+          } catch (error) {
+            console.log('No lesson_content collection found');
+          }
+        }
+        
+        // If still no lessons found, check AsyncStorage
+        if (lessonsCount === 0) {
+          try {
+            const cachedProgress = await AsyncStorage.getItem('student_progress_cache');
+            if (cachedProgress) {
+              const progressData = JSON.parse(cachedProgress);
+              
+              // Find the max number of lessons across all students
+              Object.values(progressData).forEach(student => {
+                // Check each subject for lesson data
+                ['math', 'english', 'amharic', 'oromo'].forEach(subject => {
+                  if (student[subject] && student[subject].lessons) {
+                    const lessonData = student[subject].lessons;
+                    totalLessonsAvailable += lessonData.total;
+                    totalLessonsCompleted += lessonData.completed;
+                  }
+                });
+              });
+              
+              lessonsCount = Math.max(
+                ...Object.values(progressData).map(student => 
+                  student.all.lessons ? student.all.lessons.total : 0
+                )
+              );
+            }
+          } catch (error) {
+            console.log('Error checking AsyncStorage for lesson data');
+          }
+        }
+        
+        // Calculate completion rate
+        if (totalLessonsAvailable > 0) {
+          completionRate = Math.round((totalLessonsCompleted / totalLessonsAvailable) * 100);
         }
       }
       
-      // Count total number of screens/activities in the app as a backup for lessons count
-      if (lessonsCount === 0) {
-        // This is a rough estimate based on the app's structure
-        lessonsCount = 14; // Default if no lessons found
-      }
-      
-      // At the end of the function, update data status
-      const hasAnyData = studentsCount > 0 || lessonsCount > 0 || completionRate > 0;
-      
-      setDataStatus({
-        hasData: hasAnyData,
-        message: hasAnyData ? 'Data loaded successfully' : 'No data available. Add students and lessons to see statistics.'
-      });
-      
-      // Update dashboard data state with real or fallback values
+      // Update dashboard data state
       setDashboardData({
-        studentsCount: studentsCount || 0, // Don't use fallback value
-        lessonsCount: lessonsCount || 0,   // Don't use fallback value
-        completionRate: completionRate || 0, // Don't use fallback value
+        studentsCount,
+        lessonsCount,
+        completionRate,
         isLoading: false
       });
+      
+      // Update data status
+      setDataStatus({
+        hasData: studentsCount > 0 || lessonsCount > 0 || completionRate > 0,
+        message: `Data source: ${dataSource} | Last updated: ${new Date().toLocaleTimeString()}`
+      });
+      
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
-      // Use empty values if fetch fails completely
       setDashboardData({
         studentsCount: 0,
         lessonsCount: 0,
         completionRate: 0,
         isLoading: false
       });
-      
       setDataStatus({
         hasData: false,
-        message: 'Error loading data. Please try again.'
+        message: 'Error loading data'
       });
     }
   };
@@ -737,6 +724,13 @@ export default function TeacherHome({ navigation }) {
     fetchDashboardData();
   };
 
+  // Function to get color based on completion percentage
+  const getProgressColor = (percentage) => {
+    if (percentage >= 80) return '#34A853'; // Green for high completion
+    if (percentage >= 50) return '#FBBC05'; // Yellow for medium completion
+    return '#EA4335'; // Red for low completion
+  };
+
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: currentTheme.background }]}>
       <StatusBar barStyle="light-content" backgroundColor={currentTheme.primary} />
@@ -848,21 +842,102 @@ export default function TeacherHome({ navigation }) {
               { color: dataStatus.hasData ? currentTheme.success : currentTheme.textSecondary }
             ]}>
               {dataStatus.hasData 
-                ? translate('progressReport.loading') || 'Data loaded successfully'
-                : translate('teacher.dataNotAvailable')}
+                ? translate('progressReport.dataSuccess') || 'Data loaded successfully'
+                : translate('teacher.dataNotAvailable') || 'No data available'}
             </Text>
+            {dataStatus.message && (
+              <Text style={[styles.dataSourceText, { color: currentTheme.textSecondary }]}>
+                {dataStatus.message}
+              </Text>
+            )}
             {!dataStatus.hasData && (
               <TouchableOpacity 
                 style={[styles.refreshDataButton, { backgroundColor: currentTheme.primary }]}
                 onPress={refreshDashboard}
               >
-                <Text style={styles.refreshDataButtonText}>{translate('teacher.refreshData')}</Text>
+                <Text style={styles.refreshDataButtonText}>{translate('teacher.refreshData') || 'Refresh Data'}</Text>
               </TouchableOpacity>
             )}
           </View>
         )}
         
-        {/* Menu Items */}
+        {/* Dashboard Summary */}
+        {dataStatus.hasData && !dashboardData.isLoading && (
+          <View style={[styles.dashboardSummary, { backgroundColor: currentTheme.card }]}>
+            <Text style={[styles.summaryTitle, { color: currentTheme.text }]}>
+              {translate('teacher.summary') || 'Dashboard Summary'}
+            </Text>
+            
+            <View style={styles.summaryContent}>
+              <View style={styles.summaryItem}>
+                <View style={[styles.summaryIconContainer, { backgroundColor: '#4285F420' }]}>
+                  <PeopleIcon />
+                </View>
+                <View style={styles.summaryDetails}>
+                  <Text style={[styles.summaryValue, { color: currentTheme.text }]}>
+                    {dashboardData.studentsCount}
+                  </Text>
+                  <Text style={[styles.summaryLabel, { color: currentTheme.textSecondary }]}>
+                    {translate('teacher.activeStudents') || 'Active Students'}
+                  </Text>
+                </View>
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <View style={[styles.summaryIconContainer, { backgroundColor: '#EA433520' }]}>
+                  <DocumentIcon />
+                </View>
+                <View style={styles.summaryDetails}>
+                  <Text style={[styles.summaryValue, { color: currentTheme.text }]}>
+                    {dashboardData.lessonsCount}
+                  </Text>
+                  <Text style={[styles.summaryLabel, { color: currentTheme.textSecondary }]}>
+                    {translate('teacher.totalLessons') || 'Total Lessons'}
+                  </Text>
+                </View>
+              </View>
+              
+              <View style={styles.summaryItem}>
+                <View style={[styles.summaryIconContainer, { backgroundColor: '#34A85320' }]}>
+                  <CheckmarkIcon />
+                </View>
+                <View style={styles.summaryDetails}>
+                  <Text style={[styles.summaryValue, { color: currentTheme.text }]}>
+                    {dashboardData.completionRate}%
+                  </Text>
+                  <Text style={[styles.summaryLabel, { color: currentTheme.textSecondary }]}>
+                    {translate('teacher.completionRate') || 'Completion Rate'}
+                  </Text>
+                </View>
+              </View>
+            </View>
+            
+            {/* Progress Bar */}
+            <View style={styles.progressSection}>
+              <View style={styles.progressHeader}>
+                <Text style={[styles.progressTitle, { color: currentTheme.textSecondary }]}>
+                  {translate('teacher.overallProgress') || 'Overall Progress'}
+                </Text>
+                <Text style={[styles.progressPercent, { color: currentTheme.primary }]}>
+                  {dashboardData.completionRate}%
+                </Text>
+              </View>
+              <View style={[styles.progressBar, { backgroundColor: currentTheme.mode === 'dark' ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)' }]}>
+                <View 
+                  style={[
+                    styles.progressFill, 
+                    { 
+                      width: `${dashboardData.completionRate}%`,
+                      backgroundColor: getProgressColor(dashboardData.completionRate)
+                    }
+                  ]} 
+                />
+              </View>
+            </View>
+          </View>
+        )}
+        
+        {/* Teacher Tools Section Title */}
         <Text style={[styles.sectionTitle, { color: currentTheme.text }]}>{translate('teacher.teacherTools')}</Text>
         <View style={styles.menuContainer}>
           {menuItems.map((item, index) => (
@@ -1249,6 +1324,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 8,
   },
+  dataSourceText: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 4,
+  },
   refreshDataButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
@@ -1304,5 +1384,79 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0,0,0,0.1)',
+  },
+  dashboardSummary: {
+    margin: 16,
+    padding: 16,
+    borderRadius: 12,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    elevation: 3,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  summaryContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  summaryItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  summaryIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  summaryDetails: {
+    flex: 1,
+  },
+  summaryValue: {
+    fontSize: 22,
+    fontWeight: 'bold',
+  },
+  summaryLabel: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  progressSection: {
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  progressTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  progressPercent: {
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  progressBar: {
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 10,
+    backgroundColor: '#4285F4',
   },
 });

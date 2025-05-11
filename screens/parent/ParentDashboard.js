@@ -408,6 +408,16 @@ export default function ParentDashboard() {
     }
   };
 
+  // Add a function to get the translated level for display
+  const getDisplayLevel = (level) => {
+    switch(level) {
+      case 'Beginner': return translate('teacher.levels.beginner') || 'Beginner';
+      case 'Intermediate': return translate('teacher.levels.intermediate') || 'Intermediate';
+      case 'Advanced': return translate('teacher.levels.advanced') || 'Advanced';
+      default: return level;
+    }
+  };
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: currentTheme.background }]}>
       <View style={[styles.header, { backgroundColor: currentTheme.primary }]}>
@@ -592,7 +602,7 @@ export default function ParentDashboard() {
                   <View style={styles.childDetails}>
                     <Text style={[styles.childName, { color: currentTheme.text }]}>{child.name}</Text>
                       <Text style={[styles.childAge, { color: currentTheme.textSecondary }]}>
-                      {translate('auth.age')}: {child.age} • {translate('auth.grade')}: {child.level}
+                      {translate('auth.age')}: {child.age} • {translate('auth.grade')}: {getDisplayLevel(child.level)}
                     </Text>
                       
                       {childProgress[child.id] && (
@@ -749,25 +759,29 @@ export default function ParentDashboard() {
             <View style={styles.levelSelector}>
               <Text style={[styles.levelLabel, { color: currentTheme.text }]}>{translate('auth.grade')}:</Text>
               <View style={styles.levelOptions}>
-                {['Beginner', 'Intermediate', 'Advanced'].map((level) => (
+                {[
+                  { value: 'Beginner', label: translate('teacher.levels.beginner') || 'Beginner' },
+                  { value: 'Intermediate', label: translate('teacher.levels.intermediate') || 'Intermediate' }, 
+                  { value: 'Advanced', label: translate('teacher.levels.advanced') || 'Advanced' }
+                ].map((level) => (
                     <TouchableOpacity
-                      key={level}
+                      key={level.value}
                       style={[
                       styles.levelOption,
                       { 
-                        backgroundColor: childLevel === level ? currentTheme.primary : currentTheme.background,
+                        backgroundColor: childLevel === level.value ? currentTheme.primary : currentTheme.background,
                         borderColor: currentTheme.border,
                       }
                       ]}
-                      onPress={() => setChildLevel(level)}
+                      onPress={() => setChildLevel(level.value)}
                     >
                       <Text 
                         style={[
                         styles.levelOptionText, 
-                        { color: childLevel === level ? '#FFF' : currentTheme.text }
+                        { color: childLevel === level.value ? '#FFF' : currentTheme.text }
                         ]}
                       >
-                        {level}
+                        {level.label}
                       </Text>
                     </TouchableOpacity>
                   ))}
@@ -816,7 +830,7 @@ export default function ParentDashboard() {
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={[styles.modalButton, styles.addButton, { backgroundColor: currentTheme.primary }]} 
+                style={[styles.modalButton, styles.modalAddButton, { backgroundColor: currentTheme.primary }]} 
               onPress={handleAddChild}
             >
                 <Text style={[styles.modalButtonText, { color: '#FFF' }]}>{translate('common.add')}</Text>
@@ -877,7 +891,7 @@ export default function ParentDashboard() {
               </TouchableOpacity>
               
               <TouchableOpacity 
-                style={[styles.modalButton, styles.addButton, { backgroundColor: currentTheme.primary }]} 
+                style={[styles.modalButton, styles.modalAddButton, { backgroundColor: currentTheme.primary }]} 
               onPress={savePin}
             >
                 <Text style={[styles.modalButtonText, { color: '#FFF' }]}>{translate('common.save')}</Text>
@@ -999,6 +1013,11 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  modalAddButton: {
+    backgroundColor: '#4CAF50',
+    minWidth: 100,
+    flex: 1.2,
   },
   emptyState: {
     padding: 24,
@@ -1131,18 +1150,21 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   modalButton: {
-    flex: 1,
+    flex: 0.9,
     paddingVertical: 12,
+    paddingHorizontal: 16,
     borderRadius: 8,
     alignItems: 'center',
     marginHorizontal: 8,
   },
   cancelButton: {
     borderWidth: 1,
+    flex: 0.8,
   },
   modalButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+    textAlign: 'center',
   },
   quickAccessRow: {
     flexDirection: 'row',
