@@ -1121,7 +1121,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-end',
   },
   profileMenu: {
     position: 'absolute',
@@ -1291,10 +1291,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   languageModalContainer: {
-    width: '80%',
+    width: '65%',
     borderRadius: 12,
     overflow: 'hidden',
     padding: 0,
+    marginRight: 20,
   },
   languageModalTitle: {
     fontSize: 18,

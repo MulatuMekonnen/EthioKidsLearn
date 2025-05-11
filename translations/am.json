@@ -44,7 +44,9 @@
     "fillAllFields": "ሁሉንም መስኮች ይሙሉ",
     "signupFailed": "መለያ መፍጠር አልተሳካም። እባክዎ እንደገና ይሞክሩ።",
     "loginFailed": "ግባት አልተሳካም። የይለፍ ቃልዎን ይመልከቱ።",
-    "invalidCredentials": "የስም ወይም ፒን ስህተት። እባክዎ እንደገና ይሞክሩ።"
+    "invalidCredentials": "የስም ወይም ፒን ስህተት። እባክዎ እንደገና ይሞክሩ።",
+    "invalidScore": "ውጤት ከ0 እስከ 100 ቁጥር መሆን አለበት",
+    "reportFailed": "ሪፖርት ማስገባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
   },
   "common": {
     "cancel": "ሰርዝ",
@@ -84,6 +86,8 @@
     "digits": "አሃዞች",
     "createNewPin": "አዲስ ፒን ይፍጠሩ",
     "createNewPinFor": "ለ አዲስ ፒን ይፍጠሩ",
+    "newPin": "አዲስ ፒን",
+    "studentAge": "ዕድሜ",
     "newPin": "አዲስ ፒን"
   },
   "profile": {
@@ -166,6 +170,7 @@
   "progressReport": {
     "title": "የሂደት ሪፖርት",
     "loading": "መረጃን በመጫን ላይ...",
+    "loadingStudents": "ተማሪዎችን በመጫን ላይ...",
     "teacherReports": "የመምህራን ሪፖርቶች",
     "teacherFeedback": "ለ የመምህራን አስተያየት",
     "noReports": "ለዚህ ትምህርት የመምህር ሪፖርት የለም",
@@ -192,12 +197,21 @@
     "students": "ተማሪዎች",
     "lessons": "ትምህርቶች",
     "completion": "ማጠናቀቅ",
-    "noData": "ምንም ውሂብ የለም",
+    "noData": "ምንም የጥያቄ ውሂብ አይገኝም",
     "teacherTools": "የመምህር መሳሪያዎች",
     "studentProgress": "የተማሪ ዕድገት",
     "studentProgressDesc": "የተማሪ አፈጻጸምን ይመልከቱ እና ይከታተሉ",
     "studentReports": "የተማሪ ሪፖርቶች",
     "studentReportsDesc": "የትምህርት አይነት ተኮር ሪፖርቶችን ይፍጠሩ እና ያስተዳድሩ",
+    "studentSelect": "ሪፖርት ለመፍጠር ተማሪን ይምረጡ",
+    "scoreOptional": "ውጤት (አማራጭ)",
+    "progressReport": "የሂደት ሪፖርት",
+    "submitReport": "ሪፖርትን አስገባ",
+    "previousReports": "ቀዳሚ ሪፖርቶች",
+    "reportPlaceholder": "ስለ ተማሪው በዚህ የትምህርት ዓይነት ላይ ያለው ዝርዝር እድገት ይስጡ...",
+    "studentAge": "ዕድሜ",
+    "studentLevel": "ደረጃ",
+    "parent": "ወላጅ",
     "createContent": "ይዘት ይፍጠሩ",
     "createContentDesc": "አዲስ የትምህርት ግብዓቶችን ያዘጋጁ",
     "classSchedule": "የክፍል መርሀግብር",

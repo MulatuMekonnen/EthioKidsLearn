@@ -44,7 +44,9 @@
     "fillAllFields": "Please fill in all fields",
     "signupFailed": "Failed to create account. Please try again.",
     "loginFailed": "Login failed. Please check your credentials.",
-    "invalidCredentials": "Invalid name or PIN. Please try again."
+    "invalidCredentials": "Invalid name or PIN. Please try again.",
+    "invalidScore": "Score must be a number between 0 and 100",
+    "reportFailed": "Failed to submit report. Please try again."
   },
   "common": {
     "cancel": "Cancel",
@@ -113,6 +115,15 @@
     "studentProgressDesc": "View and track student performance",
     "studentReports": "Student Reports",
     "studentReportsDesc": "Create and manage subject-specific reports for students",
+    "studentSelect": "Select a student to create report",
+    "scoreOptional": "Score (Optional)",
+    "progressReport": "Progress Report",
+    "submitReport": "Submit Report",
+    "previousReports": "Previous Reports",
+    "reportPlaceholder": "Provide detailed feedback about the student's progress in this subject...",
+    "studentAge": "Age",
+    "studentLevel": "Level",
+    "parent": "Parent",
     "createContent": "Create Content",
     "createContentDesc": "Develop new educational resources",
     "classSchedule": "Class Schedule",
@@ -215,6 +226,7 @@
   "progressReport": {
     "title": "Progress Report",
     "loading": "Loading data...",
+    "loadingStudents": "Loading students...",
     "teacherReports": "Teacher Reports",
     "teacherFeedback": "Feedback from teachers for",
     "noReports": "No teacher reports available for this subject",
